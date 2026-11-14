@@ -1,8 +1,7 @@
 name: coleta
 on:
   schedule:
-    - cron: "*/15 * * * *"        # cripto: 24h, a cada 15 min
-    - cron: "5 13-21 * * 1-5"     # Brasil e EUA: de hora em hora, seg-sex, 10h-18h de Brasília
+    - cron: "*/15 * * * *"        # cripto 24h; Brasil, EUA, setores, commodities e macro no horário do pregão (seg-sex, 10h-18h de Brasília)
   workflow_dispatch: {}
 permissions:
   contents: write
@@ -20,11 +19,13 @@ jobs:
       - run: pip install -r requirements.txt
       - name: coleta
         run: |
-          case "${{ github.event.schedule }}" in
-            "*/15 * * * *") python monitor.py --salvar --cat cripto ;;
-            "5 13-21 * * 1-5") python monitor.py --salvar --cat brasil; python monitor.py --salvar --cat eua; python monitor.py --salvar --cat setores; python monitor.py --salvar --cat commodities; python monitor.py --salvar --cat macro; python monitor.py --salvar --cat juros ;;
-            *) python monitor.py --salvar ;;
-          esac
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then python monitor.py --salvar; exit 0; fi
+          h=$(date -u +%H); m=$(date -u +%M); d=$(date -u +%u)
+          python monitor.py --salvar --cat cripto
+          if [ "$d" -le 5 ] && { { [ "$h" -ge 13 ] && [ "$h" -le 20 ]; } || { [ "$h" = "21" ] && [ "$m" -lt 15 ]; }; }; then
+            for c in brasil eua setores commodities macro; do python monitor.py --salvar --cat $c; done
+          fi
+          if [ "$m" -lt 15 ] && { [ "$h" = "13" ] || [ "$h" = "02" ]; }; then python monitor.py --salvar --cat juros; fi
       - name: mercado
         run: python monitor.py --mercado || true
       - name: eventos

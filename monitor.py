@@ -271,6 +271,20 @@ def relatorio(cfg, A, dados, d30, bench, fonte, falhas):
 
 
 
+
+def _fresco(pasta, chave, horas):
+    """True se esta rotina rodou há menos de `horas` (guardado em _meta.json, pois o mtime muda a cada checkout do GitHub)"""
+    try:
+        t = json.load(open(os.path.join(pasta, "_meta.json")))[chave]
+        return (dt.datetime.now(dt.timezone.utc) - dt.datetime.fromisoformat(t)).total_seconds() < horas * 3600
+    except Exception: return False
+
+def _marcar(pasta, chave):
+    f = os.path.join(pasta, "_meta.json")
+    try: meta = json.load(open(f))
+    except Exception: meta = {}
+    meta[chave] = dt.datetime.now(dt.timezone.utc).isoformat(); json.dump(meta, open(f, "w"))
+
 # ---------- eventos: datas de resultados ----------
 def _datas_yahoo(tk):
     import yfinance as yf
@@ -295,14 +309,14 @@ def atualizar_eventos(forcar=False):
         pasta = os.path.dirname(cdir); cfg = json.load(open(cdir, encoding="utf-8"))
         if cfg.get("sem_eventos") or not cfg.get("ativos"): continue
         f = os.path.join(pasta, "eventos.json")
-        if os.path.exists(f) and not forcar and time.time() - os.path.getmtime(f) < 20*3600: continue
+        if os.path.exists(f) and not forcar and _fresco(pasta, "eventos", 20): continue
         out = {}
         for nome, v in especificar(cfg).items():
             try: d = _datas_yahoo(v["yahoo"][0])
             except Exception as e: print("evento", nome, e); d = None
             if d is not None: out[nome] = d.strftime("%Y-%m-%d")
             time.sleep(0.2)
-        json.dump(out, open(f, "w"), indent=1); print(os.path.basename(pasta), "eventos:", len(out))
+        json.dump(out, open(f, "w"), indent=1); _marcar(pasta, "eventos"); print(os.path.basename(pasta), "eventos:", len(out))
 
 def ler_eventos(pasta):
     """datas de resultado: estimada (4T do ano anterior +52 semanas, marcada com ~) < Yahoo (só se bater com a estimativa, ±45 dias) < manual"""
@@ -420,7 +434,7 @@ def atualizar_mercado(forcar=False):
         pasta = os.path.dirname(cdir); cfg = json.load(open(cdir, encoding="utf-8"))
         if not cfg.get("valor_mercado"): continue
         f = os.path.join(pasta, "mercado.json")
-        if os.path.exists(f) and not forcar and time.time() - os.path.getmtime(f) < 20*3600: continue
+        if os.path.exists(f) and not forcar and _fresco(pasta, "mercado", 20): continue
         out = {}
         for nome, v in especificar(cfg).items():
             cap = None
@@ -434,7 +448,7 @@ def atualizar_mercado(forcar=False):
                 if cap: break
             if cap: out[nome] = float(cap)
             time.sleep(0.2)
-        json.dump(out, open(f, "w"), indent=1); print(os.path.basename(pasta), "valor de mercado:", len(out))
+        json.dump(out, open(f, "w"), indent=1); _marcar(pasta, "mercado"); print(os.path.basename(pasta), "valor de mercado:", len(out))
 
 def ordenar(cfg, pasta, nomes):
     """setores do maior para o menor (pelo maior valor de mercado de cada um); dentro do setor, do maior para o menor"""
