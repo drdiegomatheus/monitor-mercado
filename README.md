@@ -16,4 +16,4 @@ Em cada pasta:
 Ativos dos EUA: `"AAPL": "nasdaq"` ou `"JPM": "sp500"`.
 Ativos do Brasil: só o código, por exemplo `"PETR4"`.
 
-A coleta roda a cada 15 minutos pelo GitHub Actions (`.github/workflows/coleta.yml`).
+A coleta roda pelo GitHub Actions (`.github/workflows/coleta.yml`): cripto a cada 15 min, 24h; Brasil e EUA de hora em hora, seg-sex, das 10h às 18h de Brasília.
