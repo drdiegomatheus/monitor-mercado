@@ -25,6 +25,8 @@ jobs:
             "5 13-21 * * 1-5") python monitor.py --salvar --cat brasil; python monitor.py --salvar --cat eua; python monitor.py --salvar --cat setores; python monitor.py --salvar --cat commodities; python monitor.py --salvar --cat macro; python monitor.py --salvar --cat juros ;;
             *) python monitor.py --salvar ;;
           esac
+      - name: mercado
+        run: python monitor.py --mercado || true
       - name: eventos
         run: python monitor.py --eventos || true
       - name: painel

@@ -56,5 +56,6 @@
    "kraken": "PENDLEUSD"
   }
  },
- "sem_eventos": true
+ "sem_eventos": true,
+ "valor_mercado": true
 }

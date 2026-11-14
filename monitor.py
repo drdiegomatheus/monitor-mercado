@@ -406,6 +406,50 @@ def coletar_juros(cfg, pasta):
 
 def bp(v): return "–" if v != v else f"{v:+.1f} bp"
 
+
+# ---------- valor de mercado e ordem por setor ----------
+def atualizar_mercado(forcar=False):
+    import time, yfinance as yf
+    base = os.path.join(RAIZ, "categorias")
+    for cdir in sorted(glob.glob(os.path.join(base, "*", "config.json"))):
+        pasta = os.path.dirname(cdir); cfg = json.load(open(cdir, encoding="utf-8"))
+        if not cfg.get("valor_mercado"): continue
+        f = os.path.join(pasta, "mercado.json")
+        if os.path.exists(f) and not forcar and time.time() - os.path.getmtime(f) < 20*3600: continue
+        out = {}
+        for nome, v in especificar(cfg).items():
+            cap = None
+            for tk in v["yahoo"]:
+                try:
+                    t = yf.Ticker(tk)
+                    try: cap = t.fast_info.get("market_cap")
+                    except Exception: cap = None
+                    if not cap: cap = t.info.get("marketCap")
+                except Exception as e: print("mercado", nome, e)
+                if cap: break
+            if cap: out[nome] = float(cap)
+            time.sleep(0.2)
+        json.dump(out, open(f, "w"), indent=1); print(os.path.basename(pasta), "valor de mercado:", len(out))
+
+def ordenar(cfg, pasta, nomes):
+    """setores do maior para o menor (pelo maior valor de mercado de cada um); dentro do setor, do maior para o menor"""
+    A = especificar(cfg); nomes = list(nomes); idx = {n: i for i, n in enumerate(A)}
+    cap = {}
+    for arq in ("mercado_reserva.json", "mercado.json"):       # o valor real vence a reserva
+        f = os.path.join(pasta, arq)
+        if os.path.exists(f):
+            try: cap.update({k: float(v) for k, v in json.load(open(f)).items()})
+            except Exception: pass
+    setor = lambda n: A.get(n, {}).get("setor") or A.get(n, {}).get("grupo") or ""
+    c = lambda n: cap.get(n, -1.0)
+    if not any(c(n) > 0 for n in nomes):                      # sem valor de mercado: mantém a ordem do config.json
+        ordem_setor = {}
+        for n in sorted(nomes, key=lambda n: idx.get(n, 9999)): ordem_setor.setdefault(setor(n), len(ordem_setor))
+        return sorted(nomes, key=lambda n: (ordem_setor[setor(n)], idx.get(n, 9999)))
+    topo = {}
+    for n in nomes: topo[setor(n)] = max(topo.get(setor(n), -1.0), c(n))
+    return sorted(nomes, key=lambda n: (-topo[setor(n)], setor(n), -c(n), idx.get(n, 9999)))
+
 # ---------- painel resumo (todas as categorias) ----------
 def cor_rsi(v):
     if v != v: return ""
@@ -480,7 +524,10 @@ def painel():
                         if n >= 0: r["res"] = (dd, n, EV[nome].startswith("~"))
                     except Exception: pass
                 L.append(r)
-        if L: secoes.append((cfg["nome"], L, not cfg.get("sem_eventos")))
+        if L:
+            pos = {n: i for i, n in enumerate(ordenar(cfg, pasta, [r["nome"] for r in L]))}
+            for r in L: r["ord"] = pos[r["nome"]]; r["setor"] = A[r["nome"]].get("setor") or A[r["nome"]].get("grupo") or ""
+            secoes.append((cfg["nome"], L, not cfg.get("sem_eventos")))
     css = ("body{font-family:system-ui;margin:10px;max-width:1000px}h1{font-size:20px}h2{font-size:16px;margin:22px 0 4px}"
            "table{border-collapse:collapse;width:100%;font-size:13px}th,td{border-bottom:1px solid #ddd;padding:5px 6px;text-align:right;white-space:nowrap}"
            "th{background:#f3f4f6;cursor:pointer;position:sticky;top:0}th:first-child,td:first-child,td.l{text-align:left}.n{color:#666;font-size:12px}.sc{overflow-x:auto}"
@@ -491,9 +538,12 @@ def painel():
          "<p class=n>D = candle diário, S = candle semanal (RSI de 14 períodos). Variação do dia = último preço contra o fechamento anterior; da semana = contra o fechamento da semana anterior. A candle do momento ainda está em andamento. Clique no título da coluna para ordenar.</p>"]
     for nome, L, com_res in secoes:
         ns = sum(1 for r in L if r["rd"] <= 30); nc = sum(1 for r in L if r["rd"] >= 70)
-        h.append(f"<h2>{H.escape(nome)} <span class=n>· {len(L)} ativos · {ns} em sobrevenda diária · {nc} em sobrecompra diária</span></h2><div class=sc><table class=s><tr><th>Ativo</th><th>Preço</th><th>Dia</th><th>Semana</th><th>RSI D</th><th>RSI S</th><th>Sinal</th><th>Dado de</th>" + ("<th>Resultado</th>" if com_res else "") + "<th>Info</th></tr>")
-        for r in sorted(L, key=lambda r: r["rd"]):
-            h.append(f"<tr><td><b>{H.escape(r['nome'])}</b></td><td>{fmt(r['preco']) + ('%' if r.get('juros') else '')}</td><td style='{cor_var(r['dia'])}'>{bp(r['dia']) if r.get('juros') else pct(r['dia'])}</td><td style='{cor_var(r['sem'])}'>{bp(r['sem']) if r.get('juros') else pct(r['sem'])}</td>"
+        h.append(f"<h2>{H.escape(nome)} <span class=n>· {len(L)} ativos · {ns} em sobrevenda diária · {nc} em sobrecompra diária</span></h2><div class=sc><table class=s><tr><th>Ativo</th><th>Setor</th><th>Preço</th><th>Dia</th><th>Semana</th><th>RSI D</th><th>RSI S</th><th>Sinal</th><th>Dado de</th>" + ("<th>Resultado</th>" if com_res else "") + "<th>Info</th></tr>")
+        ant = None
+        for r in sorted(L, key=lambda r: r["ord"]):
+            borda = " style='border-top:2px solid #888'" if ant is not None and r["setor"] != ant else ""
+            ant = r["setor"]
+            h.append(f"<tr{borda}><td><b>{H.escape(r['nome'])}</b></td><td class='l n'>{H.escape(r['setor'])}</td><td>{fmt(r['preco']) + ('%' if r.get('juros') else '')}</td><td style='{cor_var(r['dia'])}'>{bp(r['dia']) if r.get('juros') else pct(r['dia'])}</td><td style='{cor_var(r['sem'])}'>{bp(r['sem']) if r.get('juros') else pct(r['sem'])}</td>"
                      f"<td style='{cor_rsi(r['rd'])}'>{fmt(r['rd'],1)}</td><td style='{cor_rsi(r['rw'])}'>{fmt(r['rw'],1)}</td><td class=l>{r['sinal']}</td><td>{r['data']:%d/%m}</td>{res_cell(r, com_res)}<td class='l n'>{H.escape(r['info'])}</td></tr>")
         h.append("</table></div>")
     if not secoes: h.append("<p>Sem dados coletados ainda.</p>")
@@ -514,6 +564,7 @@ def painel():
     print("painel.html gerado:", sum(len(x[1]) for x in secoes), "ativos")
 
 if __name__ == "__main__":
+    if "--mercado" in sys.argv: atualizar_mercado("--forcar" in sys.argv); sys.exit(0)
     if "--eventos" in sys.argv: atualizar_eventos("--forcar" in sys.argv); sys.exit(0)
     if "--painel" in sys.argv: painel(); sys.exit(0)
     offline = "--csv" in sys.argv

@@ -20,158 +20,197 @@
  "ativos": {
   "INTC": {
    "grupo": "nasdaq",
-   "bdr": "ITLC34"
+   "bdr": "ITLC34",
+   "setor": "Semicondutores"
   },
   "NVDA": {
    "grupo": "nasdaq",
-   "bdr": "NVDC34"
+   "bdr": "NVDC34",
+   "setor": "Semicondutores"
   },
   "AMD": {
    "grupo": "nasdaq",
-   "bdr": "A1MD34"
+   "bdr": "A1MD34",
+   "setor": "Semicondutores"
   },
   "AMZN": {
    "grupo": "nasdaq",
-   "bdr": "AMZO34"
+   "bdr": "AMZO34",
+   "setor": "Varejo online e veículos"
   },
   "GOOG": {
    "grupo": "nasdaq",
-   "bdr": "GOGL35"
+   "bdr": "GOGL35",
+   "setor": "Internet e mídia"
   },
   "MSFT": {
    "grupo": "nasdaq",
-   "bdr": "MSFT34"
+   "bdr": "MSFT34",
+   "setor": "Software, nuvem e hardware"
   },
   "PLTR": {
    "grupo": "nasdaq",
-   "bdr": "P2LT34"
+   "bdr": "P2LT34",
+   "setor": "Software, nuvem e hardware"
   },
   "TSLA": {
    "grupo": "nasdaq",
-   "bdr": "TSLA34"
+   "bdr": "TSLA34",
+   "setor": "Varejo online e veículos"
   },
   "AVGO": {
    "grupo": "nasdaq",
-   "bdr": "AVGO34"
+   "bdr": "AVGO34",
+   "setor": "Semicondutores"
   },
   "TSM": {
    "grupo": "nasdaq",
-   "bdr": "TSMC34"
+   "bdr": "TSMC34",
+   "setor": "Semicondutores"
   },
   "ASML": {
    "grupo": "nasdaq",
-   "bdr": "ASML34"
+   "bdr": "ASML34",
+   "setor": "Semicondutores"
   },
   "CSCO": {
    "grupo": "nasdaq",
-   "bdr": "CSCO34"
+   "bdr": "CSCO34",
+   "setor": "Software, nuvem e hardware"
   },
   "META": {
    "grupo": "nasdaq",
-   "bdr": "M1TA34"
+   "bdr": "M1TA34",
+   "setor": "Internet e mídia"
   },
   "MU": {
    "grupo": "nasdaq",
-   "bdr": "MUTC34"
+   "bdr": "MUTC34",
+   "setor": "Semicondutores"
   },
   "MRVL": {
    "grupo": "nasdaq",
-   "bdr": "M2RV34"
+   "bdr": "M2RV34",
+   "setor": "Semicondutores"
   },
   "MSTR": {
    "grupo": "nasdaq",
-   "bdr": "M2ST34"
+   "bdr": "M2ST34",
+   "setor": "Bitcoin (tesouraria)"
   },
   "NFLX": {
    "grupo": "nasdaq",
-   "bdr": "NFLX34"
+   "bdr": "NFLX34",
+   "setor": "Internet e mídia"
   },
   "MELI": {
    "grupo": "nasdaq",
-   "bdr": "MELI34"
+   "bdr": "MELI34",
+   "setor": "Varejo online e veículos"
   },
   "SPCX": {
    "grupo": "nasdaq",
-   "bdr": "SPCX34"
+   "bdr": "SPCX34",
+   "setor": "Aeroespacial"
   },
   "DELL": {
    "grupo": "nasdaq",
-   "bdr": "D1EL34"
+   "bdr": "D1EL34",
+   "setor": "Software, nuvem e hardware"
   },
   "ORCL": {
    "grupo": "nasdaq",
-   "bdr": "ORCL34"
+   "bdr": "ORCL34",
+   "setor": "Software, nuvem e hardware"
   },
   "IBM": {
    "grupo": "nasdaq",
-   "bdr": "IBMB34"
+   "bdr": "IBMB34",
+   "setor": "Software, nuvem e hardware"
   },
   "BRK.B": {
    "grupo": "sp500",
    "bdr": "BERK34",
    "yahoo": [
     "BRK-B"
-   ]
+   ],
+   "setor": "Holding (Berkshire)"
   },
   "MS": {
    "grupo": "sp500",
-   "bdr": "MSBR34"
+   "bdr": "MSBR34",
+   "setor": "Bancos e pagamentos"
   },
   "BAC": {
    "grupo": "sp500",
-   "bdr": "BOAC34"
+   "bdr": "BOAC34",
+   "setor": "Bancos e pagamentos"
   },
   "MA": {
    "grupo": "sp500",
-   "bdr": "MSCD34"
+   "bdr": "MSCD34",
+   "setor": "Bancos e pagamentos"
   },
   "V": {
    "grupo": "sp500",
-   "bdr": "VISA34"
+   "bdr": "VISA34",
+   "setor": "Bancos e pagamentos"
   },
   "JPM": {
    "grupo": "sp500",
-   "bdr": "JPMC34"
+   "bdr": "JPMC34",
+   "setor": "Bancos e pagamentos"
   },
   "NU": {
    "grupo": "sp500",
-   "bdr": "ROXO34"
+   "bdr": "ROXO34",
+   "setor": "Bancos e pagamentos"
   },
   "LLY": {
    "grupo": "sp500",
-   "bdr": "LILY34"
+   "bdr": "LILY34",
+   "setor": "Saúde e farmacêuticas"
   },
   "ABBV": {
    "grupo": "sp500",
-   "bdr": "ABBV34"
+   "bdr": "ABBV34",
+   "setor": "Saúde e farmacêuticas"
   },
   "JNJ": {
    "grupo": "sp500",
-   "bdr": "JNJB34"
+   "bdr": "JNJB34",
+   "setor": "Saúde e farmacêuticas"
   },
   "WMT": {
    "grupo": "sp500",
-   "bdr": "WALM34"
+   "bdr": "WALM34",
+   "setor": "Consumo básico e varejo"
   },
   "COST": {
    "grupo": "sp500",
-   "bdr": "COWC34"
+   "bdr": "COWC34",
+   "setor": "Consumo básico e varejo"
   },
   "PG": {
    "grupo": "sp500",
-   "bdr": "PGCO34"
+   "bdr": "PGCO34",
+   "setor": "Consumo básico e varejo"
   },
   "XOM": {
    "grupo": "sp500",
-   "bdr": "EXXO34"
+   "bdr": "EXXO34",
+   "setor": "Petróleo e gás"
   },
   "CVX": {
    "grupo": "sp500",
-   "bdr": "CHVX34"
+   "bdr": "CHVX34",
+   "setor": "Petróleo e gás"
   },
   "GOOGL": {
    "grupo": "nasdaq",
-   "bdr": "GOGL34"
+   "bdr": "GOGL34",
+   "setor": "Internet e mídia"
   }
- }
+ },
+ "valor_mercado": true
 }

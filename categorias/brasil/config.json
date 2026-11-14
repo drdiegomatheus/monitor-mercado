@@ -142,6 +142,9 @@
   "LREN3": {
    "setor": "Consumo cíclico"
   },
+  "MGLU3": {
+   "setor": "Consumo cíclico"
+  },
   "RENT3": {
    "setor": "Consumo cíclico"
   },
@@ -200,5 +203,6 @@
   "ALOS3": {
    "setor": "Shoppings e imobiliário"
   }
- }
+ },
+ "valor_mercado": true
 }
