@@ -457,11 +457,14 @@ def macro_html():
     h.append("</table></div><p class=n>Datas de resultados: nos EUA vêm do Yahoo. Na B3, as marcadas com ~ são estimativas (data do 4T do ano anterior mais 52 semanas), até a empresa publicar o calendário oficial. Para fixar uma data na B3, edite categorias/brasil/resultados_manual.json, por exemplo {\"PETR4\": \"2027-02-26\"}.</p>")
     return "".join(h)
 
+SO_PAINEL = sys.argv[sys.argv.index("--so")+1] if "--so" in sys.argv else None
+
 def painel():
     import html as H
     base = os.path.join(RAIZ, "categorias"); secoes = []; total_s = total_c = 0
     for cdir in sorted(glob.glob(os.path.join(base, "*", "config.json"))):
         pasta = os.path.dirname(cdir); cfg = json.load(open(cdir, encoding="utf-8"))
+        if SO_PAINEL and os.path.basename(pasta) != SO_PAINEL: continue
         A = especificar(cfg); L = []; EV = ler_eventos(pasta)
         hoje = pd.Timestamp.today().normalize()
         for nome, v in A.items():
@@ -494,7 +497,7 @@ def painel():
                      f"<td style='{cor_rsi(r['rd'])}'>{fmt(r['rd'],1)}</td><td style='{cor_rsi(r['rw'])}'>{fmt(r['rw'],1)}</td><td class=l>{r['sinal']}</td><td>{r['data']:%d/%m}</td>{res_cell(r, com_res)}<td class='l n'>{H.escape(r['info'])}</td></tr>")
         h.append("</table></div>")
     if not secoes: h.append("<p>Sem dados coletados ainda.</p>")
-    h.append(macro_html())
+    if not SO_PAINEL: h.append(macro_html())
     prox = []
     for nome_s, L_s, cr in secoes:
         for r in L_s:
@@ -504,10 +507,10 @@ def painel():
         for e in json.load(open(f_m, encoding="utf-8")):
             n = (pd.Timestamp(e["data"]) - pd.Timestamp.today().normalize()).days
             if 0 <= n <= 7: prox.append((n, f"{e['evento']} ({pd.Timestamp(e['data']):%d/%m})"))
-    if prox:
+    if prox and not SO_PAINEL:
         prox.sort(); h.insert(2, "<div style='background:#c62828;color:#fff;padding:8px 12px;border-radius:6px;margin:8px 0'><b>Atenção, próximos 7 dias:</b> " + " · ".join(("hoje: " if n == 0 else f"em {n}d: ") + t for n, t in prox) + "</div>")
     h.append("""<script>document.querySelectorAll('table.s').forEach(t=>{t.querySelectorAll('th').forEach((th,i)=>{th.onclick=()=>{const rows=[...t.rows].slice(1);const dir=th.dataset.d=th.dataset.d=='1'?-1:1;rows.sort((a,b)=>{const x=a.cells[i].innerText.replace('%','').replace(/,/g,''),y=b.cells[i].innerText.replace('%','').replace(/,/g,'');const nx=parseFloat(x),ny=parseFloat(y);return (isNaN(nx)||isNaN(ny)?x.localeCompare(y):nx-ny)*dir});rows.forEach(r=>t.appendChild(r))}})})</script></body></html>""")
-    open(os.path.join(RAIZ, "painel.html"), "w", encoding="utf-8").write("".join(h))
+    open(os.path.join(RAIZ, f"painel_{SO_PAINEL}.html" if SO_PAINEL else "painel.html"), "w", encoding="utf-8").write("".join(h))
     print("painel.html gerado:", sum(len(x[1]) for x in secoes), "ativos")
 
 if __name__ == "__main__":
