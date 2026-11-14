@@ -1,0 +1,72 @@
+{
+ "nome": "Juros: curva EUA (Treasuries) e Brasil (Tesouro Direto)",
+ "moeda": "% a.a.",
+ "semana": "FRI",
+ "tipo": "juros",
+ "sem_eventos": true,
+ "benchmarks": {},
+ "ativos": {
+  "EUA 2a": {
+   "fred": "DGS2",
+   "setor": "Treasury 2 anos"
+  },
+  "EUA 5a": {
+   "fred": "DGS5",
+   "setor": "Treasury 5 anos"
+  },
+  "EUA 10a": {
+   "fred": "DGS10",
+   "setor": "Treasury 10 anos"
+  },
+  "EUA 20a": {
+   "fred": "DGS20",
+   "setor": "Treasury 20 anos"
+  },
+  "EUA 30a": {
+   "fred": "DGS30",
+   "setor": "Treasury 30 anos"
+  },
+  "BR pré 2a": {
+   "tesouro": [
+    "pre",
+    2
+   ],
+   "setor": "Prefixado (LTN/NTN-F) 2 anos"
+  },
+  "BR pré 5a": {
+   "tesouro": [
+    "pre",
+    5
+   ],
+   "setor": "Prefixado 5 anos"
+  },
+  "BR pré 10a": {
+   "tesouro": [
+    "pre",
+    10
+   ],
+   "setor": "Prefixado 10 anos"
+  },
+  "BR IPCA+ 10a": {
+   "tesouro": [
+    "real",
+    10
+   ],
+   "setor": "Juro real (NTN-B) 10 anos"
+  },
+  "BR IPCA+ 20a": {
+   "tesouro": [
+    "real",
+    20
+   ],
+   "setor": "Juro real 20 anos"
+  },
+  "BR IPCA+ 30a": {
+   "tesouro": [
+    "real",
+    30
+   ],
+   "setor": "Juro real 30 anos"
+  }
+ }
+}

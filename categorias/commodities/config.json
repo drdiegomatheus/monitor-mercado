@@ -25,6 +25,13 @@
    "yahoo": [
     "BZ=F"
    ]
+  },
+  "MINERIO": {
+   "setor": "Minério de ferro: ETF SSIF de futuros da Dalian (HKD)",
+   "yahoo": [
+    "3047.HK",
+    "9047.HK"
+   ]
   }
  }
 }

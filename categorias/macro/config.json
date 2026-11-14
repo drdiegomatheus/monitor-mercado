@@ -1,0 +1,23 @@
+{
+ "nome": "Macro: EWZ e dólar (DXY)",
+ "moeda": "",
+ "semana": "FRI",
+ "sufixo": "",
+ "rrg": false,
+ "sem_eventos": true,
+ "benchmarks": {},
+ "ativos": {
+  "EWZ": {
+   "setor": "ETF Brasil na NYSE (US$)",
+   "yahoo": [
+    "EWZ"
+   ]
+  },
+  "DXY": {
+   "setor": "Índice do dólar (ICE)",
+   "yahoo": [
+    "DX-Y.NYB"
+   ]
+  }
+ }
+}

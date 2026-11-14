@@ -298,6 +298,55 @@ def cor_dias(n):
     if n <= 14: return "background:#fff3b0"
     return ""
 
+
+# ---------- juros (EUA via FRED, Brasil via Tesouro Direto) ----------
+TESOURO_URL = "https://www.tesourotransparente.gov.br/ckan/dataset/df56aa42-484a-4a59-8184-7676580e81e3/resource/796d2059-14e9-44e3-80c9-2d9e30b405c1/download/PrecoTaxaTesouroDireto.csv"
+
+def fred_serie(codigo):
+    d = pd.read_csv(f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={codigo}")
+    d.columns = ["data", "v"]; d["v"] = pd.to_numeric(d.v, errors="coerce")
+    d = d.dropna(); d.index = pd.to_datetime(d.data).dt.normalize()
+    return d.v[d.index >= pd.Timestamp.today().normalize() - pd.Timedelta(days=900)]
+
+def tesouro_curvas(ler_csv=None):
+    """devolve {'pre': DataFrame(index=data, colunas=anos), 'real': ...} com taxa interpolada por vértice"""
+    d = (ler_csv or (lambda: pd.read_csv(TESOURO_URL, sep=";", decimal=",", encoding="latin-1")))()
+    d.columns = [c.strip() for c in d.columns]
+    d["base"] = pd.to_datetime(d["Data Base"], dayfirst=True); d["venc"] = pd.to_datetime(d["Data Vencimento"], dayfirst=True)
+    d = d[d.base >= pd.Timestamp.today().normalize() - pd.Timedelta(days=900)].copy()
+    d["anos"] = (d.venc - d.base).dt.days / 365.25
+    d["taxa"] = pd.to_numeric(d["Taxa Compra Manha"], errors="coerce")
+    d = d.dropna(subset=["taxa"]); d = d[d.anos > 0.5]
+    tipo = d["Tipo Titulo"].str.lower()
+    fam = {"pre": d[tipo.str.contains("prefixado")], "real": d[tipo.str.contains("ipca")]}
+    out = {}
+    for nome, f in fam.items():
+        linhas = {}
+        for dia, g in f.groupby("base"):
+            g = g.sort_values("anos"); x, y = g.anos.values, g.taxa.values
+            if len(x) < 2: continue
+            linhas[dia] = {a: float(np.interp(a, x, y)) for a in (2, 5, 10, 20, 30) if x[0] - 0.5 <= a <= x[-1] + 1.5}
+        out[nome] = pd.DataFrame.from_dict(linhas, orient="index").sort_index()
+    return out
+
+def coletar_juros(cfg, pasta):
+    pasta = os.path.join(pasta, "dados"); ok, falhas = [], []
+    curvas = None
+    for nome, v in cfg["ativos"].items():
+        try:
+            if "fred" in v: s_ = fred_serie(v["fred"])
+            else:
+                if curvas is None: curvas = tesouro_curvas()
+                fam, anos = v["tesouro"]; s_ = curvas[fam][anos].dropna()
+            if len(s_) < 20: raise ValueError("poucos dados")
+            df = pd.DataFrame({"open": s_, "high": s_, "low": s_, "close": s_}); df.index = pd.to_datetime(df.index)
+            gravar(limpar(df), pasta, nome, "1D"); ok.append(nome)
+        except Exception as e:
+            falhas.append(nome); print("juros", nome, "erro:", e)
+    return ok, falhas
+
+def bp(v): return "–" if v != v else f"{v:+.1f} bp"
+
 # ---------- painel resumo (todas as categorias) ----------
 def cor_rsi(v):
     if v != v: return ""
@@ -311,13 +360,17 @@ def cor_var(v):
     if v != v: return ""
     return "color:#0a7d33" if v > 0 else "color:#b3261e" if v < 0 else ""
 
-def linha_painel(nome, d, fim, extra):
+def linha_painel(nome, d, fim, extra, juros=False):
     c = d.close
     if len(c) < 20: return None
     w = semanal(d, fim)
     rd = rsi(c).iloc[-1]; rw = rsi(w.close).iloc[-1] if len(w) > 15 else np.nan
-    dia = c.iloc[-1]/c.iloc[-2]-1
-    sem = w.close.iloc[-1]/w.close.iloc[-2]-1 if len(w) > 1 else np.nan
+    if juros:
+        dia = (c.iloc[-1]-c.iloc[-2])*100
+        sem = (w.close.iloc[-1]-w.close.iloc[-2])*100 if len(w) > 1 else np.nan
+    else:
+        dia = c.iloc[-1]/c.iloc[-2]-1
+        sem = w.close.iloc[-1]/w.close.iloc[-2]-1 if len(w) > 1 else np.nan
     sig = []
     if rd <= 30: sig.append("sobrevenda D")
     if rd >= 70: sig.append("sobrecompra D")
@@ -355,8 +408,9 @@ def painel():
         for nome, v in A.items():
             d = ler(os.path.join(pasta, "dados"), nome, "1D")
             if d is None: continue
-            r = linha_painel(nome, limpar(d), cfg.get("semana", "FRI"), dict(info=" · ".join(x for x in [v.get("setor", ""), ("BDR " + v["bdr"]) if v.get("bdr") else "", v.get("grupo", ""), "reserva" if v.get("reserva") else ""] if x), moeda=cfg.get("moeda", "")))
+            r = linha_painel(nome, limpar(d), cfg.get("semana", "FRI"), dict(info=" · ".join(x for x in [v.get("setor", ""), ("BDR " + v["bdr"]) if v.get("bdr") else "", v.get("grupo", ""), "reserva" if v.get("reserva") else ""] if x), moeda=cfg.get("moeda", "")), juros=cfg.get("tipo") == "juros")
             if r:
+                r["juros"] = cfg.get("tipo") == "juros"
                 r["res"] = None
                 if nome in EV:
                     try:
@@ -377,7 +431,7 @@ def painel():
         ns = sum(1 for r in L if r["rd"] <= 30); nc = sum(1 for r in L if r["rd"] >= 70)
         h.append(f"<h2>{H.escape(nome)} <span class=n>· {len(L)} ativos · {ns} em sobrevenda diária · {nc} em sobrecompra diária</span></h2><div class=sc><table class=s><tr><th>Ativo</th><th>Preço</th><th>Dia</th><th>Semana</th><th>RSI D</th><th>RSI S</th><th>Sinal</th><th>Dado de</th>" + ("<th>Resultado</th>" if com_res else "") + "<th>Info</th></tr>")
         for r in sorted(L, key=lambda r: r["rd"]):
-            h.append(f"<tr><td><b>{H.escape(r['nome'])}</b></td><td>{fmt(r['preco'])}</td><td style='{cor_var(r['dia'])}'>{pct(r['dia'])}</td><td style='{cor_var(r['sem'])}'>{pct(r['sem'])}</td>"
+            h.append(f"<tr><td><b>{H.escape(r['nome'])}</b></td><td>{fmt(r['preco']) + ('%' if r.get('juros') else '')}</td><td style='{cor_var(r['dia'])}'>{bp(r['dia']) if r.get('juros') else pct(r['dia'])}</td><td style='{cor_var(r['sem'])}'>{bp(r['sem']) if r.get('juros') else pct(r['sem'])}</td>"
                      f"<td style='{cor_rsi(r['rd'])}'>{fmt(r['rd'],1)}</td><td style='{cor_rsi(r['rw'])}'>{fmt(r['rw'],1)}</td><td class=l>{r['sinal']}</td><td>{r['data']:%d/%m}</td>{res_cell(r, com_res)}<td class='l n'>{H.escape(r['info'])}</td></tr>")
         h.append("</table></div>")
     if not secoes: h.append("<p>Sem dados coletados ainda.</p>")
@@ -397,6 +451,8 @@ if __name__ == "__main__":
         if so and so != nome: continue
         cfg = json.load(open(cdir, encoding="utf-8"))
         if not cfg.get("ativos"): print(nome, ": sem ativos, pulando"); continue
+        if cfg.get("tipo") == "juros":
+            ok, f = coletar_juros(cfg, pasta_cat); print(nome, "ok:", ok, "| falhas:", f or "nenhuma"); continue
         A, dados, d30, bench, fonte, falhas = carregar(cfg, os.path.join(pasta_cat, "dados"), offline)
         if not dados: print(nome, ": nenhum dado", falhas); continue
         open(os.path.join(pasta_cat, "relatorio.html"), "w", encoding="utf-8").write(relatorio(cfg, A, dados, d30, bench, fonte, falhas))
