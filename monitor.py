@@ -109,7 +109,9 @@ def limpa_yahoo(d, iv):
 
 def prefetch(tickers, iv):
     """Baixa vários tickers numa só chamada (muito mais rápido que um por um)."""
-    import yfinance as yf
+    import yfinance as yf, tempfile
+    try: yf.set_tz_cache_location(tempfile.mkdtemp())
+    except Exception: pass
     tickers = sorted(set(tickers))
     if not tickers: return
     per = "5y" if iv == "1d" else "59d"
@@ -123,6 +125,13 @@ def prefetch(tickers, iv):
             try: sub = d[t] if len(lote) > 1 else d
             except Exception: continue
             CACHE[(t, iv)] = limpa_yahoo(sub.copy(), iv)
+        import time
+        for t in lote:      # quem falhou no lote (ex.: "database is locked") é baixado de novo, um por vez
+            x = CACHE.get((t, iv))
+            if x is None or len(x) < 5:
+                time.sleep(1)
+                try: CACHE[(t, iv)] = limpa_yahoo(yf.download(t, period=per, interval=iv, auto_adjust=False, progress=False, threads=False), iv)
+                except Exception as e: print("retry", t, iv, e)
 
 def yahoo(tk, iv):
     if (tk, iv) in CACHE: return CACHE[(tk, iv)]
