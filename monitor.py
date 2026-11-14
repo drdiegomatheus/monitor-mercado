@@ -249,6 +249,55 @@ def relatorio(cfg, A, dados, d30, bench, fonte, falhas):
     return "".join(h) + "</body></html>"
 
 
+
+# ---------- eventos: datas de resultados ----------
+def _datas_yahoo(tk):
+    import yfinance as yf
+    t = yf.Ticker(tk); hoje = pd.Timestamp.today().normalize(); cand = []
+    try:
+        cal = t.calendar
+        v = cal.get("Earnings Date") if isinstance(cal, dict) else None
+        if v: cand += [pd.Timestamp(x) for x in (v if isinstance(v, (list, tuple)) else [v])]
+    except Exception: pass
+    if not cand:
+        try:
+            ed = t.get_earnings_dates(limit=8)
+            if ed is not None and len(ed): cand += [pd.Timestamp(i).tz_localize(None) for i in ed.index]
+        except Exception: pass
+    fut = sorted(x.normalize() for x in cand if x.normalize() >= hoje - pd.Timedelta(days=1))
+    return fut[0] if fut else None
+
+def atualizar_eventos(forcar=False):
+    import time
+    base = os.path.join(RAIZ, "categorias")
+    for cdir in sorted(glob.glob(os.path.join(base, "*", "config.json"))):
+        pasta = os.path.dirname(cdir); cfg = json.load(open(cdir, encoding="utf-8"))
+        if os.path.basename(pasta) == "cripto" or not cfg.get("ativos"): continue
+        f = os.path.join(pasta, "eventos.json")
+        if os.path.exists(f) and not forcar and time.time() - os.path.getmtime(f) < 20*3600: continue
+        out = {}
+        for nome, v in especificar(cfg).items():
+            try: d = _datas_yahoo(v["yahoo"][0])
+            except Exception as e: print("evento", nome, e); d = None
+            if d is not None: out[nome] = d.strftime("%Y-%m-%d")
+            time.sleep(0.2)
+        json.dump(out, open(f, "w"), indent=1); print(os.path.basename(pasta), "eventos:", len(out))
+
+def ler_eventos(pasta):
+    ev = {}
+    for nome in ("eventos.json", "resultados_manual.json"):   # o manual vence
+        f = os.path.join(pasta, nome)
+        if os.path.exists(f):
+            try: ev.update(json.load(open(f, encoding="utf-8")))
+            except Exception as e: print(nome, e)
+    return ev
+
+def cor_dias(n):
+    if n <= 3: return "background:#c62828;color:#fff"
+    if n <= 7: return "background:#f4a261"
+    if n <= 14: return "background:#fff3b0"
+    return ""
+
 # ---------- painel resumo (todas as categorias) ----------
 def cor_rsi(v):
     if v != v: return ""
@@ -276,18 +325,46 @@ def linha_painel(nome, d, fim, extra):
     if rw == rw and rw >= 70: sig.append("sobrecompra S")
     return dict(nome=nome, preco=c.iloc[-1], dia=dia, sem=sem, rd=rd, rw=rw, data=d.index[-1], sinal=" + ".join(sig), **extra)
 
+def res_cell(r, com_res):
+    if not com_res: return ""
+    if not r.get("res"): return "<td class=n>–</td>"
+    dd, n = r["res"]; return f"<td style='{cor_dias(n)}'>{dd:%d/%m} ({n}d)</td>"
+
+def macro_html():
+    f = os.path.join(RAIZ, "macro.json")
+    if not os.path.exists(f): return ""
+    hoje = pd.Timestamp.today().normalize(); L = []
+    for e in json.load(open(f, encoding="utf-8")):
+        d = pd.Timestamp(e["data"]); n = (d - hoje).days
+        if n >= 0: L.append((d, n, e))
+    if not L: return ""
+    L.sort(key=lambda x: x[0])
+    h = ["<h2>Calendário: juros, inflação e feriados <span class=n>· cores: ≤3 dias vermelho, ≤7 laranja, ≤14 amarelo</span></h2><div class=sc><table><tr><th>Data</th><th>Faltam</th><th>Região</th><th>Evento</th></tr>"]
+    for d, n, e in L:
+        h.append(f"<tr><td style='{cor_dias(n)}'>{d:%d/%m/%Y}</td><td style='{cor_dias(n)}'>{n}d</td><td class=l>{e['regiao']}</td><td class=l>{e['evento']}</td></tr>")
+    h.append("</table></div><p class=n>Datas de resultados de empresas vêm do Yahoo (nos EUA são confiáveis; na B3 muitas vêm em branco). Para fixar uma data na B3, edite categorias/brasil/resultados_manual.json, por exemplo {\"PETR4\": \"2027-02-26\"}.</p>")
+    return "".join(h)
+
 def painel():
     import html as H
     base = os.path.join(RAIZ, "categorias"); secoes = []; total_s = total_c = 0
     for cdir in sorted(glob.glob(os.path.join(base, "*", "config.json"))):
         pasta = os.path.dirname(cdir); cfg = json.load(open(cdir, encoding="utf-8"))
-        A = especificar(cfg); L = []
+        A = especificar(cfg); L = []; EV = ler_eventos(pasta)
+        hoje = pd.Timestamp.today().normalize()
         for nome, v in A.items():
             d = ler(os.path.join(pasta, "dados"), nome, "1D")
             if d is None: continue
             r = linha_painel(nome, limpar(d), cfg.get("semana", "FRI"), dict(info=" · ".join(x for x in [v.get("setor", ""), ("BDR " + v["bdr"]) if v.get("bdr") else "", v.get("grupo", ""), "reserva" if v.get("reserva") else ""] if x), moeda=cfg.get("moeda", "")))
-            if r: L.append(r)
-        if L: secoes.append((cfg["nome"], L))
+            if r:
+                r["res"] = None
+                if nome in EV:
+                    try:
+                        dd = pd.Timestamp(EV[nome]); n = (dd - hoje).days
+                        if n >= 0: r["res"] = (dd, n)
+                    except Exception: pass
+                L.append(r)
+        if L: secoes.append((cfg["nome"], L, os.path.basename(pasta) != "cripto"))
     css = ("body{font-family:system-ui;margin:10px;max-width:1000px}h1{font-size:20px}h2{font-size:16px;margin:22px 0 4px}"
            "table{border-collapse:collapse;width:100%;font-size:13px}th,td{border-bottom:1px solid #ddd;padding:5px 6px;text-align:right;white-space:nowrap}"
            "th{background:#f3f4f6;cursor:pointer;position:sticky;top:0}th:first-child,td:first-child,td.l{text-align:left}.n{color:#666;font-size:12px}.sc{overflow-x:auto}"
@@ -296,19 +373,21 @@ def painel():
          f"<h1>Painel RSI · atualizado {dt.datetime.now(dt.timezone(dt.timedelta(hours=-3))):%d/%m/%Y %H:%M} (Brasília)</h1>",
          "<div class=leg><span style='background:#1b8a3a;color:#fff'>RSI ≤ 30 sobrevenda</span><span style='background:#cdeed6'>30–40</span><span style='background:#f9d3d3'>60–70</span><span style='background:#c62828;color:#fff'>RSI ≥ 70 sobrecompra</span></div>",
          "<p class=n>D = candle diário, S = candle semanal (RSI de 14 períodos). Variação do dia = último preço contra o fechamento anterior; da semana = contra o fechamento da semana anterior. A candle do momento ainda está em andamento. Clique no título da coluna para ordenar.</p>"]
-    for nome, L in secoes:
+    for nome, L, com_res in secoes:
         ns = sum(1 for r in L if r["rd"] <= 30); nc = sum(1 for r in L if r["rd"] >= 70)
-        h.append(f"<h2>{H.escape(nome)} <span class=n>· {len(L)} ativos · {ns} em sobrevenda diária · {nc} em sobrecompra diária</span></h2><div class=sc><table class=s><tr><th>Ativo</th><th>Preço</th><th>Dia</th><th>Semana</th><th>RSI D</th><th>RSI S</th><th>Sinal</th><th>Dado de</th><th>Info</th></tr>")
+        h.append(f"<h2>{H.escape(nome)} <span class=n>· {len(L)} ativos · {ns} em sobrevenda diária · {nc} em sobrecompra diária</span></h2><div class=sc><table class=s><tr><th>Ativo</th><th>Preço</th><th>Dia</th><th>Semana</th><th>RSI D</th><th>RSI S</th><th>Sinal</th><th>Dado de</th>" + ("<th>Resultado</th>" if com_res else "") + "<th>Info</th></tr>")
         for r in sorted(L, key=lambda r: r["rd"]):
             h.append(f"<tr><td><b>{H.escape(r['nome'])}</b></td><td>{fmt(r['preco'])}</td><td style='{cor_var(r['dia'])}'>{pct(r['dia'])}</td><td style='{cor_var(r['sem'])}'>{pct(r['sem'])}</td>"
-                     f"<td style='{cor_rsi(r['rd'])}'>{fmt(r['rd'],1)}</td><td style='{cor_rsi(r['rw'])}'>{fmt(r['rw'],1)}</td><td class=l>{r['sinal']}</td><td>{r['data']:%d/%m}</td><td class='l n'>{H.escape(r['info'])}</td></tr>")
+                     f"<td style='{cor_rsi(r['rd'])}'>{fmt(r['rd'],1)}</td><td style='{cor_rsi(r['rw'])}'>{fmt(r['rw'],1)}</td><td class=l>{r['sinal']}</td><td>{r['data']:%d/%m}</td>{res_cell(r, com_res)}<td class='l n'>{H.escape(r['info'])}</td></tr>")
         h.append("</table></div>")
     if not secoes: h.append("<p>Sem dados coletados ainda.</p>")
+    h.append(macro_html())
     h.append("""<script>document.querySelectorAll('table.s').forEach(t=>{t.querySelectorAll('th').forEach((th,i)=>{th.onclick=()=>{const rows=[...t.rows].slice(1);const dir=th.dataset.d=th.dataset.d=='1'?-1:1;rows.sort((a,b)=>{const x=a.cells[i].innerText.replace('%','').replace(/,/g,''),y=b.cells[i].innerText.replace('%','').replace(/,/g,'');const nx=parseFloat(x),ny=parseFloat(y);return (isNaN(nx)||isNaN(ny)?x.localeCompare(y):nx-ny)*dir});rows.forEach(r=>t.appendChild(r))}})})</script></body></html>""")
     open(os.path.join(RAIZ, "painel.html"), "w", encoding="utf-8").write("".join(h))
-    print("painel.html gerado:", sum(len(L) for _, L in secoes), "ativos")
+    print("painel.html gerado:", sum(len(x[1]) for x in secoes), "ativos")
 
 if __name__ == "__main__":
+    if "--eventos" in sys.argv: atualizar_eventos("--forcar" in sys.argv); sys.exit(0)
     if "--painel" in sys.argv: painel(); sys.exit(0)
     offline = "--csv" in sys.argv
     so = sys.argv[sys.argv.index("--cat")+1] if "--cat" in sys.argv else None
