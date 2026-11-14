@@ -34,7 +34,7 @@ def baixar_yahoo(tk, y):
 
 def ler_csv(pasta, tk):
     import re
-    alvo = "BTCUSDT" if tk == "BTC" else tk
+    alvo = "(?:BTC|BTCUSDT)" if tk == "BTC" else tk
     pat = re.compile(r"^(?:[0-9a-f]{8}-)?(?:BMFBOVESPA|BINANCE)_%s_1D" % alvo)
     fs = [f for f in glob.glob(os.path.join(pasta, "*.csv")) if pat.match(os.path.basename(f))]
     if not fs: return None
@@ -129,7 +129,7 @@ def pares(dados):
     L = []
     for a, b, k in PARES:
         if a not in dados or b not in dados: continue
-        j = pd.concat([dados[a].close, dados[b].close], axis=1, keys=["a","b"]).dropna()
+        j = pd.concat([dados[a].close, dados[b].close], axis=1, keys=["a","b"], sort=True).dropna()
         if len(j) < 30: continue
         sp = j.a - k*j.b; rz = j.a/j.b
         z = (sp.iloc[-1]-sp.tail(60).mean())/sp.tail(60).std()
@@ -140,7 +140,8 @@ def pares(dados):
 def rot_m2(dados):
     if "M2ST34" not in dados or "BITH11" not in dados: return ""
     r = rsi(semanal(dados["M2ST34"]).close).iloc[-1]; hi, lo = RSI_ROT
-    est = (f"RSI semanal do M2ST34 = {r:.1f}. " +
+    aviso = " ATENÇÃO: histórico curto no Yahoo (%d pregões); RSI semanal pouco confiável, confira no TradingView/Alpha Vantage." % len(dados["M2ST34"]) if len(dados["M2ST34"]) < 300 else ""
+    est = (f"RSI semanal do M2ST34 = {r:.1f}.{aviso} " +
            ("SINAL: favorece migrar para BITH11 (≥ %d); só voltar com RSI ≤ %d." % (hi, lo) if r >= hi else
             "Zona de transição: se já está no BITH11, mantém até RSI ≤ %d." % lo if r > lo else
             "Sem sinal de troca: fica no M2ST34 (abaixo de %d)." % hi))
