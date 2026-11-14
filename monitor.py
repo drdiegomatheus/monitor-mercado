@@ -222,7 +222,7 @@ def relatorio(cfg, A, dados, d30, bench, fonte, falhas):
         ref, bn = refde(k); o = tecnico(d, fim, None if bn == k else ref)
         cor = "ruim" if o["rsi_d"] >= 70 else "ok" if o["rsi_d"] <= 30 else ""
         h.append(f"<tr><td><b>{k}</b></td><td>{fmt(o['preco'])}</td><td>{pct(o['r7'])}</td><td>{pct(o['r30'])}</td><td>{pct(o['r90'])}</td><td>{pct(o['dd'])}</td><td class={cor}>{fmt(o['rsi_d'],1)}</td><td>{fmt(o['rsi_w'],1)}</td><td>{fmt(o['sma50'])}</td><td>{fmt(o['sma200'])}</td><td>{fmt(o['boll'])}</td><td>{fmt(o['atr'])}</td><td>{fmt(o['corr'])}</td></tr>")
-        h.append(f"<tr><td colspan=13 class='l n'>{o['leitura']} · dado de {o['data']} · {o['n']} dias · {fonte.get(k,'')} · ref {bn}{(' · ' + A[k]['setor']) if A.get(k, {}).get('setor') else ''}{' · reserva' if A.get(k, {}).get('reserva') else ''}</td></tr>")
+        h.append(f"<tr><td colspan=13 class='l n'>{o['leitura']} · dado de {o['data']} · {o['n']} dias · {fonte.get(k,'')} · ref {bn}{(' · ' + A[k]['setor']) if A.get(k, {}).get('setor') else ''}{' · reserva' if A.get(k, {}).get('reserva') else ''}{(' · BDR ' + A[k]['bdr']) if A.get(k, {}).get('bdr') else ''}</td></tr>")
     h.append("</table></div>")
     if d30:
         h.append("<h2>30 minutos</h2><div class=sc><table><tr><th>Ativo</th><th>Preço</th><th>RSI 30m</th><th>MM9</th><th>MM21</th><th>MM50</th><th>MM200</th><th>Boll</th><th>ATR</th><th>Última candle (UTC)</th></tr>")

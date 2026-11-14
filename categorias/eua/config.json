@@ -1,11 +1,173 @@
 {
-  "nome": "EUA",
-  "moeda": "US$",
-  "semana": "FRI",
-  "sufixo": "",
-  "rrg": true,
-  "benchmark_padrao": "SPY",
-  "benchmarks": {"NASDAQ": ["QQQ"], "SP500": ["SPY"]},
-  "grupo_benchmark": {"nasdaq": "NASDAQ", "sp500": "SP500"},
-  "ativos": {}
+ "nome": "EUA",
+ "moeda": "US$",
+ "semana": "FRI",
+ "sufixo": "",
+ "rrg": true,
+ "benchmark_padrao": "SPY",
+ "benchmarks": {
+  "NASDAQ": [
+   "QQQ"
+  ],
+  "SP500": [
+   "SPY"
+  ]
+ },
+ "grupo_benchmark": {
+  "nasdaq": "NASDAQ",
+  "sp500": "SP500"
+ },
+ "ativos": {
+  "INTC": {
+   "grupo": "nasdaq",
+   "bdr": "ITLC34"
+  },
+  "NVDA": {
+   "grupo": "nasdaq",
+   "bdr": "NVDC34"
+  },
+  "AMD": {
+   "grupo": "nasdaq",
+   "bdr": "A1MD34"
+  },
+  "AMZN": {
+   "grupo": "nasdaq",
+   "bdr": "AMZO34"
+  },
+  "GOOG": {
+   "grupo": "nasdaq",
+   "bdr": "GOGL35"
+  },
+  "MSFT": {
+   "grupo": "nasdaq",
+   "bdr": "MSFT34"
+  },
+  "PLTR": {
+   "grupo": "nasdaq",
+   "bdr": "P2LT34"
+  },
+  "TSLA": {
+   "grupo": "nasdaq",
+   "bdr": "TSLA34"
+  },
+  "AVGO": {
+   "grupo": "nasdaq",
+   "bdr": "AVGO34"
+  },
+  "TSM": {
+   "grupo": "nasdaq",
+   "bdr": "TSMC34"
+  },
+  "ASML": {
+   "grupo": "nasdaq",
+   "bdr": "ASML34"
+  },
+  "CSCO": {
+   "grupo": "nasdaq",
+   "bdr": "CSCO34"
+  },
+  "META": {
+   "grupo": "nasdaq",
+   "bdr": "M1TA34"
+  },
+  "MU": {
+   "grupo": "nasdaq",
+   "bdr": "MUTC34"
+  },
+  "MRVL": {
+   "grupo": "nasdaq",
+   "bdr": "M2RV34"
+  },
+  "MSTR": {
+   "grupo": "nasdaq",
+   "bdr": "M2ST34"
+  },
+  "NFLX": {
+   "grupo": "nasdaq",
+   "bdr": "NFLX34"
+  },
+  "MELI": {
+   "grupo": "nasdaq",
+   "bdr": "MELI34"
+  },
+  "SPCX": {
+   "grupo": "nasdaq",
+   "bdr": "SPCX34"
+  },
+  "DELL": {
+   "grupo": "nasdaq",
+   "bdr": "D1EL34"
+  },
+  "ORCL": {
+   "grupo": "nasdaq",
+   "bdr": "ORCL34"
+  },
+  "IBM": {
+   "grupo": "nasdaq",
+   "bdr": "IBMB34"
+  },
+  "BRK.B": {
+   "grupo": "sp500",
+   "bdr": "BERK34",
+   "yahoo": [
+    "BRK-B"
+   ]
+  },
+  "MS": {
+   "grupo": "sp500",
+   "bdr": "MSBR34"
+  },
+  "BAC": {
+   "grupo": "sp500",
+   "bdr": "BOAC34"
+  },
+  "MA": {
+   "grupo": "sp500",
+   "bdr": "MSCD34"
+  },
+  "V": {
+   "grupo": "sp500",
+   "bdr": "VISA34"
+  },
+  "JPM": {
+   "grupo": "sp500",
+   "bdr": "JPMC34"
+  },
+  "NU": {
+   "grupo": "sp500",
+   "bdr": "ROXO34"
+  },
+  "LLY": {
+   "grupo": "sp500",
+   "bdr": "LILY34"
+  },
+  "ABBV": {
+   "grupo": "sp500",
+   "bdr": "ABBV34"
+  },
+  "JNJ": {
+   "grupo": "sp500",
+   "bdr": "JNJB34"
+  },
+  "WMT": {
+   "grupo": "sp500",
+   "bdr": "WALM34"
+  },
+  "COST": {
+   "grupo": "sp500",
+   "bdr": "COWC34"
+  },
+  "PG": {
+   "grupo": "sp500",
+   "bdr": "PGCO34"
+  },
+  "XOM": {
+   "grupo": "sp500",
+   "bdr": "EXXO34"
+  },
+  "CVX": {
+   "grupo": "sp500",
+   "bdr": "CHVX34"
+  }
+ }
 }
