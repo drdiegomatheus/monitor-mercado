@@ -30,6 +30,8 @@ jobs:
             for c in brasil eua setores commodities macro; do python monitor.py --salvar --cat $c; done
           fi
           if [ "$m" -lt 5 ] && { [ "$h" = "13" ] || [ "$h" = "02" ]; }; then python monitor.py --salvar --cat juros; fi
+      - name: pre e pos mercado EUA
+        run: python monitor.py --ext || true
       - name: mercado
         run: python monitor.py --mercado || true
       - name: eventos
@@ -42,7 +44,7 @@ jobs:
         run: |
           git config user.name "coleta"; git config user.email "coleta@users.noreply.github.com"
           ARQ=""
-          for f in painel.html painel_*.html index.html categorias/*/dados categorias/*/relatorio.html categorias/*/eventos.json categorias/*/mercado.json categorias/*/_meta.json; do
+          for f in painel.html painel_*.html ext.json index.html categorias/*/dados categorias/*/relatorio.html categorias/*/eventos.json categorias/*/mercado.json categorias/*/_meta.json; do
             if [ -e "$f" ]; then ARQ="$ARQ $f"; fi
           done
           git checkout -q --orphan dados_novo

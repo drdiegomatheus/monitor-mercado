@@ -544,9 +544,60 @@ def macro_html():
 
 SO_PAINEL = sys.argv[sys.argv.index("--so")+1] if "--so" in sys.argv else None
 
+def calc_ext(d):
+    """d: barras de 5 min com prepost, indice em horario de Nova York. Retorna (preco, variacao%, fase, datahora) ou None."""
+    d = d.dropna(subset=["Close"]) if "Close" in d.columns else d
+    if d is None or len(d) < 2: return None
+    idx = d.index; hm = idx.hour * 60 + idx.minute
+    reg = (hm >= 570) & (hm < 960)
+    if not reg.any(): return None
+    ult = idx[-1]; h = ult.hour * 60 + ult.minute
+    if 570 <= h < 960: return None
+    if h >= 960:
+        ref = d.loc[reg & (idx.normalize() == ult.normalize()), "Close"]
+        fase = "Pós"
+    else:
+        ref = d.loc[reg & (idx.normalize() < ult.normalize()), "Close"]
+        fase = "Pré"
+    if len(ref) == 0: return None
+    ref = float(ref.iloc[-1]); p = float(d["Close"].iloc[-1])
+    return p, (p / ref - 1) * 100, fase, ult.tz_convert("America/Sao_Paulo").strftime("%d/%m %H:%M")
+
+def atualizar_ext():
+    """Preço pré/pós-mercado (EUA) das ações e ETFs americanos; grava ext.json"""
+    import yfinance as yf
+    tks = {}
+    for cat in ("eua", "setores", "macro", "commodities"):
+        f = os.path.join(RAIZ, "categorias", cat, "config.json")
+        if not os.path.exists(f): continue
+        for nome, v in especificar(json.load(open(f, encoding="utf-8"))).items():
+            y = v["yahoo"][0]
+            if not any(c in y for c in "^=.-"): tks[y] = 1
+    out = {}; L = sorted(tks)
+    for i in range(0, len(L), 40):
+        lote = L[i:i+40]
+        try: d = yf.download(lote, period="5d", interval="5m", prepost=True, auto_adjust=False, progress=False, group_by="ticker", threads=False)
+        except Exception as e: print("ext lote", e); continue
+        for t in lote:
+            try:
+                sub = d[t].dropna(how="all")
+                if sub.index.tz is None: sub.index = sub.index.tz_localize("UTC")
+                sub.index = sub.index.tz_convert("America/New_York")
+                r = calc_ext(sub)
+                if r: out[t] = dict(preco=r[0], var=r[1], fase=r[2], hora=r[3])
+            except Exception as e: print("ext", t, e)
+    json.dump(out, open(os.path.join(RAIZ, "ext.json"), "w"))
+    print("ext.json:", len(out), "de", len(L))
+
+def ext_cell(r):
+    e = r.get("ext")
+    if not e: return "<td>–</td>"
+    return f"<td style='{cor_var(e['var'])}' title='{e['fase']}-mercado, {e['hora']} (Brasília)'>{fmt(e['preco'])} ({e['var']:+.2f}%) <span class=n>{e['fase']} {e['hora'][-5:]}</span></td>"
+
 def painel():
     import html as H
     base = os.path.join(RAIZ, "categorias"); secoes = []; total_s = total_c = 0
+    f_e = os.path.join(RAIZ, "ext.json"); EXT = json.load(open(f_e)) if os.path.exists(f_e) else {}
     for cdir in sorted(glob.glob(os.path.join(base, "*", "config.json"))):
         pasta = os.path.dirname(cdir); cfg = json.load(open(cdir, encoding="utf-8"))
         if SO_PAINEL and os.path.basename(pasta) != SO_PAINEL: continue
@@ -562,6 +613,7 @@ def painel():
                     x = ler(os.path.join(pasta, "dados"), nome, tf)
                     if x is not None and len(x) > 30: r["tf"][tf] = rsi(limpar(x).close).iloc[-1]
                 r["juros"] = cfg.get("tipo") == "juros"
+                r["ext"] = EXT.get(A[nome]["yahoo"][0])
                 r["res"] = None
                 if nome in EV:
                     try:
@@ -588,18 +640,19 @@ def painel():
         sel = [x for x in secoes if chaves is None or x[5] in chaves]
         if chaves: sel.sort(key=lambda x: chaves.index(x[5]))
         nav = "<div class=nav>" + "".join(f"<a class='{'at' if a == arq else ''}' href='{a}'>{t}</a>" for a, t, _ in PAGINAS) + "</div>"
-        h = [f"<html><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>Painel RSI · {titulo}</title><style>{css}</style></head><body>",
+        h = [f"<html><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta http-equiv=refresh content=300><title>Painel RSI · {titulo}</title><style>{css}</style></head><body>",
              nav, f"<h1>{titulo} · atualizado {dt.datetime.now(dt.timezone(dt.timedelta(hours=-3))):%d/%m/%Y %H:%M} (Brasília)</h1>",
              "<div class=leg><span style='background:#1b8a3a;color:#fff'>RSI ≤ 30 sobrevenda</span><span style='background:#cdeed6'>30–40</span><span style='background:#f9d3d3'>60–70</span><span style='background:#c62828;color:#fff'>RSI ≥ 70 sobrecompra</span></div>",
              "<p class=n>D = candle diário, S = semanal, M = mensal (30 dias); nos ativos cripto também 15 min, 30 min, 1H e 4H (RSI de 14 períodos; * = menos de 30 meses de histórico, RSI mensal menos confiável). Variação do dia = último preço contra o fechamento anterior; da semana = contra o fechamento da semana anterior. A candle do momento ainda está em andamento. Clique no título da coluna para ordenar.</p>"]
         for nome, L, com_res, tempos, e_juros, _ in sel:
+            tem_ext = any(r.get('ext') for r in L)
             ns = sum(1 for r in L if r["rd"] <= 30); nc = sum(1 for r in L if r["rd"] >= 70)
-            h.append(f"<h2>{H.escape(nome)} <span class=n>· {len(L)} ativos · {ns} em sobrevenda diária · {nc} em sobrecompra diária</span></h2><div class=sc><table class=s><tr><th>Ativo</th><th>Setor</th><th>Preço</th><th>Dia</th><th>Semana</th>" + "".join(f"<th>RSI {t.upper() if t.endswith('h') else t}</th>" for t in tempos) + "<th>RSI D</th><th>RSI S</th>" + ("" if e_juros else "<th>RSI M (30d)</th>") + "<th>Sinal</th><th>Dado de</th>" + ("<th>Resultado</th>" if com_res else "") + "<th>Info</th></tr>")
+            h.append(f"<h2>{H.escape(nome)} <span class=n>· {len(L)} ativos · {ns} em sobrevenda diária · {nc} em sobrecompra diária</span></h2><div class=sc><table class=s><tr><th>Ativo</th><th>Setor</th><th>Preço</th>" + ("<th>Fora do pregão</th>" if tem_ext else "") + "<th>Dia</th><th>Semana</th>" + "".join(f"<th>RSI {t.upper() if t.endswith('h') else t}</th>" for t in tempos) + "<th>RSI D</th><th>RSI S</th>" + ("" if e_juros else "<th>RSI M (30d)</th>") + "<th>Sinal</th><th>Dado de</th>" + ("<th>Resultado</th>" if com_res else "") + "<th>Info</th></tr>")
             ant = None
             for r in sorted(L, key=lambda r: r["ord"]):
                 borda = " style='border-top:2px solid #888'" if ant is not None and r["setor"] != ant else ""
                 ant = r["setor"]
-                h.append(f"<tr{borda}><td><b>{H.escape(r['rot'])}</b></td><td class='l n'>{H.escape(r['setor'])}</td><td>{fmt(r['preco']) + ('%' if r.get('juros') else '')}</td><td style='{cor_var(r['dia'])}'>{bp(r['dia']) if r.get('juros') else pct(r['dia'])}</td><td style='{cor_var(r['sem'])}'>{bp(r['sem']) if r.get('juros') else pct(r['sem'])}</td>"
+                h.append(f"<tr{borda}><td><b>{H.escape(r['rot'])}</b></td><td class='l n'>{H.escape(r['setor'])}</td><td>{fmt(r['preco']) + ('%' if r.get('juros') else '')}</td>{ext_cell(r) if tem_ext else ''}<td style='{cor_var(r['dia'])}'>{bp(r['dia']) if r.get('juros') else pct(r['dia'])}</td><td style='{cor_var(r['sem'])}'>{bp(r['sem']) if r.get('juros') else pct(r['sem'])}</td>"
                          + "".join(f"<td style='{cor_rsi(r['tf'].get(t, float('nan')))}'>{fmt(r['tf'].get(t, float('nan')), 1)}</td>" for t in tempos) +
                          f"<td style='{cor_rsi(r['rd'])}'>{fmt(r['rd'],1)}</td><td style='{cor_rsi(r['rw'])}'>{fmt(r['rw'],1)}</td>" + ("" if e_juros else f"<td style='{cor_rsi(r['rm'])}'>{fmt(r['rm'],1)}{'*' if r['rm'] == r['rm'] and r['nm'] < 30 else ''}</td>") + f"<td class=l>{r['sinal']}</td><td>{r['data']:%d/%m}</td>{res_cell(r, com_res)}<td class='l n'>{H.escape(r['info'])}</td></tr>")
             h.append("</table></div>")
@@ -625,6 +678,7 @@ def painel():
 if __name__ == "__main__":
     if "--mercado" in sys.argv: atualizar_mercado("--forcar" in sys.argv); sys.exit(0)
     if "--eventos" in sys.argv: atualizar_eventos("--forcar" in sys.argv); sys.exit(0)
+    if "--ext" in sys.argv: atualizar_ext(); sys.exit(0)
     if "--painel" in sys.argv: painel(); sys.exit(0)
     offline = "--csv" in sys.argv
     so = sys.argv[sys.argv.index("--cat")+1] if "--cat" in sys.argv else None
