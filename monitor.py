@@ -184,7 +184,8 @@ def relatorio(cfg, A, dados, d30, bench, fonte, falhas):
     gb = cfg.get("grupo_benchmark", {}); pad = cfg.get("benchmark_padrao")
     def refde(k):
         b = gb.get(A[k].get("grupo", ""), pad) if A.get(k) else pad
-        return bench.get(b) if b in bench else (dados.get(b) if b in dados else None), b
+        r = bench.get(b) if b in bench else dados.get(b)
+        return (r.close if r is not None else None), b
     h = [f"<html><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><style>{CSS}</style></head><body><h1>{cfg['nome']} · {agora}</h1>",
          "<p class=n>Fechamento diário. Boll: −1 = banda inferior, +1 = superior. Corr = correlação diária com o benchmark, 30 dias.</p>",
          f"<div class=sc><table><tr><th>Ativo</th><th>Preço {cfg['moeda']}</th><th>7d</th><th>30d</th><th>90d</th><th>vs máx 12m</th><th>RSI D</th><th>RSI S</th><th>MM50</th><th>MM200</th><th>Boll</th><th>ATR</th><th>Corr</th></tr>"]
@@ -206,7 +207,7 @@ def relatorio(cfg, A, dados, d30, bench, fonte, falhas):
             ref, bn = refde(k)
             if ref is not None and bn != k: grupos.setdefault(bn, {})[k] = dados[k]
         for bn, ser in grupos.items():
-            ref = bench.get(bn, dados.get(bn)).close
+            ref = refde(next(iter(ser)))[0]
             for modo, nome in (("w", "semanal"), ("d", "diário")):
                 T = tabela_rrg(ser, ref, modo, fim)
                 if T.empty: continue
