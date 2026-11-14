@@ -2,7 +2,11 @@ name: coleta
 on:
   schedule:
     - cron: "*/5 * * * *"         # cripto 24h; Brasil, EUA, setores, commodities e macro no horário do pregão (seg-sex, 10h-18h de Brasília)
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: completo (tudo) ou agenda (só o que está no horário)
+        default: completo
 permissions:
   contents: write
   actions: write
@@ -26,7 +30,7 @@ jobs:
           git checkout -q origin/dados -- . || true
       - name: coleta
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then python monitor.py --salvar; exit 0; fi
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.modo }}" != "agenda" ]; then python monitor.py --salvar; exit 0; fi
           h=$(date -u +%H); m=$(date -u +%M); d=$(date -u +%u)
           python monitor.py --salvar --cat cripto
           if [ "$d" -le 5 ] && { { [ "$h" -ge 13 ] && [ "$h" -le 20 ]; } || { [ "$h" = "21" ] && [ "$m" -lt 5 ]; }; }; then
@@ -65,5 +69,5 @@ jobs:
           espera=$(( 300 - ($(date +%s) - T0) )); [ "$espera" -gt 0 ] && sleep "$espera"
           outras=$(gh api "repos/${{ github.repository }}/actions/workflows/coleta.yml/runs?status=queued&per_page=5" -q '.total_count' || echo 0)
           if [ "$outras" = "0" ]; then
-            gh api -X POST "repos/${{ github.repository }}/actions/workflows/coleta.yml/dispatches" -f ref=main || true
+            gh api -X POST "repos/${{ github.repository }}/actions/workflows/coleta.yml/dispatches" -f ref=main -f "inputs[modo]=agenda" || true
           fi
