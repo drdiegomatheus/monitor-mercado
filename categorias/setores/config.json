@@ -1,0 +1,168 @@
+{
+ "nome": "Setores (índices B3 e ETFs EUA)",
+ "moeda": "pts/US$",
+ "semana": "FRI",
+ "sufixo": "",
+ "rrg": true,
+ "sem_eventos": true,
+ "benchmark_padrao": "SP500",
+ "benchmarks": {
+  "IBOV": [
+   "^BVSP",
+   "BOVA11.SA"
+  ],
+  "SP500": [
+   "SPY"
+  ]
+ },
+ "grupo_benchmark": {
+  "br": "IBOV",
+  "eua": "SP500"
+ },
+ "ativos": {
+  "IFNC": {
+   "setor": "Financeiro",
+   "yahoo": [
+    "^IFNC",
+    "FIND11.SA"
+   ],
+   "grupo": "br"
+  },
+  "IMAT": {
+   "setor": "Materiais Básicos",
+   "yahoo": [
+    "^IMAT",
+    "MATB11.SA"
+   ],
+   "grupo": "br"
+  },
+  "INDX": {
+   "setor": "Industrial",
+   "yahoo": [
+    "^INDX"
+   ],
+   "grupo": "br"
+  },
+  "IEEX": {
+   "setor": "Energia Elétrica",
+   "yahoo": [
+    "^IEEX"
+   ],
+   "grupo": "br"
+  },
+  "UTIL": {
+   "setor": "Utilidade Pública",
+   "yahoo": [
+    "^UTIL"
+   ],
+   "grupo": "br"
+  },
+  "ICON": {
+   "setor": "Consumo",
+   "yahoo": [
+    "^ICON"
+   ],
+   "grupo": "br"
+  },
+  "IMOB": {
+   "setor": "Imobiliário",
+   "yahoo": [
+    "^IMOB"
+   ],
+   "grupo": "br"
+  },
+  "SMLL": {
+   "setor": "Small Caps",
+   "yahoo": [
+    "^SMLL",
+    "SMAL11.SA"
+   ],
+   "grupo": "br"
+  },
+  "IDIV": {
+   "setor": "Dividendos",
+   "yahoo": [
+    "^IDIV",
+    "DIVO11.SA"
+   ],
+   "grupo": "br"
+  },
+  "XLF": {
+   "setor": "Financeiro",
+   "yahoo": [
+    "XLF"
+   ],
+   "grupo": "eua"
+  },
+  "XLB": {
+   "setor": "Materiais",
+   "yahoo": [
+    "XLB"
+   ],
+   "grupo": "eua"
+  },
+  "XLI": {
+   "setor": "Industrial",
+   "yahoo": [
+    "XLI"
+   ],
+   "grupo": "eua"
+  },
+  "XLE": {
+   "setor": "Energia",
+   "yahoo": [
+    "XLE"
+   ],
+   "grupo": "eua"
+  },
+  "XLU": {
+   "setor": "Utilidades (equiv. IEEX/UTIL)",
+   "yahoo": [
+    "XLU"
+   ],
+   "grupo": "eua"
+  },
+  "XLP": {
+   "setor": "Consumo básico",
+   "yahoo": [
+    "XLP"
+   ],
+   "grupo": "eua"
+  },
+  "XLY": {
+   "setor": "Consumo discricionário",
+   "yahoo": [
+    "XLY"
+   ],
+   "grupo": "eua"
+  },
+  "XLV": {
+   "setor": "Saúde",
+   "yahoo": [
+    "XLV"
+   ],
+   "grupo": "eua"
+  },
+  "XLK": {
+   "setor": "Tecnologia",
+   "yahoo": [
+    "XLK"
+   ],
+   "grupo": "eua"
+  },
+  "XLC": {
+   "setor": "Comunicação",
+   "yahoo": [
+    "XLC"
+   ],
+   "grupo": "eua"
+  },
+  "XLRE": {
+   "setor": "Imobiliário",
+   "yahoo": [
+    "XLRE"
+   ],
+   "grupo": "eua"
+  }
+ }
+}

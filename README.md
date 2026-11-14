@@ -4,6 +4,8 @@ Três categorias, cada uma com sua pasta em `categorias/`:
 
 | Pasta | Referência do RRG | RRG |
 |---|---|---|
+| `setores` | IBOV / SPY | índices setoriais da B3 (RRG vs Ibovespa) e ETFs setoriais dos EUA (RRG vs SPY) |
+| `commodities` | – | ouro, Brent |
 | `cripto` | BTC | desligado por enquanto (`"rrg": false`) |
 | `eua` | NASDAQ (QQQ) ou S&P 500 (SPY), conforme o grupo do ativo | ligado |
 | `brasil` | BOVA11 | ligado |

@@ -272,7 +272,7 @@ def atualizar_eventos(forcar=False):
     base = os.path.join(RAIZ, "categorias")
     for cdir in sorted(glob.glob(os.path.join(base, "*", "config.json"))):
         pasta = os.path.dirname(cdir); cfg = json.load(open(cdir, encoding="utf-8"))
-        if os.path.basename(pasta) == "cripto" or not cfg.get("ativos"): continue
+        if cfg.get("sem_eventos") or not cfg.get("ativos"): continue
         f = os.path.join(pasta, "eventos.json")
         if os.path.exists(f) and not forcar and time.time() - os.path.getmtime(f) < 20*3600: continue
         out = {}
@@ -364,7 +364,7 @@ def painel():
                         if n >= 0: r["res"] = (dd, n)
                     except Exception: pass
                 L.append(r)
-        if L: secoes.append((cfg["nome"], L, os.path.basename(pasta) != "cripto"))
+        if L: secoes.append((cfg["nome"], L, not cfg.get("sem_eventos")))
     css = ("body{font-family:system-ui;margin:10px;max-width:1000px}h1{font-size:20px}h2{font-size:16px;margin:22px 0 4px}"
            "table{border-collapse:collapse;width:100%;font-size:13px}th,td{border-bottom:1px solid #ddd;padding:5px 6px;text-align:right;white-space:nowrap}"
            "th{background:#f3f4f6;cursor:pointer;position:sticky;top:0}th:first-child,td:first-child,td.l{text-align:left}.n{color:#666;font-size:12px}.sc{overflow-x:auto}"

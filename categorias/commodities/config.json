@@ -1,0 +1,30 @@
+{
+ "nome": "Commodities",
+ "moeda": "US$",
+ "semana": "FRI",
+ "sufixo": "",
+ "rrg": false,
+ "sem_eventos": true,
+ "benchmarks": {},
+ "ativos": {
+  "OURO": {
+   "setor": "Ouro futuro (GC) US$/oz",
+   "yahoo": [
+    "GC=F",
+    "GLD"
+   ]
+  },
+  "GOLD11": {
+   "setor": "Ouro na B3 (ETF, R$)",
+   "yahoo": [
+    "GOLD11.SA"
+   ]
+  },
+  "BRENT": {
+   "setor": "Petróleo Brent (BZ) US$/barril",
+   "yahoo": [
+    "BZ=F"
+   ]
+  }
+ }
+}
