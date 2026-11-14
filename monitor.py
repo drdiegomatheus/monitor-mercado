@@ -572,42 +572,55 @@ def painel():
         if L:
             pos = {n: i for i, n in enumerate(ordenar(cfg, pasta, [r["nome"] for r in L]))}
             for r in L: r["ord"] = pos[r["nome"]]; r["setor"] = A[r["nome"]].get("setor") or A[r["nome"]].get("grupo") or ""
-            secoes.append((cfg["nome"], L, not cfg.get("sem_eventos"), cfg.get("tempos", []), cfg.get("tipo") == "juros"))
+            secoes.append((cfg["nome"], L, not cfg.get("sem_eventos"), cfg.get("tempos", []), cfg.get("tipo") == "juros", os.path.basename(pasta)))
     css = ("body{font-family:system-ui;margin:10px;max-width:1000px}h1{font-size:20px}h2{font-size:16px;margin:22px 0 4px}"
            "table{border-collapse:collapse;width:100%;font-size:13px}th,td{border-bottom:1px solid #ddd;padding:5px 6px;text-align:right;white-space:nowrap}"
            "th{background:#f3f4f6;cursor:pointer;position:sticky;top:0}th:first-child,td:first-child,td.l,th:nth-child(2){text-align:left}.n{color:#666;font-size:12px}.sc{overflow-x:auto}"
-           ".leg span{display:inline-block;padding:2px 8px;margin:2px;border-radius:4px;font-size:12px}")
-    h = [f"<html><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>Painel RSI</title><style>{css}</style></head><body>",
-         f"<h1>Painel RSI · atualizado {dt.datetime.now(dt.timezone(dt.timedelta(hours=-3))):%d/%m/%Y %H:%M} (Brasília)</h1>",
-         "<div class=leg><span style='background:#1b8a3a;color:#fff'>RSI ≤ 30 sobrevenda</span><span style='background:#cdeed6'>30–40</span><span style='background:#f9d3d3'>60–70</span><span style='background:#c62828;color:#fff'>RSI ≥ 70 sobrecompra</span></div>",
-         "<p class=n>D = candle diário, S = semanal, M = mensal (30 dias); nos ativos cripto também 15 min, 30 min, 1H e 4H (RSI de 14 períodos; * = menos de 30 meses de histórico, RSI mensal menos confiável). Variação do dia = último preço contra o fechamento anterior; da semana = contra o fechamento da semana anterior. A candle do momento ainda está em andamento. Clique no título da coluna para ordenar.</p>"]
-    for nome, L, com_res, tempos, e_juros in secoes:
-        ns = sum(1 for r in L if r["rd"] <= 30); nc = sum(1 for r in L if r["rd"] >= 70)
-        h.append(f"<h2>{H.escape(nome)} <span class=n>· {len(L)} ativos · {ns} em sobrevenda diária · {nc} em sobrecompra diária</span></h2><div class=sc><table class=s><tr><th>Ativo</th><th>Setor</th><th>Preço</th><th>Dia</th><th>Semana</th>" + "".join(f"<th>RSI {t.upper() if t.endswith('h') else t}</th>" for t in tempos) + "<th>RSI D</th><th>RSI S</th>" + ("" if e_juros else "<th>RSI M (30d)</th>") + "<th>Sinal</th><th>Dado de</th>" + ("<th>Resultado</th>" if com_res else "") + "<th>Info</th></tr>")
-        ant = None
-        for r in sorted(L, key=lambda r: r["ord"]):
-            borda = " style='border-top:2px solid #888'" if ant is not None and r["setor"] != ant else ""
-            ant = r["setor"]
-            h.append(f"<tr{borda}><td><b>{H.escape(r['rot'])}</b></td><td class='l n'>{H.escape(r['setor'])}</td><td>{fmt(r['preco']) + ('%' if r.get('juros') else '')}</td><td style='{cor_var(r['dia'])}'>{bp(r['dia']) if r.get('juros') else pct(r['dia'])}</td><td style='{cor_var(r['sem'])}'>{bp(r['sem']) if r.get('juros') else pct(r['sem'])}</td>"
-                     + "".join(f"<td style='{cor_rsi(r['tf'].get(t, float('nan')))}'>{fmt(r['tf'].get(t, float('nan')), 1)}</td>" for t in tempos) +
-                     f"<td style='{cor_rsi(r['rd'])}'>{fmt(r['rd'],1)}</td><td style='{cor_rsi(r['rw'])}'>{fmt(r['rw'],1)}</td>" + ("" if e_juros else f"<td style='{cor_rsi(r['rm'])}'>{fmt(r['rm'],1)}{'*' if r['rm'] == r['rm'] and r['nm'] < 30 else ''}</td>") + f"<td class=l>{r['sinal']}</td><td>{r['data']:%d/%m}</td>{res_cell(r, com_res)}<td class='l n'>{H.escape(r['info'])}</td></tr>")
-        h.append("</table></div>")
-    if not secoes: h.append("<p>Sem dados coletados ainda.</p>")
-    if not SO_PAINEL: h.append(macro_html())
-    prox = []
-    for nome_s, L_s, *_ in secoes:
-        for r in L_s:
-            if r.get("res") and r["res"][1] <= 7: prox.append((r["res"][1], f"Resultado {r['nome']} ({'~' if r['res'][2] else ''}{r['res'][0]:%d/%m})"))
+           ".leg span{display:inline-block;padding:2px 8px;margin:2px;border-radius:4px;font-size:12px}"
+           ".nav a{display:inline-block;padding:6px 14px;margin:2px 4px 2px 0;border-radius:6px;background:#eef0f3;color:#222;text-decoration:none;font-weight:600;font-size:14px}.nav a.at{background:#222;color:#fff}")
+    PAGINAS = [("painel_cripto.html", "Cripto", ["cripto"]), ("painel_brasil.html", "Brasil", ["brasil"]), ("painel_eua.html", "EUA", ["eua"]),
+               ("painel_outros.html", "Outros", ["setores", "commodities", "macro", "juros"]), ("painel.html", "Tudo", None)]
+    script = """<script>document.querySelectorAll('table.s').forEach(t=>{t.querySelectorAll('th').forEach((th,i)=>{th.onclick=()=>{const rows=[...t.rows].slice(1);const dir=th.dataset.d=th.dataset.d=='1'?-1:1;rows.sort((a,b)=>{const x=a.cells[i].innerText.replace('%','').replace(/,/g,''),y=b.cells[i].innerText.replace('%','').replace(/,/g,'');const nx=parseFloat(x),ny=parseFloat(y);return (isNaN(nx)||isNaN(ny)?x.localeCompare(y):nx-ny)*dir});rows.forEach(r=>t.appendChild(r))}})})</script></body></html>"""
     f_m = os.path.join(RAIZ, "macro.json")
-    if os.path.exists(f_m):
-        for e in json.load(open(f_m, encoding="utf-8")):
-            n = (pd.Timestamp(e["data"]) - pd.Timestamp.today().normalize()).days
-            if 0 <= n <= 7: prox.append((n, f"{e['evento']} ({pd.Timestamp(e['data']):%d/%m})"))
-    if prox and not SO_PAINEL:
-        prox.sort(); h.insert(2, "<div style='background:#c62828;color:#fff;padding:8px 12px;border-radius:6px;margin:8px 0'><b>Atenção, próximos 7 dias:</b> " + " · ".join(("hoje: " if n == 0 else f"em {n}d: ") + t for n, t in prox) + "</div>")
-    h.append("""<script>document.querySelectorAll('table.s').forEach(t=>{t.querySelectorAll('th').forEach((th,i)=>{th.onclick=()=>{const rows=[...t.rows].slice(1);const dir=th.dataset.d=th.dataset.d=='1'?-1:1;rows.sort((a,b)=>{const x=a.cells[i].innerText.replace('%','').replace(/,/g,''),y=b.cells[i].innerText.replace('%','').replace(/,/g,'');const nx=parseFloat(x),ny=parseFloat(y);return (isNaN(nx)||isNaN(ny)?x.localeCompare(y):nx-ny)*dir});rows.forEach(r=>t.appendChild(r))}})})</script></body></html>""")
-    open(os.path.join(RAIZ, f"painel_{SO_PAINEL}.html" if SO_PAINEL else "painel.html"), "w", encoding="utf-8").write("".join(h))
-    print("painel.html gerado:", sum(len(x[1]) for x in secoes), "ativos")
+    macro_ev = json.load(open(f_m, encoding="utf-8")) if os.path.exists(f_m) else []
+
+    def pagina(arq, titulo, chaves):
+        sel = [x for x in secoes if chaves is None or x[5] in chaves]
+        if chaves: sel.sort(key=lambda x: chaves.index(x[5]))
+        nav = "<div class=nav>" + "".join(f"<a class='{'at' if a == arq else ''}' href='{a}'>{t}</a>" for a, t, _ in PAGINAS) + "</div>"
+        h = [f"<html><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>Painel RSI · {titulo}</title><style>{css}</style></head><body>",
+             nav, f"<h1>{titulo} · atualizado {dt.datetime.now(dt.timezone(dt.timedelta(hours=-3))):%d/%m/%Y %H:%M} (Brasília)</h1>",
+             "<div class=leg><span style='background:#1b8a3a;color:#fff'>RSI ≤ 30 sobrevenda</span><span style='background:#cdeed6'>30–40</span><span style='background:#f9d3d3'>60–70</span><span style='background:#c62828;color:#fff'>RSI ≥ 70 sobrecompra</span></div>",
+             "<p class=n>D = candle diário, S = semanal, M = mensal (30 dias); nos ativos cripto também 15 min, 30 min, 1H e 4H (RSI de 14 períodos; * = menos de 30 meses de histórico, RSI mensal menos confiável). Variação do dia = último preço contra o fechamento anterior; da semana = contra o fechamento da semana anterior. A candle do momento ainda está em andamento. Clique no título da coluna para ordenar.</p>"]
+        for nome, L, com_res, tempos, e_juros, _ in sel:
+            ns = sum(1 for r in L if r["rd"] <= 30); nc = sum(1 for r in L if r["rd"] >= 70)
+            h.append(f"<h2>{H.escape(nome)} <span class=n>· {len(L)} ativos · {ns} em sobrevenda diária · {nc} em sobrecompra diária</span></h2><div class=sc><table class=s><tr><th>Ativo</th><th>Setor</th><th>Preço</th><th>Dia</th><th>Semana</th>" + "".join(f"<th>RSI {t.upper() if t.endswith('h') else t}</th>" for t in tempos) + "<th>RSI D</th><th>RSI S</th>" + ("" if e_juros else "<th>RSI M (30d)</th>") + "<th>Sinal</th><th>Dado de</th>" + ("<th>Resultado</th>" if com_res else "") + "<th>Info</th></tr>")
+            ant = None
+            for r in sorted(L, key=lambda r: r["ord"]):
+                borda = " style='border-top:2px solid #888'" if ant is not None and r["setor"] != ant else ""
+                ant = r["setor"]
+                h.append(f"<tr{borda}><td><b>{H.escape(r['rot'])}</b></td><td class='l n'>{H.escape(r['setor'])}</td><td>{fmt(r['preco']) + ('%' if r.get('juros') else '')}</td><td style='{cor_var(r['dia'])}'>{bp(r['dia']) if r.get('juros') else pct(r['dia'])}</td><td style='{cor_var(r['sem'])}'>{bp(r['sem']) if r.get('juros') else pct(r['sem'])}</td>"
+                         + "".join(f"<td style='{cor_rsi(r['tf'].get(t, float('nan')))}'>{fmt(r['tf'].get(t, float('nan')), 1)}</td>" for t in tempos) +
+                         f"<td style='{cor_rsi(r['rd'])}'>{fmt(r['rd'],1)}</td><td style='{cor_rsi(r['rw'])}'>{fmt(r['rw'],1)}</td>" + ("" if e_juros else f"<td style='{cor_rsi(r['rm'])}'>{fmt(r['rm'],1)}{'*' if r['rm'] == r['rm'] and r['nm'] < 30 else ''}</td>") + f"<td class=l>{r['sinal']}</td><td>{r['data']:%d/%m}</td>{res_cell(r, com_res)}<td class='l n'>{H.escape(r['info'])}</td></tr>")
+            h.append("</table></div>")
+        if not sel: h.append("<p>Sem dados coletados ainda.</p>")
+        if chaves is None or "juros" in chaves: h.append(macro_html())
+        prox = []
+        for x in sel:
+            for r in x[1]:
+                if r.get("res") and r["res"][1] <= 7: prox.append((r["res"][1], f"Resultado {r['nome']} ({'~' if r['res'][2] else ''}{r['res'][0]:%d/%m})"))
+        if chaves is None or "juros" in chaves:
+            for e in macro_ev:
+                n = (pd.Timestamp(e["data"]) - pd.Timestamp.today().normalize()).days
+                if 0 <= n <= 7: prox.append((n, f"{e['evento']} ({pd.Timestamp(e['data']):%d/%m})"))
+        if prox:
+            prox.sort(); h.insert(3, "<div style='background:#c62828;color:#fff;padding:8px 12px;border-radius:6px;margin:8px 0'><b>Atenção, próximos 7 dias:</b> " + " · ".join(("hoje: " if n == 0 else f"em {n}d: ") + t for n, t in prox) + "</div>")
+        h.append(script)
+        open(os.path.join(RAIZ, arq), "w", encoding="utf-8").write("".join(h))
+    for arq, titulo, chaves in PAGINAS:
+        if SO_PAINEL and SO_PAINEL not in (chaves or []): continue
+        pagina(arq, titulo, chaves)
+    print("paineis gerados:", sum(len(x[1]) for x in secoes), "ativos")
 
 if __name__ == "__main__":
     if "--mercado" in sys.argv: atualizar_mercado("--forcar" in sys.argv); sys.exit(0)

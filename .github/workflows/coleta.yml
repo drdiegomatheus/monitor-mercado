@@ -42,7 +42,7 @@ jobs:
         run: |
           git config user.name "coleta"; git config user.email "coleta@users.noreply.github.com"
           ARQ=""
-          for f in painel.html index.html categorias/*/dados categorias/*/relatorio.html categorias/*/eventos.json categorias/*/mercado.json categorias/*/_meta.json; do
+          for f in painel.html painel_*.html index.html categorias/*/dados categorias/*/relatorio.html categorias/*/eventos.json categorias/*/mercado.json categorias/*/_meta.json; do
             if [ -e "$f" ]; then ARQ="$ARQ $f"; fi
           done
           git checkout -q --orphan dados_novo
