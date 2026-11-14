@@ -1,0 +1,10 @@
+{
+  "nome": "Brasil (B3)",
+  "moeda": "R$",
+  "semana": "FRI",
+  "sufixo": ".SA",
+  "rrg": true,
+  "benchmark_padrao": "BOVA11",
+  "benchmarks": {"BOVA11": ["BOVA11.SA"]},
+  "ativos": []
+}

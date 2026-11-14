@@ -1,0 +1,17 @@
+{
+  "nome": "Cripto",
+  "moeda": "US$",
+  "semana": "SUN",
+  "rrg": false,
+  "benchmark_padrao": "BTC",
+  "benchmarks": {"BTC": ["BTC-USD", "XBTUSD"]},
+  "ativos": {
+    "BTC":    {"yahoo": ["BTC-USD"],                   "kraken": "XBTUSD"},
+    "ETH":    {"yahoo": ["ETH-USD"],                   "kraken": "ETHUSD"},
+    "SOL":    {"yahoo": ["SOL-USD"],                   "kraken": "SOLUSD"},
+    "HYPE":   {"yahoo": ["HYPE32196-USD", "HYPE-USD"], "kraken": "HYPEUSD"},
+    "UNI":    {"yahoo": ["UNI7083-USD", "UNI-USD"],    "kraken": "UNIUSD"},
+    "AAVE":   {"yahoo": ["AAVE-USD"],                  "kraken": "AAVEUSD"},
+    "PENDLE": {"yahoo": ["PENDLE-USD"],                "kraken": "PENDLEUSD"}
+  }
+}

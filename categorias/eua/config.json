@@ -1,0 +1,11 @@
+{
+  "nome": "EUA",
+  "moeda": "US$",
+  "semana": "FRI",
+  "sufixo": "",
+  "rrg": true,
+  "benchmark_padrao": "SPY",
+  "benchmarks": {"NASDAQ": ["QQQ"], "SP500": ["SPY"]},
+  "grupo_benchmark": {"nasdaq": "NASDAQ", "sp500": "SP500"},
+  "ativos": {}
+}
