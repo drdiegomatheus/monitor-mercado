@@ -1,7 +1,7 @@
 name: coleta
 on:
   schedule:
-    - cron: "*/30 * * * *"   # a cada 30 min, todos os dias
+    - cron: "*/15 * * * *"   # a cada 15 min, todos os dias
   workflow_dispatch: {}
 permissions:
   contents: write
