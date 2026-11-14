@@ -194,6 +194,13 @@ def carregar(cfg, pasta, offline):
         if d is not None:
             dados[nome] = d; fonte[nome] = f
             if m is not None: d30[nome] = m
+    if not offline:
+        import time
+        for nome in [x for x in falhas if x in A]:      # nova tentativa (erros passageiros do Yahoo)
+            time.sleep(3); falhas.remove(nome); d, m, f = um(nome, A[nome]["yahoo"], A[nome].get("kraken"))
+            if d is not None:
+                dados[nome] = d; fonte[nome] = f
+                if m is not None: d30[nome] = m
     bench = {}
     for nome, yts in cfg.get("benchmarks", {}).items():
         kp = yts[1] if len(yts) > 1 and nome == "BTC" else None
@@ -300,7 +307,16 @@ def cor_dias(n):
 
 
 # ---------- juros (EUA via FRED, Brasil via Tesouro Direto) ----------
-TESOURO_URL = "https://www.tesourotransparente.gov.br/ckan/dataset/df56aa42-484a-4a59-8184-7676580e81e3/resource/796d2059-14e9-44e3-80c9-2d9e30b405c1/download/PrecoTaxaTesouroDireto.csv"
+TESOURO_DATASET = "df56aa42-484a-4a59-8184-7676580c81e3"
+def tesouro_url():
+    """acha o link atual do CSV pela API do portal (o link muda de vez em quando)"""
+    import urllib.request
+    try:
+        j = json.load(urllib.request.urlopen(f"https://www.tesourotransparente.gov.br/ckan/api/3/action/package_show?id={TESOURO_DATASET}", timeout=60))
+        for r in j["result"]["resources"]:
+            if r["url"].lower().endswith("precotaxatesourodireto.csv"): return r["url"]
+    except Exception as e: print("tesouro api:", e)
+    return f"https://www.tesourotransparente.gov.br/ckan/dataset/{TESOURO_DATASET}/resource/796d2059-14e9-44e3-80c9-2d9e30b405c1/download/PrecoTaxaTesouroDireto.csv"
 
 def fred_serie(codigo):
     d = pd.read_csv(f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={codigo}")
@@ -310,7 +326,7 @@ def fred_serie(codigo):
 
 def tesouro_curvas(ler_csv=None):
     """devolve {'pre': DataFrame(index=data, colunas=anos), 'real': ...} com taxa interpolada por vértice"""
-    d = (ler_csv or (lambda: pd.read_csv(TESOURO_URL, sep=";", decimal=",", encoding="latin-1")))()
+    d = (ler_csv or (lambda: pd.read_csv(tesouro_url(), sep=";", decimal=",", encoding="latin-1")))()
     d.columns = [c.strip() for c in d.columns]
     d["base"] = pd.to_datetime(d["Data Base"], dayfirst=True); d["venc"] = pd.to_datetime(d["Data Vencimento"], dayfirst=True)
     d = d[d.base >= pd.Timestamp.today().normalize() - pd.Timedelta(days=900)].copy()
