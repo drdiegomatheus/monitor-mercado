@@ -1,10 +1,204 @@
 {
-  "nome": "Brasil (B3)",
-  "moeda": "R$",
-  "semana": "FRI",
-  "sufixo": ".SA",
-  "rrg": true,
-  "benchmark_padrao": "BOVA11",
-  "benchmarks": {"BOVA11": ["BOVA11.SA"]},
-  "ativos": []
+ "nome": "Brasil (B3)",
+ "moeda": "R$",
+ "semana": "FRI",
+ "sufixo": ".SA",
+ "rrg": true,
+ "benchmark_padrao": "BOVA11",
+ "benchmarks": {
+  "BOVA11": [
+   "BOVA11.SA"
+  ]
+ },
+ "ativos": {
+  "ITUB4": {
+   "setor": "Bancos"
+  },
+  "BBDC4": {
+   "setor": "Bancos"
+  },
+  "BPAC11": {
+   "setor": "Bancos",
+   "reserva": true
+  },
+  "ITSA4": {
+   "setor": "Bancos",
+   "reserva": true
+  },
+  "SANB11": {
+   "setor": "Bancos",
+   "reserva": true
+  },
+  "BBAS3": {
+   "setor": "Bancos",
+   "reserva": true
+  },
+  "BBSE3": {
+   "setor": "Seguros e serviços financeiros"
+  },
+  "B3SA3": {
+   "setor": "Seguros e serviços financeiros"
+  },
+  "PSSA3": {
+   "setor": "Seguros e serviços financeiros",
+   "reserva": true
+  },
+  "CXSE3": {
+   "setor": "Seguros e serviços financeiros",
+   "reserva": true
+  },
+  "PETR4": {
+   "setor": "Petróleo e gás"
+  },
+  "PRIO3": {
+   "setor": "Petróleo e gás"
+  },
+  "VBBR3": {
+   "setor": "Petróleo e gás",
+   "reserva": true
+  },
+  "UGPA3": {
+   "setor": "Petróleo e gás",
+   "reserva": true
+  },
+  "VALE3": {
+   "setor": "Mineração e siderurgia"
+  },
+  "GGBR4": {
+   "setor": "Mineração e siderurgia"
+  },
+  "CMIN3": {
+   "setor": "Mineração e siderurgia",
+   "reserva": true
+  },
+  "USIM5": {
+   "setor": "Mineração e siderurgia",
+   "reserva": true
+  },
+  "EGIE3": {
+   "setor": "Energia elétrica"
+  },
+  "CMIG4": {
+   "setor": "Energia elétrica"
+  },
+  "CPFE3": {
+   "setor": "Energia elétrica",
+   "reserva": true
+  },
+  "TAEE11": {
+   "setor": "Energia elétrica",
+   "reserva": true
+  },
+  "ISAE4": {
+   "setor": "Energia elétrica",
+   "reserva": true
+  },
+  "CPLE3": {
+   "setor": "Energia elétrica",
+   "reserva": true
+  },
+  "AXIA3": {
+   "setor": "Energia elétrica",
+   "reserva": true
+  },
+  "SBSP3": {
+   "setor": "Saneamento"
+  },
+  "SAPR11": {
+   "setor": "Saneamento"
+  },
+  "WEGE3": {
+   "setor": "Bens industriais"
+  },
+  "MOTV3": {
+   "setor": "Bens industriais"
+  },
+  "RAIL3": {
+   "setor": "Bens industriais",
+   "reserva": true
+  },
+  "POMO4": {
+   "setor": "Bens industriais",
+   "reserva": true
+  },
+  "EMBJ3": {
+   "setor": "Bens industriais",
+   "reserva": true
+  },
+  "ABEV3": {
+   "setor": "Consumo não cíclico"
+  },
+  "GMAT3": {
+   "setor": "Consumo não cíclico"
+  },
+  "ASAI3": {
+   "setor": "Consumo não cíclico",
+   "reserva": true
+  },
+  "SMTO3": {
+   "setor": "Consumo não cíclico",
+   "reserva": true
+  },
+  "LREN3": {
+   "setor": "Consumo cíclico"
+  },
+  "RENT3": {
+   "setor": "Consumo cíclico"
+  },
+  "RIAA3": {
+   "setor": "Consumo cíclico",
+   "reserva": true
+  },
+  "CYRE3": {
+   "setor": "Construção civil"
+  },
+  "CURY3": {
+   "setor": "Construção civil"
+  },
+  "DIRR3": {
+   "setor": "Construção civil",
+   "reserva": true
+  },
+  "TEND3": {
+   "setor": "Construção civil",
+   "reserva": true
+  },
+  "JHSF3": {
+   "setor": "Construção civil",
+   "reserva": true
+  },
+  "RADL3": {
+   "setor": "Saúde"
+  },
+  "RDOR3": {
+   "setor": "Saúde"
+  },
+  "HYPE3": {
+   "setor": "Saúde",
+   "reserva": true
+  },
+  "FLRY3": {
+   "setor": "Saúde",
+   "reserva": true
+  },
+  "VIVT3": {
+   "setor": "Telecomunicações"
+  },
+  "TIMS3": {
+   "setor": "Telecomunicações"
+  },
+  "TOTS3": {
+   "setor": "Tecnologia"
+  },
+  "BMOB3": {
+   "setor": "Tecnologia",
+   "reserva": true
+  },
+  "MULT3": {
+   "setor": "Shoppings e imobiliário"
+  },
+  "ALOS3": {
+   "setor": "Shoppings e imobiliário"
+  }
+ }
 }

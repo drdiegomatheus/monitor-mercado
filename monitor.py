@@ -93,16 +93,42 @@ def svg_rrg(df):
     s.append("</svg>"); return "".join(s)
 
 # ---------- dados ----------
-def yahoo(tk, iv):
-    import yfinance as yf
-    d = yf.download(tk, period="5y" if iv == "1d" else "59d", interval=iv, auto_adjust=False, progress=False)
-    if d is None or d.empty: return None
+CACHE = {}
+
+def limpa_yahoo(d, iv):
+    if d is None or len(d) == 0: return None
     if isinstance(d.columns, pd.MultiIndex): d.columns = d.columns.get_level_values(0)
-    d = d.rename(columns=str.lower)[["open","high","low","close"]].dropna()
+    d = d.rename(columns=str.lower)
+    if not set(["open","high","low","close"]) <= set(d.columns): return None
+    d = d[["open","high","low","close"]].dropna()
+    if d.empty: return None
     d.index = pd.to_datetime(d.index)
     d.index = (d.index.tz_convert("UTC") if d.index.tz is not None else d.index).tz_localize(None)
     if iv == "1d": d.index = d.index.normalize()
     return d
+
+def prefetch(tickers, iv):
+    """Baixa vários tickers numa só chamada (muito mais rápido que um por um)."""
+    import yfinance as yf
+    tickers = sorted(set(tickers))
+    if not tickers: return
+    per = "5y" if iv == "1d" else "59d"
+    for i in range(0, len(tickers), 40):
+        lote = tickers[i:i+40]
+        try:
+            d = yf.download(lote, period=per, interval=iv, auto_adjust=False, progress=False, group_by="ticker", threads=True)
+        except Exception as e:
+            print("lote", iv, e); continue
+        for t in lote:
+            try: sub = d[t] if len(lote) > 1 else d
+            except Exception: continue
+            CACHE[(t, iv)] = limpa_yahoo(sub.copy(), iv)
+
+def yahoo(tk, iv):
+    if (tk, iv) in CACHE: return CACHE[(tk, iv)]
+    import yfinance as yf
+    d = yf.download(tk, period="5y" if iv == "1d" else "59d", interval=iv, auto_adjust=False, progress=False)
+    return limpa_yahoo(d, iv)
 
 def kraken(par, iv):
     url = f"https://api.kraken.com/0/public/OHLC?pair={par}&interval={1440 if iv == '1d' else 30}"
@@ -150,6 +176,9 @@ def especificar(cfg):
 
 def carregar(cfg, pasta, offline):
     A = especificar(cfg); dados, d30, fonte, falhas = {}, {}, {}, []
+    if not offline:
+        tks = [v["yahoo"][0] for v in A.values()] + [y[0] for y in cfg.get("benchmarks", {}).values()]
+        prefetch(tks, "1d"); prefetch(tks, "30m")
     def um(nome, yts, kpar, bench=False):
         pre = "BENCH_" if bench else ""
         if offline: d, f, m = ler(pasta, pre+nome, "1D"), "csv", ler(pasta, pre+nome, "30m")
@@ -193,7 +222,7 @@ def relatorio(cfg, A, dados, d30, bench, fonte, falhas):
         ref, bn = refde(k); o = tecnico(d, fim, None if bn == k else ref)
         cor = "ruim" if o["rsi_d"] >= 70 else "ok" if o["rsi_d"] <= 30 else ""
         h.append(f"<tr><td><b>{k}</b></td><td>{fmt(o['preco'])}</td><td>{pct(o['r7'])}</td><td>{pct(o['r30'])}</td><td>{pct(o['r90'])}</td><td>{pct(o['dd'])}</td><td class={cor}>{fmt(o['rsi_d'],1)}</td><td>{fmt(o['rsi_w'],1)}</td><td>{fmt(o['sma50'])}</td><td>{fmt(o['sma200'])}</td><td>{fmt(o['boll'])}</td><td>{fmt(o['atr'])}</td><td>{fmt(o['corr'])}</td></tr>")
-        h.append(f"<tr><td colspan=13 class='l n'>{o['leitura']} · dado de {o['data']} · {o['n']} dias · {fonte.get(k,'')} · ref {bn}</td></tr>")
+        h.append(f"<tr><td colspan=13 class='l n'>{o['leitura']} · dado de {o['data']} · {o['n']} dias · {fonte.get(k,'')} · ref {bn}{(' · ' + A[k]['setor']) if A.get(k, {}).get('setor') else ''}{' · reserva' if A.get(k, {}).get('reserva') else ''}</td></tr>")
     h.append("</table></div>")
     if d30:
         h.append("<h2>30 minutos</h2><div class=sc><table><tr><th>Ativo</th><th>Preço</th><th>RSI 30m</th><th>MM9</th><th>MM21</th><th>MM50</th><th>MM200</th><th>Boll</th><th>ATR</th><th>Última candle (UTC)</th></tr>")
