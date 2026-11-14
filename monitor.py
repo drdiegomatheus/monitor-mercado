@@ -329,12 +329,38 @@ def tesouro_curvas(ler_csv=None):
         out[nome] = pd.DataFrame.from_dict(linhas, orient="index").sort_index()
     return out
 
+
+def di_curva(n_dias=120, existentes=None):
+    """taxa de ajuste do DI1 (B3) interpolada em 2, 5, 10, 20, 30 anos, por data. Só baixa datas novas."""
+    from pyield import di1
+    datas = [pd.Timestamp(x) for x in di1.datas_disponiveis().to_list()][-n_dias:]
+    feitas = set(existentes.index) if existentes is not None else set()
+    linhas = {}
+    for dia in datas:
+        if dia in feitas: continue
+        vs = [dia + pd.DateOffset(years=a) for a in (2, 5, 10, 20, 30)]
+        try:
+            t = di1.interpolar_taxas(datas_referencia=dia.date(), datas_vencimento=[v.date() for v in vs], extrapolar=False).to_list()
+        except Exception as e:
+            print("DI", dia.date(), e); continue
+        linhas[dia] = {a: (x * 100 if x is not None and x == x else np.nan) for a, x in zip((2, 5, 10, 20, 30), t)}
+    return pd.DataFrame.from_dict(linhas, orient="index").sort_index()
+
 def coletar_juros(cfg, pasta):
     pasta = os.path.join(pasta, "dados"); ok, falhas = [], []
-    curvas = None
+    curvas = None; cache = {}
     for nome, v in cfg["ativos"].items():
         try:
             if "fred" in v: s_ = fred_serie(v["fred"])
+            elif "di" in v:
+                if "DI" not in cache:
+                    ant = {a: ler(pasta, n, "1D") for a, n in [(vv["di"], n) for n, vv in cfg["ativos"].items() if "di" in vv]}
+                    base = next((x for x in ant.values() if x is not None), None)
+                    cache["DI"] = (di_curva(existentes=base), ant)
+                novo, ant = cache["DI"]; a = v["di"]
+                s_ = novo[a].dropna() if a in novo.columns else pd.Series(dtype=float)
+                velho = ant.get(a)
+                if velho is not None: s_ = pd.concat([velho.close, s_]); s_ = s_[~s_.index.duplicated(keep="last")].sort_index()
             else:
                 if curvas is None: curvas = tesouro_curvas()
                 fam, anos = v["tesouro"]; s_ = curvas[fam][anos].dropna()
@@ -436,6 +462,17 @@ def painel():
         h.append("</table></div>")
     if not secoes: h.append("<p>Sem dados coletados ainda.</p>")
     h.append(macro_html())
+    prox = []
+    for nome_s, L_s, cr in secoes:
+        for r in L_s:
+            if r.get("res") and r["res"][1] <= 7: prox.append((r["res"][1], f"Resultado {r['nome']} ({r['res'][0]:%d/%m})"))
+    f_m = os.path.join(RAIZ, "macro.json")
+    if os.path.exists(f_m):
+        for e in json.load(open(f_m, encoding="utf-8")):
+            n = (pd.Timestamp(e["data"]) - pd.Timestamp.today().normalize()).days
+            if 0 <= n <= 7: prox.append((n, f"{e['evento']} ({pd.Timestamp(e['data']):%d/%m})"))
+    if prox:
+        prox.sort(); h.insert(2, "<div style='background:#c62828;color:#fff;padding:8px 12px;border-radius:6px;margin:8px 0'><b>Atenção, próximos 7 dias:</b> " + " · ".join(("hoje: " if n == 0 else f"em {n}d: ") + t for n, t in prox) + "</div>")
     h.append("""<script>document.querySelectorAll('table.s').forEach(t=>{t.querySelectorAll('th').forEach((th,i)=>{th.onclick=()=>{const rows=[...t.rows].slice(1);const dir=th.dataset.d=th.dataset.d=='1'?-1:1;rows.sort((a,b)=>{const x=a.cells[i].innerText.replace('%','').replace(/,/g,''),y=b.cells[i].innerText.replace('%','').replace(/,/g,'');const nx=parseFloat(x),ny=parseFloat(y);return (isNaN(nx)||isNaN(ny)?x.localeCompare(y):nx-ny)*dir});rows.forEach(r=>t.appendChild(r))}})})</script></body></html>""")
     open(os.path.join(RAIZ, "painel.html"), "w", encoding="utf-8").write("".join(h))
     print("painel.html gerado:", sum(len(x[1]) for x in secoes), "ativos")

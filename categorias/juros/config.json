@@ -1,5 +1,5 @@
 {
- "nome": "Juros: curva EUA (Treasuries) e Brasil (Tesouro Direto)",
+ "nome": "Juros: Treasuries (EUA) e DI futuro B3 + NTN-B (Brasil)",
  "moeda": "% a.a.",
  "semana": "FRI",
  "tipo": "juros",
@@ -26,27 +26,6 @@
    "fred": "DGS30",
    "setor": "Treasury 30 anos"
   },
-  "BR pré 2a": {
-   "tesouro": [
-    "pre",
-    2
-   ],
-   "setor": "Prefixado (LTN/NTN-F) 2 anos"
-  },
-  "BR pré 5a": {
-   "tesouro": [
-    "pre",
-    5
-   ],
-   "setor": "Prefixado 5 anos"
-  },
-  "BR pré 10a": {
-   "tesouro": [
-    "pre",
-    10
-   ],
-   "setor": "Prefixado 10 anos"
-  },
   "BR IPCA+ 10a": {
    "tesouro": [
     "real",
@@ -67,6 +46,18 @@
     30
    ],
    "setor": "Juro real 30 anos"
+  },
+  "BR DI 2a": {
+   "di": 2,
+   "setor": "DI1 B3 (taxa de ajuste) 2 anos"
+  },
+  "BR DI 5a": {
+   "di": 5,
+   "setor": "DI1 B3 5 anos"
+  },
+  "BR DI 10a": {
+   "di": 10,
+   "setor": "DI1 B3 10 anos (vence jan/2037)"
   }
  }
 }
