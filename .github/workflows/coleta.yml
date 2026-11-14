@@ -41,8 +41,10 @@ jobs:
         # Assim o repositório não cresce a cada coleta (o código fica no ramo main).
         run: |
           git config user.name "coleta"; git config user.email "coleta@users.noreply.github.com"
-          ARQ="$(ls -d painel.html index.html 2>/dev/null)"
-          for c in categorias/*; do ARQ="$ARQ $(ls -d $c/dados $c/relatorio.html $c/eventos.json $c/mercado.json $c/_meta.json 2>/dev/null)"; done
+          ARQ=""
+          for f in painel.html index.html categorias/*/dados categorias/*/relatorio.html categorias/*/eventos.json categorias/*/mercado.json categorias/*/_meta.json; do
+            if [ -e "$f" ]; then ARQ="$ARQ $f"; fi
+          done
           git checkout -q --orphan dados_novo
           git rm -rf -q --cached .
           git add -f $ARQ
