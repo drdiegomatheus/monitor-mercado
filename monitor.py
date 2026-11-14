@@ -10,7 +10,7 @@ import numpy as np, pandas as pd
 ATIVOS = ["PETR4","VALE3","ITUB4","BBDC4","LREN3","EGIE3","SBSP3","WEGE3","ABEV3",
           "RADL3","VIVT3","SUZB3","MRVE3","TRIS3","DIRR3","M2ST34","BITH11"]
 BENCH = "BOVA11"
-CRIPTO = {"BTC-USD":"BTC"}        # ticker Yahoo : nome
+CRIPTO = {"BTC-USD":"BTC", "SOL-USD":"SOL"}        # ticker Yahoo : nome
 # Pares (A, B): spread = A - k*B e razão
 PARES = [("TRIS3","MRVE3",1), ("DIRR3","TRIS3",1), ("M2ST34","BITH11",10)]
 RSI_ROT = (65, 60)   # M2ST34: RSI semanal >= 65 favorece BITH11; volta quando <= 60
