@@ -140,7 +140,7 @@ def yahoo(tk, iv):
     return limpa_yahoo(d, iv)
 
 def kraken(par, iv):
-    url = f"https://api.kraken.com/0/public/OHLC?pair={par}&interval={1440 if iv == '1d' else 30}"
+    url = f"https://api.kraken.com/0/public/OHLC?pair={par}&interval={ {'1d': 1440, '30m': 30, '15m': 15, '1h': 60, '4h': 240}.get(iv, 30) }"
     r = json.load(urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"}), timeout=30))
     if r.get("error"): return None
     k = [v for kk, v in r["result"].items() if kk != "last"][0]
@@ -190,18 +190,32 @@ def especificar(cfg):
 
 def carregar(cfg, pasta, offline):
     A = especificar(cfg); dados, d30, fonte, falhas = {}, {}, {}, []
+    tempos = cfg.get("tempos", []); extra = {}
     if not offline:
         tks = [v["yahoo"][0] for v in A.values()] + [y[0] for y in cfg.get("benchmarks", {}).values()]
         prefetch(tks, "1d"); prefetch(tks, "30m")
+        for tf in ("15m", "1h"):
+            if tf in tempos or ("4h" in tempos and tf == "1h"): prefetch([v["yahoo"][0] for v in A.values()], tf)
     def um(nome, yts, kpar, bench=False):
         pre = "BENCH_" if bench else ""
         if offline: d, f, m = ler(pasta, pre+nome, "1D"), "csv", ler(pasta, pre+nome, "30m")
         else: d, f = baixar(yts, kpar, "1d"); m, _ = baixar(yts, kpar, "30m") if not bench else (None, "")
         if d is None or len(d) < 40: falhas.append(nome); return None, None, ""
         d = limpar(d); m = limpar(m) if m is not None and len(m) > 60 else None
+        if tempos and not bench and not offline:
+            for tf in ("15m", "1h"):
+                if tf in tempos or ("4h" in tempos and tf == "1h"):
+                    try:
+                        x, _ = baixar(yts, kpar, tf)
+                        if x is not None and len(x) > 40: extra[(nome, tf)] = limpar(x)
+                    except Exception as e: print("tempo", nome, tf, e)
+            if "4h" in tempos and (nome, "1h") in extra:
+                extra[(nome, "4h")] = extra[(nome, "1h")].resample("4h").agg({"open": "first", "high": "max", "low": "min", "close": "last"}).dropna()
         if SALVAR and not offline:
             gravar(d, pasta, pre+nome, "1D")
             if m is not None: gravar(m, pasta, pre+nome, "30m")
+            for (n_, tf), x in list(extra.items()):
+                if n_ == nome and tf in tempos: gravar(x, pasta, nome, tf)
         return d, m, f
     for nome, v in A.items():
         d, m, f = um(nome, v["yahoo"], v.get("kraken"))
@@ -482,11 +496,17 @@ def cor_var(v):
     if v != v: return ""
     return "color:#0a7d33" if v > 0 else "color:#b3261e" if v < 0 else ""
 
+def rsi_mensal(c):
+    try: mm = c.resample("ME").last().dropna()
+    except Exception: mm = c.resample("M").last().dropna()
+    return (rsi(mm).iloc[-1] if len(mm) > 15 else np.nan), len(mm)
+
 def linha_painel(nome, d, fim, extra, juros=False):
     c = d.close
     if len(c) < 20: return None
     w = semanal(d, fim)
     rd = rsi(c).iloc[-1]; rw = rsi(w.close).iloc[-1] if len(w) > 15 else np.nan
+    rm, nm = (np.nan, 0) if juros else rsi_mensal(c)
     if juros:
         dia = (c.iloc[-1]-c.iloc[-2])*100
         sem = (w.close.iloc[-1]-w.close.iloc[-2])*100 if len(w) > 1 else np.nan
@@ -498,7 +518,9 @@ def linha_painel(nome, d, fim, extra, juros=False):
     if rd >= 70: sig.append("sobrecompra D")
     if rw == rw and rw <= 30: sig.append("sobrevenda S")
     if rw == rw and rw >= 70: sig.append("sobrecompra S")
-    return dict(nome=nome, preco=c.iloc[-1], dia=dia, sem=sem, rd=rd, rw=rw, data=d.index[-1], sinal=" + ".join(sig), **extra)
+    if rm == rm and rm <= 30: sig.append("sobrevenda M")
+    if rm == rm and rm >= 70: sig.append("sobrecompra M")
+    return dict(nome=nome, preco=c.iloc[-1], dia=dia, sem=sem, rd=rd, rw=rw, rm=rm, nm=nm, data=d.index[-1], sinal=" + ".join(sig), **extra)
 
 def res_cell(r, com_res):
     if not com_res: return ""
@@ -535,6 +557,10 @@ def painel():
             if d is None: continue
             r = linha_painel(nome, limpar(d), cfg.get("semana", "FRI"), dict(info=" · ".join(x for x in [v.get("grupo", "")] if x), rot=rotulo(nome, v), moeda=cfg.get("moeda", "")), juros=cfg.get("tipo") == "juros")
             if r:
+                r["tf"] = {}
+                for tf in cfg.get("tempos", []):
+                    x = ler(os.path.join(pasta, "dados"), nome, tf)
+                    if x is not None and len(x) > 30: r["tf"][tf] = rsi(limpar(x).close).iloc[-1]
                 r["juros"] = cfg.get("tipo") == "juros"
                 r["res"] = None
                 if nome in EV:
@@ -546,7 +572,7 @@ def painel():
         if L:
             pos = {n: i for i, n in enumerate(ordenar(cfg, pasta, [r["nome"] for r in L]))}
             for r in L: r["ord"] = pos[r["nome"]]; r["setor"] = A[r["nome"]].get("setor") or A[r["nome"]].get("grupo") or ""
-            secoes.append((cfg["nome"], L, not cfg.get("sem_eventos")))
+            secoes.append((cfg["nome"], L, not cfg.get("sem_eventos"), cfg.get("tempos", []), cfg.get("tipo") == "juros"))
     css = ("body{font-family:system-ui;margin:10px;max-width:1000px}h1{font-size:20px}h2{font-size:16px;margin:22px 0 4px}"
            "table{border-collapse:collapse;width:100%;font-size:13px}th,td{border-bottom:1px solid #ddd;padding:5px 6px;text-align:right;white-space:nowrap}"
            "th{background:#f3f4f6;cursor:pointer;position:sticky;top:0}th:first-child,td:first-child,td.l,th:nth-child(2){text-align:left}.n{color:#666;font-size:12px}.sc{overflow-x:auto}"
@@ -554,21 +580,22 @@ def painel():
     h = [f"<html><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>Painel RSI</title><style>{css}</style></head><body>",
          f"<h1>Painel RSI · atualizado {dt.datetime.now(dt.timezone(dt.timedelta(hours=-3))):%d/%m/%Y %H:%M} (Brasília)</h1>",
          "<div class=leg><span style='background:#1b8a3a;color:#fff'>RSI ≤ 30 sobrevenda</span><span style='background:#cdeed6'>30–40</span><span style='background:#f9d3d3'>60–70</span><span style='background:#c62828;color:#fff'>RSI ≥ 70 sobrecompra</span></div>",
-         "<p class=n>D = candle diário, S = candle semanal (RSI de 14 períodos). Variação do dia = último preço contra o fechamento anterior; da semana = contra o fechamento da semana anterior. A candle do momento ainda está em andamento. Clique no título da coluna para ordenar.</p>"]
-    for nome, L, com_res in secoes:
+         "<p class=n>D = candle diário, S = semanal, M = mensal (30 dias); nos ativos cripto também 15 min, 30 min, 1H e 4H (RSI de 14 períodos; * = menos de 30 meses de histórico, RSI mensal menos confiável). Variação do dia = último preço contra o fechamento anterior; da semana = contra o fechamento da semana anterior. A candle do momento ainda está em andamento. Clique no título da coluna para ordenar.</p>"]
+    for nome, L, com_res, tempos, e_juros in secoes:
         ns = sum(1 for r in L if r["rd"] <= 30); nc = sum(1 for r in L if r["rd"] >= 70)
-        h.append(f"<h2>{H.escape(nome)} <span class=n>· {len(L)} ativos · {ns} em sobrevenda diária · {nc} em sobrecompra diária</span></h2><div class=sc><table class=s><tr><th>Ativo</th><th>Setor</th><th>Preço</th><th>Dia</th><th>Semana</th><th>RSI D</th><th>RSI S</th><th>Sinal</th><th>Dado de</th>" + ("<th>Resultado</th>" if com_res else "") + "<th>Info</th></tr>")
+        h.append(f"<h2>{H.escape(nome)} <span class=n>· {len(L)} ativos · {ns} em sobrevenda diária · {nc} em sobrecompra diária</span></h2><div class=sc><table class=s><tr><th>Ativo</th><th>Setor</th><th>Preço</th><th>Dia</th><th>Semana</th>" + "".join(f"<th>RSI {t.upper() if t.endswith('h') else t}</th>" for t in tempos) + "<th>RSI D</th><th>RSI S</th>" + ("" if e_juros else "<th>RSI M (30d)</th>") + "<th>Sinal</th><th>Dado de</th>" + ("<th>Resultado</th>" if com_res else "") + "<th>Info</th></tr>")
         ant = None
         for r in sorted(L, key=lambda r: r["ord"]):
             borda = " style='border-top:2px solid #888'" if ant is not None and r["setor"] != ant else ""
             ant = r["setor"]
             h.append(f"<tr{borda}><td><b>{H.escape(r['rot'])}</b></td><td class='l n'>{H.escape(r['setor'])}</td><td>{fmt(r['preco']) + ('%' if r.get('juros') else '')}</td><td style='{cor_var(r['dia'])}'>{bp(r['dia']) if r.get('juros') else pct(r['dia'])}</td><td style='{cor_var(r['sem'])}'>{bp(r['sem']) if r.get('juros') else pct(r['sem'])}</td>"
-                     f"<td style='{cor_rsi(r['rd'])}'>{fmt(r['rd'],1)}</td><td style='{cor_rsi(r['rw'])}'>{fmt(r['rw'],1)}</td><td class=l>{r['sinal']}</td><td>{r['data']:%d/%m}</td>{res_cell(r, com_res)}<td class='l n'>{H.escape(r['info'])}</td></tr>")
+                     + "".join(f"<td style='{cor_rsi(r['tf'].get(t, float('nan')))}'>{fmt(r['tf'].get(t, float('nan')), 1)}</td>" for t in tempos) +
+                     f"<td style='{cor_rsi(r['rd'])}'>{fmt(r['rd'],1)}</td><td style='{cor_rsi(r['rw'])}'>{fmt(r['rw'],1)}</td>" + ("" if e_juros else f"<td style='{cor_rsi(r['rm'])}'>{fmt(r['rm'],1)}{'*' if r['rm'] == r['rm'] and r['nm'] < 30 else ''}</td>") + f"<td class=l>{r['sinal']}</td><td>{r['data']:%d/%m}</td>{res_cell(r, com_res)}<td class='l n'>{H.escape(r['info'])}</td></tr>")
         h.append("</table></div>")
     if not secoes: h.append("<p>Sem dados coletados ainda.</p>")
     if not SO_PAINEL: h.append(macro_html())
     prox = []
-    for nome_s, L_s, cr in secoes:
+    for nome_s, L_s, *_ in secoes:
         for r in L_s:
             if r.get("res") and r["res"][1] <= 7: prox.append((r["res"][1], f"Resultado {r['nome']} ({'~' if r['res'][2] else ''}{r['res'][0]:%d/%m})"))
     f_m = os.path.join(RAIZ, "macro.json")
