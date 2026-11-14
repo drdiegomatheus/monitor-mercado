@@ -579,7 +579,7 @@ def painel():
            ".leg span{display:inline-block;padding:2px 8px;margin:2px;border-radius:4px;font-size:12px}"
            ".nav a{display:inline-block;padding:6px 14px;margin:2px 4px 2px 0;border-radius:6px;background:#eef0f3;color:#222;text-decoration:none;font-weight:600;font-size:14px}.nav a.at{background:#222;color:#fff}")
     PAGINAS = [("painel_cripto.html", "Cripto", ["cripto"]), ("painel_brasil.html", "Brasil", ["brasil"]), ("painel_eua.html", "EUA", ["eua"]),
-               ("painel_outros.html", "Outros", ["setores", "commodities", "macro", "juros"]), ("painel.html", "Tudo", None)]
+               ("painel_outros.html", "Dados gerais", ["setores", "commodities", "macro", "juros"]), ("painel.html", "Tudo", None)]
     script = """<script>document.querySelectorAll('table.s').forEach(t=>{t.querySelectorAll('th').forEach((th,i)=>{th.onclick=()=>{const rows=[...t.rows].slice(1);const dir=th.dataset.d=th.dataset.d=='1'?-1:1;rows.sort((a,b)=>{const x=a.cells[i].innerText.replace('%','').replace(/,/g,''),y=b.cells[i].innerText.replace('%','').replace(/,/g,'');const nx=parseFloat(x),ny=parseFloat(y);return (isNaN(nx)||isNaN(ny)?x.localeCompare(y):nx-ny)*dir});rows.forEach(r=>t.appendChild(r))}})})</script></body></html>"""
     f_m = os.path.join(RAIZ, "macro.json")
     macro_ev = json.load(open(f_m, encoding="utf-8")) if os.path.exists(f_m) else []
