@@ -1,6 +1,6 @@
 # Monitor de mercado
 
-Três categorias, cada uma com sua pasta em `categorias/`:
+Categorias, cada uma com sua pasta em `categorias/`:
 
 | Pasta | Referência do RRG | RRG |
 |---|---|---|
