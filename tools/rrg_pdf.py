@@ -77,22 +77,23 @@ def main(saida):
            "Construção, shoppings, saúde, tecnologia e telecom": ["Construção civil", "Shoppings e imobiliário", "Saúde", "Tecnologia", "Telecomunicações"]}
     gr = [(n, {k: v for k, v in S.items() if A[k].get("setor") in ss}) for n, ss in SEC.items()]
     gr = sorted([g for g in gr if g[1]], key=lambda g: min(ordem.index(k) for k in g[1]))   # grupos pelo ativo de maior valor
-    paginas.append(("Brasil · referência BOVA11", "BOVA11", gr, B["BOVA11"].close, cfg["semana"]))
+    paginas.append(("Brasil · referência BOVA11", "BOVA11", gr, B["BOVA11"].close, cfg["semana"], A))
     cfg, A, S, B, ordem = carregar("eua")
     for g, nome in (("nasdaq", "NASDAQ (QQQ)"), ("sp500", "S&P 500 (SPY)")):
         sub = {k: v for k, v in S.items() if A[k].get("grupo") == g}
-        paginas.append((f"EUA · referência {nome}", nome, [("", sub)], B[cfg["grupo_benchmark"][g]].close, cfg["semana"]))
+        paginas.append((f"EUA · referência {nome}", nome, [("", sub)], B[cfg["grupo_benchmark"][g]].close, cfg["semana"], A))
     cfg, A, S, B, ordem = carregar("cripto")
     sub = {k: v for k, v in S.items() if k != "BTC"}
-    paginas.append(("Cripto · referência BTC", "BTC", [("", sub)], (B["BTC"] if "BTC" in B else S["BTC"]).close, cfg["semana"]))
+    paginas.append(("Cripto · referência BTC", "BTC", [("", sub)], (B["BTC"] if "BTC" in B else S["BTC"]).close, cfg["semana"], A))
     agora = dt.datetime.now(dt.timezone(dt.timedelta(hours=-3))).strftime("%d/%m/%Y %H:%M")
     css = m.CSS + "body{max-width:none;font-size:12px}h1{margin:0 0 4px}h2{margin:8px 0 2px;font-size:14px}.par{display:flex;gap:12px}.par>div{flex:1;min-width:0}svg{width:56%!important;height:auto!important;display:block;margin:0 auto}.pg{break-before:page}.cm p{margin:4px 0;font-size:11px;line-height:1.35;text-align:left}"
     h = [f"<html><head><meta charset=utf-8><style>{css}</style></head><body><h1>RRG · {agora} (Brasília)</h1>"
          "<p class=n>O RRG mede força relativa contra o benchmark, não se o preço sobe ou cai: um ativo pode estar em Leading e cair, só que cai menos que o benchmark. Eixo horizontal = RS-Ratio (tendência da força relativa, 100 = igual ao benchmark); vertical = momento dessa força (acima de 100 = acelerando). "
          "Os quadrantes giram no sentido horário: Improving → Leading → Weakening → Lagging → Improving. Semanal mostra a tendência; diário, o timing. Rastro cinza = últimas barras. Ordem dos ativos: setores e empresas do maior para o menor valor de mercado.</p>"]
-    for i, (tit, bn, grupos, ref, fim) in enumerate(paginas):
+    for i, (tit, bn, grupos, ref, fim, A_) in enumerate(paginas):
         h.append(f"<h1{' class=pg' if i else ''}>{tit}</h1>")
         for j, (sub, ser) in enumerate(grupos):
+            lab = {k: m.rotulo(k, A_[k]) for k in ser}; ser = {lab[k]: v for k, v in ser.items()}
             ordem_g = list(ser)
             Tw = m.tabela_rrg(ser, ref, "w", fim); Td = m.tabela_rrg(ser, ref, "d", fim)
             h.append("<div class=pg>" if j else "<div>")

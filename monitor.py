@@ -175,6 +175,11 @@ def gravar(d, pasta, nome, suf):
 
 def limpar(d): return d[~d.index.duplicated(keep="last")].sort_index()
 
+def rotulo(nome, v=None):
+    """nome exibido: '**' nas 2 melhores do setor (Brasil) e 'TICKER/BDR' nos EUA"""
+    v = v or {}
+    return ("** " if v.get("destaque") else "") + nome + (("/" + v["bdr"]) if v.get("bdr") else "")
+
 def especificar(cfg):
     suf = cfg.get("sufixo", ""); A = cfg.get("ativos", {}); out = {}
     if isinstance(A, list): A = {t: {} for t in A}
@@ -237,8 +242,8 @@ def relatorio(cfg, A, dados, d30, bench, fonte, falhas):
     for k, d in dados.items():
         ref, bn = refde(k); o = tecnico(d, fim, None if bn == k else ref)
         cor = "ruim" if o["rsi_d"] >= 70 else "ok" if o["rsi_d"] <= 30 else ""
-        h.append(f"<tr><td><b>{k}</b></td><td>{fmt(o['preco'])}</td><td>{pct(o['r7'])}</td><td>{pct(o['r30'])}</td><td>{pct(o['r90'])}</td><td>{pct(o['dd'])}</td><td class={cor}>{fmt(o['rsi_d'],1)}</td><td>{fmt(o['rsi_w'],1)}</td><td>{fmt(o['sma50'])}</td><td>{fmt(o['sma200'])}</td><td>{fmt(o['boll'])}</td><td>{fmt(o['atr'])}</td><td>{fmt(o['corr'])}</td></tr>")
-        h.append(f"<tr><td colspan=13 class='l n'>{o['leitura']} · dado de {o['data']} · {o['n']} dias · {fonte.get(k,'')} · ref {bn}{(' · ' + A[k]['setor']) if A.get(k, {}).get('setor') else ''}{' · reserva' if A.get(k, {}).get('reserva') else ''}{(' · BDR ' + A[k]['bdr']) if A.get(k, {}).get('bdr') else ''}</td></tr>")
+        h.append(f"<tr><td><b>{rotulo(k, A.get(k))}</b></td><td>{fmt(o['preco'])}</td><td>{pct(o['r7'])}</td><td>{pct(o['r30'])}</td><td>{pct(o['r90'])}</td><td>{pct(o['dd'])}</td><td class={cor}>{fmt(o['rsi_d'],1)}</td><td>{fmt(o['rsi_w'],1)}</td><td>{fmt(o['sma50'])}</td><td>{fmt(o['sma200'])}</td><td>{fmt(o['boll'])}</td><td>{fmt(o['atr'])}</td><td>{fmt(o['corr'])}</td></tr>")
+        h.append(f"<tr><td colspan=13 class='l n'>{o['leitura']} · dado de {o['data']} · {o['n']} dias · {fonte.get(k,'')} · ref {bn}{(' · ' + A[k]['setor']) if A.get(k, {}).get('setor') else ''}{(' · BDR ' + A[k]['bdr']) if A.get(k, {}).get('bdr') else ''}</td></tr>")
     h.append("</table></div>")
     if d30:
         h.append("<h2>30 minutos</h2><div class=sc><table><tr><th>Ativo</th><th>Preço</th><th>RSI 30m</th><th>MM9</th><th>MM21</th><th>MM50</th><th>MM200</th><th>Boll</th><th>ATR</th><th>Última candle (UTC)</th></tr>")
@@ -514,7 +519,7 @@ def painel():
         for nome, v in A.items():
             d = ler(os.path.join(pasta, "dados"), nome, "1D")
             if d is None: continue
-            r = linha_painel(nome, limpar(d), cfg.get("semana", "FRI"), dict(info=" · ".join(x for x in [v.get("setor", ""), ("BDR " + v["bdr"]) if v.get("bdr") else "", v.get("grupo", ""), "reserva" if v.get("reserva") else ""] if x), moeda=cfg.get("moeda", "")), juros=cfg.get("tipo") == "juros")
+            r = linha_painel(nome, limpar(d), cfg.get("semana", "FRI"), dict(info=" · ".join(x for x in [v.get("grupo", "")] if x), rot=rotulo(nome, v), moeda=cfg.get("moeda", "")), juros=cfg.get("tipo") == "juros")
             if r:
                 r["juros"] = cfg.get("tipo") == "juros"
                 r["res"] = None
@@ -530,7 +535,7 @@ def painel():
             secoes.append((cfg["nome"], L, not cfg.get("sem_eventos")))
     css = ("body{font-family:system-ui;margin:10px;max-width:1000px}h1{font-size:20px}h2{font-size:16px;margin:22px 0 4px}"
            "table{border-collapse:collapse;width:100%;font-size:13px}th,td{border-bottom:1px solid #ddd;padding:5px 6px;text-align:right;white-space:nowrap}"
-           "th{background:#f3f4f6;cursor:pointer;position:sticky;top:0}th:first-child,td:first-child,td.l{text-align:left}.n{color:#666;font-size:12px}.sc{overflow-x:auto}"
+           "th{background:#f3f4f6;cursor:pointer;position:sticky;top:0}th:first-child,td:first-child,td.l,th:nth-child(2){text-align:left}.n{color:#666;font-size:12px}.sc{overflow-x:auto}"
            ".leg span{display:inline-block;padding:2px 8px;margin:2px;border-radius:4px;font-size:12px}")
     h = [f"<html><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>Painel RSI</title><style>{css}</style></head><body>",
          f"<h1>Painel RSI · atualizado {dt.datetime.now(dt.timezone(dt.timedelta(hours=-3))):%d/%m/%Y %H:%M} (Brasília)</h1>",
@@ -543,7 +548,7 @@ def painel():
         for r in sorted(L, key=lambda r: r["ord"]):
             borda = " style='border-top:2px solid #888'" if ant is not None and r["setor"] != ant else ""
             ant = r["setor"]
-            h.append(f"<tr{borda}><td><b>{H.escape(r['nome'])}</b></td><td class='l n'>{H.escape(r['setor'])}</td><td>{fmt(r['preco']) + ('%' if r.get('juros') else '')}</td><td style='{cor_var(r['dia'])}'>{bp(r['dia']) if r.get('juros') else pct(r['dia'])}</td><td style='{cor_var(r['sem'])}'>{bp(r['sem']) if r.get('juros') else pct(r['sem'])}</td>"
+            h.append(f"<tr{borda}><td><b>{H.escape(r['rot'])}</b></td><td class='l n'>{H.escape(r['setor'])}</td><td>{fmt(r['preco']) + ('%' if r.get('juros') else '')}</td><td style='{cor_var(r['dia'])}'>{bp(r['dia']) if r.get('juros') else pct(r['dia'])}</td><td style='{cor_var(r['sem'])}'>{bp(r['sem']) if r.get('juros') else pct(r['sem'])}</td>"
                      f"<td style='{cor_rsi(r['rd'])}'>{fmt(r['rd'],1)}</td><td style='{cor_rsi(r['rw'])}'>{fmt(r['rw'],1)}</td><td class=l>{r['sinal']}</td><td>{r['data']:%d/%m}</td>{res_cell(r, com_res)}<td class='l n'>{H.escape(r['info'])}</td></tr>")
         h.append("</table></div>")
     if not secoes: h.append("<p>Sem dados coletados ainda.</p>")

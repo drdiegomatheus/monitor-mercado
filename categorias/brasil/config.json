@@ -12,196 +12,196 @@
  },
  "ativos": {
   "ITUB4": {
-   "setor": "Bancos"
+   "setor": "Bancos",
+   "destaque": true
   },
   "BBDC4": {
-   "setor": "Bancos"
+   "setor": "Bancos",
+   "destaque": true
   },
   "BPAC11": {
-   "setor": "Bancos",
-   "reserva": true
+   "setor": "Bancos"
   },
   "ITSA4": {
-   "setor": "Bancos",
-   "reserva": true
+   "setor": "Bancos"
   },
   "SANB11": {
-   "setor": "Bancos",
-   "reserva": true
+   "setor": "Bancos"
   },
   "BBAS3": {
-   "setor": "Bancos",
-   "reserva": true
+   "setor": "Bancos"
   },
   "BBSE3": {
-   "setor": "Seguros e serviços financeiros"
+   "setor": "Seguros e serviços financeiros",
+   "destaque": true
   },
   "B3SA3": {
-   "setor": "Seguros e serviços financeiros"
+   "setor": "Seguros e serviços financeiros",
+   "destaque": true
   },
   "PSSA3": {
-   "setor": "Seguros e serviços financeiros",
-   "reserva": true
+   "setor": "Seguros e serviços financeiros"
   },
   "CXSE3": {
-   "setor": "Seguros e serviços financeiros",
-   "reserva": true
+   "setor": "Seguros e serviços financeiros"
   },
   "PETR4": {
-   "setor": "Petróleo e gás"
+   "setor": "Petróleo e gás",
+   "destaque": true
   },
   "PRIO3": {
-   "setor": "Petróleo e gás"
+   "setor": "Petróleo e gás",
+   "destaque": true
   },
   "VBBR3": {
-   "setor": "Petróleo e gás",
-   "reserva": true
+   "setor": "Petróleo e gás"
   },
   "UGPA3": {
-   "setor": "Petróleo e gás",
-   "reserva": true
+   "setor": "Petróleo e gás"
   },
   "VALE3": {
-   "setor": "Mineração e siderurgia"
+   "setor": "Mineração e siderurgia",
+   "destaque": true
   },
   "GGBR4": {
-   "setor": "Mineração e siderurgia"
+   "setor": "Mineração e siderurgia",
+   "destaque": true
   },
   "CMIN3": {
-   "setor": "Mineração e siderurgia",
-   "reserva": true
+   "setor": "Mineração e siderurgia"
   },
   "USIM5": {
-   "setor": "Mineração e siderurgia",
-   "reserva": true
+   "setor": "Mineração e siderurgia"
   },
   "EGIE3": {
-   "setor": "Energia elétrica"
+   "setor": "Energia elétrica",
+   "destaque": true
   },
   "CMIG4": {
-   "setor": "Energia elétrica"
+   "setor": "Energia elétrica",
+   "destaque": true
   },
   "CPFE3": {
-   "setor": "Energia elétrica",
-   "reserva": true
+   "setor": "Energia elétrica"
   },
   "TAEE11": {
-   "setor": "Energia elétrica",
-   "reserva": true
+   "setor": "Energia elétrica"
   },
   "ISAE4": {
-   "setor": "Energia elétrica",
-   "reserva": true
+   "setor": "Energia elétrica"
   },
   "CPLE3": {
-   "setor": "Energia elétrica",
-   "reserva": true
+   "setor": "Energia elétrica"
   },
   "AXIA3": {
-   "setor": "Energia elétrica",
-   "reserva": true
+   "setor": "Energia elétrica"
   },
   "SBSP3": {
-   "setor": "Saneamento"
+   "setor": "Saneamento",
+   "destaque": true
   },
   "SAPR11": {
-   "setor": "Saneamento"
+   "setor": "Saneamento",
+   "destaque": true
   },
   "WEGE3": {
-   "setor": "Bens industriais"
+   "setor": "Bens industriais",
+   "destaque": true
   },
   "MOTV3": {
-   "setor": "Bens industriais"
+   "setor": "Bens industriais",
+   "destaque": true
   },
   "RAIL3": {
-   "setor": "Bens industriais",
-   "reserva": true
+   "setor": "Bens industriais"
   },
   "POMO4": {
-   "setor": "Bens industriais",
-   "reserva": true
+   "setor": "Bens industriais"
   },
   "EMBJ3": {
-   "setor": "Bens industriais",
-   "reserva": true
+   "setor": "Bens industriais"
   },
   "ABEV3": {
-   "setor": "Consumo não cíclico"
+   "setor": "Consumo não cíclico",
+   "destaque": true
   },
   "GMAT3": {
-   "setor": "Consumo não cíclico"
+   "setor": "Consumo não cíclico",
+   "destaque": true
   },
   "ASAI3": {
-   "setor": "Consumo não cíclico",
-   "reserva": true
+   "setor": "Consumo não cíclico"
   },
   "SMTO3": {
-   "setor": "Consumo não cíclico",
-   "reserva": true
+   "setor": "Consumo não cíclico"
   },
   "LREN3": {
-   "setor": "Consumo cíclico"
+   "setor": "Consumo cíclico",
+   "destaque": true
   },
   "MGLU3": {
    "setor": "Consumo cíclico"
   },
   "RENT3": {
-   "setor": "Consumo cíclico"
+   "setor": "Consumo cíclico",
+   "destaque": true
   },
   "RIAA3": {
-   "setor": "Consumo cíclico",
-   "reserva": true
+   "setor": "Consumo cíclico"
   },
   "CYRE3": {
-   "setor": "Construção civil"
+   "setor": "Construção civil",
+   "destaque": true
   },
   "CURY3": {
-   "setor": "Construção civil"
+   "setor": "Construção civil",
+   "destaque": true
   },
   "DIRR3": {
-   "setor": "Construção civil",
-   "reserva": true
+   "setor": "Construção civil"
   },
   "TEND3": {
-   "setor": "Construção civil",
-   "reserva": true
+   "setor": "Construção civil"
   },
   "JHSF3": {
-   "setor": "Construção civil",
-   "reserva": true
+   "setor": "Construção civil"
   },
   "RADL3": {
-   "setor": "Saúde"
+   "setor": "Saúde",
+   "destaque": true
   },
   "RDOR3": {
-   "setor": "Saúde"
+   "setor": "Saúde",
+   "destaque": true
   },
   "HYPE3": {
-   "setor": "Saúde",
-   "reserva": true
+   "setor": "Saúde"
   },
   "FLRY3": {
-   "setor": "Saúde",
-   "reserva": true
+   "setor": "Saúde"
   },
   "VIVT3": {
-   "setor": "Telecomunicações"
+   "setor": "Telecomunicações",
+   "destaque": true
   },
   "TIMS3": {
-   "setor": "Telecomunicações"
+   "setor": "Telecomunicações",
+   "destaque": true
   },
   "TOTS3": {
-   "setor": "Tecnologia"
+   "setor": "Tecnologia",
+   "destaque": true
   },
   "BMOB3": {
-   "setor": "Tecnologia",
-   "reserva": true
+   "setor": "Tecnologia"
   },
   "MULT3": {
-   "setor": "Shoppings e imobiliário"
+   "setor": "Shoppings e imobiliário",
+   "destaque": true
   },
   "ALOS3": {
-   "setor": "Shoppings e imobiliário"
+   "setor": "Shoppings e imobiliário",
+   "destaque": true
   }
  },
  "valor_mercado": true
