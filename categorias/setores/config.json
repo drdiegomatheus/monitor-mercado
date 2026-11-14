@@ -36,41 +36,6 @@
    ],
    "grupo": "br"
   },
-  "INDX": {
-   "setor": "Industrial",
-   "yahoo": [
-    "^INDX"
-   ],
-   "grupo": "br"
-  },
-  "IEEX": {
-   "setor": "Energia Elétrica",
-   "yahoo": [
-    "^IEEX"
-   ],
-   "grupo": "br"
-  },
-  "UTIL": {
-   "setor": "Utilidade Pública",
-   "yahoo": [
-    "^UTIL"
-   ],
-   "grupo": "br"
-  },
-  "ICON": {
-   "setor": "Consumo",
-   "yahoo": [
-    "^ICON"
-   ],
-   "grupo": "br"
-  },
-  "IMOB": {
-   "setor": "Imobiliário",
-   "yahoo": [
-    "^IMOB"
-   ],
-   "grupo": "br"
-  },
   "SMLL": {
    "setor": "Small Caps",
    "yahoo": [

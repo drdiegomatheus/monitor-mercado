@@ -291,12 +291,20 @@ def atualizar_eventos(forcar=False):
         json.dump(out, open(f, "w"), indent=1); print(os.path.basename(pasta), "eventos:", len(out))
 
 def ler_eventos(pasta):
-    ev = {}
-    for nome in ("eventos.json", "resultados_manual.json"):   # o manual vence
+    """datas de resultado: estimada (4T do ano anterior +52 semanas, marcada com ~) < Yahoo (só se bater com a estimativa, ±45 dias) < manual"""
+    def j(nome):
         f = os.path.join(pasta, nome)
-        if os.path.exists(f):
-            try: ev.update(json.load(open(f, encoding="utf-8")))
-            except Exception as e: print(nome, e)
+        try: return json.load(open(f, encoding="utf-8")) if os.path.exists(f) else {}
+        except Exception as e: print(nome, e); return {}
+    est, yah, man = j("resultados_estimados.json"), j("eventos.json"), j("resultados_manual.json")
+    ev = {k: "~" + v for k, v in est.items()}
+    for k, v in yah.items():
+        if k not in est: ev[k] = v
+        else:
+            try:
+                if abs((pd.Timestamp(v) - pd.Timestamp(est[k])).days) <= 45: ev[k] = v
+            except Exception: pass
+    ev.update(man)
     return ev
 
 def cor_dias(n):
@@ -423,7 +431,7 @@ def linha_painel(nome, d, fim, extra, juros=False):
 def res_cell(r, com_res):
     if not com_res: return ""
     if not r.get("res"): return "<td class=n>–</td>"
-    dd, n = r["res"]; return f"<td style='{cor_dias(n)}'>{dd:%d/%m} ({n}d)</td>"
+    dd, n, est = r["res"]; return f"<td style='{cor_dias(n)}'>{'~' if est else ''}{dd:%d/%m} ({n}d)</td>"
 
 def macro_html():
     f = os.path.join(RAIZ, "macro.json")
@@ -437,7 +445,7 @@ def macro_html():
     h = ["<h2>Calendário: juros, inflação e feriados <span class=n>· cores: ≤3 dias vermelho, ≤7 laranja, ≤14 amarelo</span></h2><div class=sc><table><tr><th>Data</th><th>Faltam</th><th>Região</th><th>Evento</th></tr>"]
     for d, n, e in L:
         h.append(f"<tr><td style='{cor_dias(n)}'>{d:%d/%m/%Y}</td><td style='{cor_dias(n)}'>{n}d</td><td class=l>{e['regiao']}</td><td class=l>{e['evento']}</td></tr>")
-    h.append("</table></div><p class=n>Datas de resultados de empresas vêm do Yahoo (nos EUA são confiáveis; na B3 muitas vêm em branco). Para fixar uma data na B3, edite categorias/brasil/resultados_manual.json, por exemplo {\"PETR4\": \"2027-02-26\"}.</p>")
+    h.append("</table></div><p class=n>Datas de resultados: nos EUA vêm do Yahoo. Na B3, as marcadas com ~ são estimativas (data do 4T do ano anterior mais 52 semanas), até a empresa publicar o calendário oficial. Para fixar uma data na B3, edite categorias/brasil/resultados_manual.json, por exemplo {\"PETR4\": \"2027-02-26\"}.</p>")
     return "".join(h)
 
 def painel():
@@ -456,8 +464,8 @@ def painel():
                 r["res"] = None
                 if nome in EV:
                     try:
-                        dd = pd.Timestamp(EV[nome]); n = (dd - hoje).days
-                        if n >= 0: r["res"] = (dd, n)
+                        dd = pd.Timestamp(EV[nome].lstrip("~")); n = (dd - hoje).days
+                        if n >= 0: r["res"] = (dd, n, EV[nome].startswith("~"))
                     except Exception: pass
                 L.append(r)
         if L: secoes.append((cfg["nome"], L, not cfg.get("sem_eventos")))
@@ -481,7 +489,7 @@ def painel():
     prox = []
     for nome_s, L_s, cr in secoes:
         for r in L_s:
-            if r.get("res") and r["res"][1] <= 7: prox.append((r["res"][1], f"Resultado {r['nome']} ({r['res'][0]:%d/%m})"))
+            if r.get("res") and r["res"][1] <= 7: prox.append((r["res"][1], f"Resultado {r['nome']} ({'~' if r['res'][2] else ''}{r['res'][0]:%d/%m})"))
     f_m = os.path.join(RAIZ, "macro.json")
     if os.path.exists(f_m):
         for e in json.load(open(f_m, encoding="utf-8")):
