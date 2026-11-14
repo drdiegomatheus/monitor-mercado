@@ -1,5 +1,5 @@
 {
- "nome": "Macro: EWZ e dólar (DXY)",
+ "nome": "Macro: EWZ, dólar (DXY) e USD/BRL",
  "moeda": "",
  "semana": "FRI",
  "sufixo": "",
@@ -17,6 +17,12 @@
    "setor": "Índice do dólar (ICE)",
    "yahoo": [
     "DX-Y.NYB"
+   ]
+  },
+  "USDBRL": {
+   "setor": "Dólar em reais (US$ 1 = R$)",
+   "yahoo": [
+    "BRL=X"
    ]
   }
  }
