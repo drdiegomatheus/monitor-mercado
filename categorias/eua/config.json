@@ -168,6 +168,10 @@
   "CVX": {
    "grupo": "sp500",
    "bdr": "CHVX34"
+  },
+  "GOOGL": {
+   "grupo": "nasdaq",
+   "bdr": "GOGL34"
   }
  }
 }

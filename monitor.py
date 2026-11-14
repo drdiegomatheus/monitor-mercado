@@ -248,7 +248,68 @@ def relatorio(cfg, A, dados, d30, bench, fonte, falhas):
     if not dados: h.append("<p>Nenhum ativo configurado nesta categoria ainda.</p>")
     return "".join(h) + "</body></html>"
 
+
+# ---------- painel resumo (todas as categorias) ----------
+def cor_rsi(v):
+    if v != v: return ""
+    if v <= 30: return "background:#1b8a3a;color:#fff"
+    if v <= 40: return "background:#cdeed6"
+    if v >= 70: return "background:#c62828;color:#fff"
+    if v >= 60: return "background:#f9d3d3"
+    return ""
+
+def cor_var(v):
+    if v != v: return ""
+    return "color:#0a7d33" if v > 0 else "color:#b3261e" if v < 0 else ""
+
+def linha_painel(nome, d, fim, extra):
+    c = d.close
+    if len(c) < 20: return None
+    w = semanal(d, fim)
+    rd = rsi(c).iloc[-1]; rw = rsi(w.close).iloc[-1] if len(w) > 15 else np.nan
+    dia = c.iloc[-1]/c.iloc[-2]-1
+    sem = w.close.iloc[-1]/w.close.iloc[-2]-1 if len(w) > 1 else np.nan
+    sig = []
+    if rd <= 30: sig.append("sobrevenda D")
+    if rd >= 70: sig.append("sobrecompra D")
+    if rw == rw and rw <= 30: sig.append("sobrevenda S")
+    if rw == rw and rw >= 70: sig.append("sobrecompra S")
+    return dict(nome=nome, preco=c.iloc[-1], dia=dia, sem=sem, rd=rd, rw=rw, data=d.index[-1], sinal=" + ".join(sig), **extra)
+
+def painel():
+    import html as H
+    base = os.path.join(RAIZ, "categorias"); secoes = []; total_s = total_c = 0
+    for cdir in sorted(glob.glob(os.path.join(base, "*", "config.json"))):
+        pasta = os.path.dirname(cdir); cfg = json.load(open(cdir, encoding="utf-8"))
+        A = especificar(cfg); L = []
+        for nome, v in A.items():
+            d = ler(os.path.join(pasta, "dados"), nome, "1D")
+            if d is None: continue
+            r = linha_painel(nome, limpar(d), cfg.get("semana", "FRI"), dict(info=" · ".join(x for x in [v.get("setor", ""), ("BDR " + v["bdr"]) if v.get("bdr") else "", v.get("grupo", ""), "reserva" if v.get("reserva") else ""] if x), moeda=cfg.get("moeda", "")))
+            if r: L.append(r)
+        if L: secoes.append((cfg["nome"], L))
+    css = ("body{font-family:system-ui;margin:10px;max-width:1000px}h1{font-size:20px}h2{font-size:16px;margin:22px 0 4px}"
+           "table{border-collapse:collapse;width:100%;font-size:13px}th,td{border-bottom:1px solid #ddd;padding:5px 6px;text-align:right;white-space:nowrap}"
+           "th{background:#f3f4f6;cursor:pointer;position:sticky;top:0}th:first-child,td:first-child,td.l{text-align:left}.n{color:#666;font-size:12px}.sc{overflow-x:auto}"
+           ".leg span{display:inline-block;padding:2px 8px;margin:2px;border-radius:4px;font-size:12px}")
+    h = [f"<html><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>Painel RSI</title><style>{css}</style></head><body>",
+         f"<h1>Painel RSI · atualizado {dt.datetime.now(dt.timezone(dt.timedelta(hours=-3))):%d/%m/%Y %H:%M} (Brasília)</h1>",
+         "<div class=leg><span style='background:#1b8a3a;color:#fff'>RSI ≤ 30 sobrevenda</span><span style='background:#cdeed6'>30–40</span><span style='background:#f9d3d3'>60–70</span><span style='background:#c62828;color:#fff'>RSI ≥ 70 sobrecompra</span></div>",
+         "<p class=n>D = candle diário, S = candle semanal (RSI de 14 períodos). Variação do dia = último preço contra o fechamento anterior; da semana = contra o fechamento da semana anterior. A candle do momento ainda está em andamento. Clique no título da coluna para ordenar.</p>"]
+    for nome, L in secoes:
+        ns = sum(1 for r in L if r["rd"] <= 30); nc = sum(1 for r in L if r["rd"] >= 70)
+        h.append(f"<h2>{H.escape(nome)} <span class=n>· {len(L)} ativos · {ns} em sobrevenda diária · {nc} em sobrecompra diária</span></h2><div class=sc><table class=s><tr><th>Ativo</th><th>Preço</th><th>Dia</th><th>Semana</th><th>RSI D</th><th>RSI S</th><th>Sinal</th><th>Dado de</th><th>Info</th></tr>")
+        for r in sorted(L, key=lambda r: r["rd"]):
+            h.append(f"<tr><td><b>{H.escape(r['nome'])}</b></td><td>{fmt(r['preco'])}</td><td style='{cor_var(r['dia'])}'>{pct(r['dia'])}</td><td style='{cor_var(r['sem'])}'>{pct(r['sem'])}</td>"
+                     f"<td style='{cor_rsi(r['rd'])}'>{fmt(r['rd'],1)}</td><td style='{cor_rsi(r['rw'])}'>{fmt(r['rw'],1)}</td><td class=l>{r['sinal']}</td><td>{r['data']:%d/%m}</td><td class='l n'>{H.escape(r['info'])}</td></tr>")
+        h.append("</table></div>")
+    if not secoes: h.append("<p>Sem dados coletados ainda.</p>")
+    h.append("""<script>document.querySelectorAll('table.s').forEach(t=>{t.querySelectorAll('th').forEach((th,i)=>{th.onclick=()=>{const rows=[...t.rows].slice(1);const dir=th.dataset.d=th.dataset.d=='1'?-1:1;rows.sort((a,b)=>{const x=a.cells[i].innerText.replace('%','').replace(/,/g,''),y=b.cells[i].innerText.replace('%','').replace(/,/g,'');const nx=parseFloat(x),ny=parseFloat(y);return (isNaN(nx)||isNaN(ny)?x.localeCompare(y):nx-ny)*dir});rows.forEach(r=>t.appendChild(r))}})})</script></body></html>""")
+    open(os.path.join(RAIZ, "painel.html"), "w", encoding="utf-8").write("".join(h))
+    print("painel.html gerado:", sum(len(L) for _, L in secoes), "ativos")
+
 if __name__ == "__main__":
+    if "--painel" in sys.argv: painel(); sys.exit(0)
     offline = "--csv" in sys.argv
     so = sys.argv[sys.argv.index("--cat")+1] if "--cat" in sys.argv else None
     base = os.path.join(RAIZ, "categorias")
