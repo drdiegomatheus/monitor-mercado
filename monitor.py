@@ -594,6 +594,19 @@ def ext_cell(r):
     if not e: return "<td>–</td>"
     return f"<td style='{cor_var(e['var'])}' title='{e['fase']}-mercado, {e['hora']} (Brasília)'>{fmt(e['preco'])} ({e['var']:+.2f}%) <span class=n>{e['fase']} {e['hora'][-5:]}</span></td>"
 
+def rsi_est(c, n=14):
+    """Estado do RSI de Wilder para recalcular ao vivo: [fech_ant, ganho_ant, perda_ant, fech, ganho, perda] (barra atual em andamento ou fechada)"""
+    d = c.diff(); up = d.clip(lower=0); dn = -d.clip(upper=0)
+    ag = up.ewm(alpha=1/n, adjust=False, min_periods=n).mean(); al = dn.ewm(alpha=1/n, adjust=False, min_periods=n).mean()
+    if len(c) < n + 3 or ag.iloc[-2] != ag.iloc[-2]: return None
+    return [float(f"{x:.8g}") for x in (c.iloc[-2], ag.iloc[-2], al.iloc[-2], c.iloc[-1], ag.iloc[-1], al.iloc[-1])]
+
+def mensal_serie(c):
+    try: return c.resample("ME").last().dropna()
+    except Exception: return c.resample("M").last().dropna()
+
+TF_SEG = {"15m": 900, "30m": 1800, "1h": 3600, "4h": 14400}
+
 def painel():
     import html as H
     base = os.path.join(RAIZ, "categorias"); secoes = []; total_s = total_c = 0
@@ -608,10 +621,31 @@ def painel():
             if d is None: continue
             r = linha_painel(nome, limpar(d), cfg.get("semana", "FRI"), dict(info=" · ".join(x for x in [v.get("grupo", "")] if x), rot=rotulo(nome, v), moeda=cfg.get("moeda", "")), juros=cfg.get("tipo") == "juros")
             if r:
-                r["tf"] = {}
+                r["tf"] = {}; r["rs"] = {}
+                dd = limpar(d); cc = dd.close; fim = cfg.get("semana", "FRI"); ww = semanal(dd, fim); lab = lambda ix: int(ix.strftime("%Y%m%d"))
+                try:
+                    if cfg.get("tipo") != "juros":
+                        e = rsi_est(cc)
+                        if e: r["rs"]["D"] = (e, "d", lab(cc.index[-1]))
+                        e = rsi_est(ww.close)
+                        if e: r["rs"]["S"] = (e, "d", lab(ww.index[-1]))
+                        mm = mensal_serie(cc); e = rsi_est(mm)
+                        if e: r["rs"]["M"] = (e, "d", lab(mm.index[-1]))
+                        cb = os.path.basename(pasta); y0 = A[nome]["yahoo"][0]
+                        src = "cr" if cb == "cripto" else "us" if (cb == "eua" or (cb in ("setores", "macro") and not any(ch in y0 for ch in "^=.-"))) else None
+                        if src and len(cc) > 2 and len(ww) > 1:
+                            r["lv"] = dict(src=src, sym=nome if cb in ("cripto", "eua") else y0, tz="utc" if src == "cr" else "et",
+                                           pd=[float(cc.iloc[-2]), float(cc.iloc[-1])], pw=[float(ww.close.iloc[-2]), float(ww.close.iloc[-1])],
+                                           ld=lab(cc.index[-1]), lw=lab(ww.index[-1]), pc=float(cc.iloc[-1]))
+                except Exception as ex: print("live", nome, ex)
                 for tf in cfg.get("tempos", []):
                     x = ler(os.path.join(pasta, "dados"), nome, tf)
-                    if x is not None and len(x) > 30: r["tf"][tf] = rsi(limpar(x).close).iloc[-1]
+                    if x is not None and len(x) > 30:
+                        xc = limpar(x).close; r["tf"][tf] = rsi(xc).iloc[-1]
+                        try:
+                            e = rsi_est(xc)
+                            if e: r["rs"][tf] = (e, "i", int(pd.Timestamp(xc.index[-1]).tz_localize("UTC").timestamp()) + TF_SEG.get(tf, 900))
+                        except Exception as ex: print("live tf", nome, tf, ex)
                 r["juros"] = cfg.get("tipo") == "juros"
                 r["ext"] = EXT.get(A[nome]["yahoo"][0])
                 r["res"] = None
@@ -627,10 +661,16 @@ def painel():
             secoes.append((cfg["nome"], L, not cfg.get("sem_eventos"), cfg.get("tempos", []), cfg.get("tipo") == "juros", os.path.basename(pasta)))
     import ui
     PAGINAS = [("painel.html", "Todos", None), ("painel_cripto.html", "Cripto", ["cripto"]), ("painel_brasil.html", "Brasil", ["brasil"]),
-               ("painel_eua.html", "EUA", ["eua"]), ("painel_outros.html", "Dados gerais", ["setores", "commodities", "macro", "juros"])]
+               ("painel_eua.html", "EUA", ["eua"]), ("painel_outros.html", "Dados gerais", ["setores", "commodities", "macro", "juros"]),
+               ("painel_graficos.html", "Gráficos", "graficos")]
     f_m = os.path.join(RAIZ, "macro.json")
     macro_ev = json.load(open(f_m, encoding="utf-8")) if os.path.exists(f_m) else []
+    f_l = os.path.join(RAIZ, "live.json")
+    ui.LIVE = json.load(open(f_l)) if os.path.exists(f_l) else {}
     for arq, titulo, chaves in PAGINAS:
+        if chaves == "graficos":
+            if not SO_PAINEL: open(os.path.join(RAIZ, arq), "w", encoding="utf-8").write(ui.graficos(arq, titulo, PAGINAS))
+            continue
         if SO_PAINEL and SO_PAINEL not in (chaves or []): continue
         sel = [x for x in secoes if chaves is None or x[5] in chaves]
         if chaves: sel.sort(key=lambda x: chaves.index(x[5]))

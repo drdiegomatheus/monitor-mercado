@@ -1,9 +1,11 @@
 """Visual do painel (páginas HTML). Recebe os dados prontos de monitor.py e devolve HTML."""
 import html as H
+import json
 import datetime as dt
 import pandas as pd
 
 BRT = dt.timezone(dt.timedelta(hours=-3))
+LIVE = {}
 
 CSS = """
 :root{--bg:#f4f6fa;--card:#fff;--card2:#eef1f7;--line:#e2e7f0;--tx:#0f1729;--mu:#6b7690;--ac:#4f46e5;--gr:#16a34a;--rd:#dc2626;
@@ -73,6 +75,12 @@ a.tile .tt{font-size:20px;font-weight:800;letter-spacing:-.02em;display:flex;jus
 a.tile .tt span{color:var(--mu);font-weight:400}
 a.tile .ln{color:var(--mu);font-size:13px;margin-top:3px}
 a.tile.big{background:linear-gradient(135deg,#4f46e5,#0891b2);color:#fff;border:0}a.tile.big .ln,a.tile.big .tt span{color:#dbeafe}
+.lvb{font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;background:var(--card2);color:var(--mu)}.lvb.on{background:var(--grbg);color:var(--gr)}
+@keyframes fu{from{background:var(--grbg)}to{background:transparent}}@keyframes fd{from{background:var(--rdbg)}to{background:transparent}}
+td.fu{animation:fu 1s}td.fd{animation:fd 1s}
+.tvw{height:70vh;min-height:420px;background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin:0 0 16px}
+.tvt{margin:0 0 14px;border-radius:12px;overflow:hidden}
+.sy{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}.sy button{border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:999px;padding:5px 12px;font-weight:600;font-size:12.5px;cursor:pointer}.sy button.on{background:var(--tx);color:var(--bg)}
 .foot{color:var(--mu);font-size:12px;margin:0 0 18px}
 @media (max-width:700px){.kpis{grid-template-columns:1fr 1fr;gap:8px}.kpi{padding:11px 12px}.kpi .v{font-size:24px}.kpi .l{font-size:10.5px}h1{font-size:22px}.tx2{display:none}main{padding:14px 10px 50px}th,td{padding:7px 8px}td:first-child,th:first-child{padding-left:12px}}
 @media print{.top,.bar{display:none}}
@@ -99,6 +107,43 @@ var y=g('y');if(y){window.scrollTo(0,parseInt(y))}
 var fim=Date.now()+300000,cd=document.getElementById('cd');
 setInterval(function(){var r=Math.max(0,Math.round((fim-Date.now())/1000));if(cd)cd.textContent=Math.floor(r/60)+':'+('0'+(r%60)).slice(-2);
  if(r<=0){s('y',window.scrollY);location.reload()}},1000);
+
+var LV=window.LVCFG||{},rows={},last={},dirty={},lastKr={},open_=0;
+document.querySelectorAll('tr[data-lv]').forEach(function(r){try{var c=JSON.parse(r.dataset.lv);r._c=c;(rows[c.sym]=rows[c.sym]||[]).push(r)}catch(e){}});
+function fnum(v){return v.toLocaleString('pt-BR',{minimumFractionDigits:v>=1?2:4,maximumFractionDigits:v>=1?2:4})}
+function vtxt(v){return(v>=0?'+':'')+(v*100).toFixed(2).replace('.',',')+'%'}
+function setVar(td,v){if(!td)return;var sp=td.querySelector('.var');if(!sp){td.innerHTML='<span class=var></span>';sp=td.firstChild}
+ sp.className='var '+(v>0?'up':v<0?'dn':'mu');sp.textContent=vtxt(v);td.dataset.v=v}
+function flash(td,up){if(!td)return;td.classList.remove('fu','fd');void td.offsetWidth;td.classList.add(up?'fu':'fd')}
+function etNow(){var o={};new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false,weekday:'short'}).formatToParts(new Date()).forEach(function(p){o[p.type]=p.value});
+ var m=(parseInt(o.hour)%24)*60+parseInt(o.minute);return{d:parseInt(o.year+o.month+o.day),reg:o.weekday!='Sat'&&o.weekday!='Sun'&&m>=570&&m<960}}
+function utcD(){return parseInt(new Date().toISOString().slice(0,10).replace(/-/g,''))}
+function apply(r,p){var c=r._c,et=etNow(),today=c.tz=='et'?et.d:utcD(),reg=c.tz=='utc'||et.reg;
+ if(!reg){var ex=r.querySelector('td.ex');if(ex){var v=p/c.pc-1;ex.className='ext ex';ex.innerHTML=fnum(p)+' <span class="var '+(v>0?'up':v<0?'dn':'mu')+'">'+vtxt(v)+'</span><small>ao vivo</small>';ex.dataset.v=v;flash(ex,v>=0)}return}
+ var px=r.querySelector('td.px');if(px){var old=parseFloat(px.dataset.v);px.textContent=fnum(p);px.dataset.v=p;if(old!==p)flash(px,p>=old)}
+ setVar(r.querySelector('td.vd'),p/(c.ld>=today?c.pd[0]:c.pd[1])-1);
+ setVar(r.querySelector('td.vw'),p/(c.lw>=today?c.pw[0]:c.pw[1])-1);
+ var now=Date.now()/1000;
+ r.querySelectorAll('td.rc').forEach(function(td){var a=JSON.parse(td.dataset.rs),k=td.dataset.k,e=parseFloat(td.dataset.e),inp=k=='d'?e>=today:now<e,pc=inp?a[0]:a[3],ag=inp?a[1]:a[4],al=inp?a[2]:a[5],d=p-pc;
+  ag=ag*13/14+Math.max(d,0)/14;al=al*13/14+Math.max(-d,0)/14;var v=al==0?100:100-100/(1+ag/al);
+  var cl=v<=30?'os':v<=40?'lo':v>=70?'ob':v>=60?'hi':'';td.dataset.v=v.toFixed(2);td.innerHTML='<span class="r '+cl+'">'+Math.round(v)+(td.dataset.star?'*':'')+'</span>'})}
+function tick(k,p,src){if(!(p>0)||!rows[k])return;if(src=='kr')lastKr[k]=Date.now();else if(src=='bn'&&Date.now()-(lastKr[k]||0)<20000)return;last[k]=p;dirty[k]=1}
+setInterval(function(){for(var k in dirty){delete dirty[k];(rows[k]||[]).forEach(function(r){apply(r,last[k])})}},1000);
+window.__tick=tick;
+var bad=document.getElementById('lv');
+function st(d){open_+=d;if(bad){bad.textContent=open_>0?'● ao vivo':'5 min';bad.className='lvb'+(open_>0?' on':'')}}
+function sock(url,onopen,onmsg){var w;function go(){try{w=new WebSocket(url)}catch(e){return}var up=false;
+ w.onopen=function(){up=true;st(1);onopen(w)};w.onmessage=function(m){try{onmsg(JSON.parse(m.data))}catch(e){}};
+ w.onclose=function(){if(up)st(-1);setTimeout(go,8000)};w.onerror=function(){try{w.close()}catch(e){}}}go()}
+var cr=[],us=[];document.querySelectorAll('tr[data-lv]').forEach(function(r){var c=r._c;if(c.src=='cr'&&cr.indexOf(c.sym)<0)cr.push(c.sym);if(c.src=='us'&&us.indexOf(c.sym)<0)us.push(c.sym)});
+if(cr.length){
+ sock('wss://ws.kraken.com/v2',function(w){w.send(JSON.stringify({method:'subscribe',params:{channel:'ticker',symbol:cr.map(function(k){return k+'/USD'})}}))},
+  function(j){if(j.channel=='ticker'&&j.data)j.data.forEach(function(d){tick(d.symbol.split('/')[0].replace('XBT','BTC'),d.last,'kr')})});
+ sock('wss://stream.binance.com:9443/stream?streams='+cr.map(function(k){return k.toLowerCase()+'usdt@miniTicker'}).join('/'),function(){},
+  function(j){var d=j.data;if(d&&d.s)tick(d.s.replace('USDT',''),parseFloat(d.c),'bn')})}
+if(us.length&&LV.fh){us=us.slice(0,50);
+ sock('wss://ws.finnhub.io?token='+LV.fh,function(w){us.forEach(function(k){w.send(JSON.stringify({type:'subscribe',symbol:k}))})},
+  function(j){if(j.type=='trade'&&j.data)j.data.forEach(function(t){tick(t.s,t.p,'fh')})})}
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){})}
 })();
 """
@@ -116,16 +161,17 @@ def pc(v, juros=False):
     return f"{v*100:+.2f}%".replace(".", ",")
 
 
-def var(v, juros=False):
-    if v != v: return "<td data-v=''>–</td>"
+def var(v, juros=False, cls=""):
+    if v != v: return f"<td class='{cls}' data-v=''>–</td>"
     c = "up" if v > 0 else "dn" if v < 0 else "mu"
-    return f"<td data-v='{v:.6f}'><span class='var {c}'>{pc(v, juros)}</span></td>"
+    return f"<td class='{cls}' data-v='{v:.6f}'><span class='var {c}'>{pc(v, juros)}</span></td>"
 
 
-def rsi_td(v, star=False):
-    if v != v: return "<td data-v=''><span class=mu>–</span></td>"
+def rsi_td(v, star=False, rs=None):
+    live = f" class=rc data-rs='{json.dumps(rs[0])}' data-k={rs[1]} data-e={rs[2]}{' data-star=1' if star else ''}" if rs else ""
+    if v != v: return f"<td{live} data-v=''><span class=mu>–</span></td>"
     c = "os" if v <= 30 else "lo" if v <= 40 else "ob" if v >= 70 else "hi" if v >= 60 else ""
-    return f"<td data-v='{v:.2f}'><span class='r {c}'>{v:.0f}{'*' if star else ''}</span></td>"
+    return f"<td{live} data-v='{v:.2f}'><span class='r {c}'>{v:.0f}{'*' if star else ''}</span></td>"
 
 
 def dias_badge(n):
@@ -134,9 +180,9 @@ def dias_badge(n):
 
 def ext_td(r):
     e = r.get("ext")
-    if not e: return "<td data-v='' class=mu>–</td>"
+    if not e: return "<td data-v='' class='mu ex'>–</td>"
     c = "up" if e["var"] > 0 else "dn" if e["var"] < 0 else "mu"
-    return (f"<td class=ext data-v='{e['var']:.4f}' title='{e['fase']}-mercado, {e['hora']} (Brasília)'>"
+    return (f"<td class='ext ex' data-v='{e['var']:.4f}' title='{e['fase']}-mercado, {e['hora']} (Brasília)'>"
             f"{num(e['preco'])} <span class='var {c}'>{e['var']:+.2f}%</span><small>{e['fase']} {e['hora'][-5:]}</small></td>")
 
 
@@ -194,13 +240,15 @@ def secao(nome, L, com_res, tempos, e_juros):
         os_ = "1" if r["rd"] <= 30 else "0"; ob = "1" if r["rd"] >= 70 else "0"
         busca = f"{r['rot']} {r['nome']} {r['setor']} {r.get('info', '')}".lower()
         star = r["rm"] == r["rm"] and r["nm"] < 30
-        row = [f"<tr data-t='{H.escape(busca, quote=True)}' data-os={os_} data-ob={ob}><td class=tk data-v='{r['ord']}' title='{H.escape(r.get('info', ''), quote=True)}'>{H.escape(r['rot'])}</td>",
-               f"<td data-v='{r['preco']:.6f}'>{num(r['preco']) + ('%' if j else '')}</td>"]
+        lv = f" data-lv='{json.dumps(r['lv'], separators=(',', ':'))}'" if r.get("lv") else ""
+        row = [f"<tr data-t='{H.escape(busca, quote=True)}' data-os={os_} data-ob={ob}{lv}><td class=tk data-v='{r['ord']}' title='{H.escape(r.get('info', ''), quote=True)}'>{H.escape(r['rot'])}</td>",
+               f"<td class=px data-v='{r['preco']:.6f}'>{num(r['preco']) + ('%' if j else '')}</td>"]
         if tem_ext: row.append(ext_td(r))
-        row += [var(r["dia"], j), var(r["sem"], j)]
-        row += [rsi_td(r["tf"].get(t, float("nan"))) for t in tempos]
-        row += [rsi_td(r["rd"]), rsi_td(r["rw"])]
-        if not e_juros: row.append(rsi_td(r["rm"], star))
+        row += [var(r["dia"], j, "vd"), var(r["sem"], j, "vw")]
+        rs = r.get("rs") or {}
+        row += [rsi_td(r["tf"].get(t, float("nan")), rs=rs.get(t)) for t in tempos]
+        row += [rsi_td(r["rd"], rs=rs.get("D")), rsi_td(r["rw"], rs=rs.get("S"))]
+        if not e_juros: row.append(rsi_td(r["rm"], star, rs.get("M")))
         row.append(f"<td data-v='' style='text-align:left'>{tags(r['sinal'])}</td>")
         if com_res:
             if r.get("res"):
@@ -254,7 +302,7 @@ def cabeca(titulo, paginas, atual):
             "<meta name=apple-mobile-web-app-capable content=yes><meta name=mobile-web-app-capable content=yes><meta name=apple-mobile-web-app-title content=Monitor>"
             f"<style>{CSS}</style></head><body><header class=top><a class=brand href=index.html><span class=logo>◢</span>Monitor</a><nav>"
             f"<a class='{'at' if atual == 'index.html' else ''}' href=index.html>Início</a>{nav}</nav>"
-            f"<div class=stamp><span class=dot></span><span>{agora:%H:%M}</span><span class=tx2>· próxima em <b id=cd>5:00</b></span></div></header><main>")
+            f"<div class=stamp><span class=dot></span><span>{agora:%H:%M}</span><span id=lv class=lvb title='Tempo real'>5 min</span><span class=tx2>· próxima em <b id=cd>5:00</b></span></div></header><main>")
 
 
 def pagina(arq, titulo, sel, paginas, eventos, com_cal):
@@ -270,7 +318,7 @@ def pagina(arq, titulo, sel, paginas, eventos, com_cal):
              "Verde forte = sobrevenda (RSI ≤ 30), verde claro = 30–40, vermelho claro = 60–70, vermelho forte = sobrecompra (≥ 70). "
              "* no RSI mensal = menos de 30 meses de histórico. Dia = último preço contra o fechamento anterior; Semana = contra o fechamento da semana anterior. "
              "A candle do momento ainda está em andamento. ** antes do nome (Brasil) = as 2 melhores do setor. Clique no título de uma coluna para ordenar.</p></details>")
-    h.append(f"</main><script>{JS}</script></body></html>")
+    h.append(f"</main><script>window.LVCFG={{fh:{json.dumps(LIVE.get('finnhub', ''))}}};{JS}</script></body></html>")
     return "".join(h)
 
 
@@ -278,6 +326,9 @@ def inicio(paginas, secoes, eventos):
     h = [cabeca("Início", paginas, "index.html"), "<h1>Monitor de mercado</h1><p class=sub>RSI, variações e calendário · atualizado a cada 5 minutos</p>",
          alerta(secoes, eventos), "<div class=tiles>"]
     for arq, titulo, chaves in paginas:
+        if chaves == "graficos":
+            h.append(f"<a class=tile href='{arq}'><div class=tt>{titulo}<span>→</span></div><div class=ln>TradingView: gráficos interativos com RSI</div><div class=ln>Cripto, B3, EUA, dólar, ouro e petróleo</div></a>")
+            continue
         sel = [x for x in secoes if chaves is None or x[5] in chaves]
         L, os_, ob, mv = agrega(sel)
         big = " big" if chaves is None else ""
@@ -287,4 +338,36 @@ def inicio(paginas, secoes, eventos):
                  f"<div class=ln>{len(L)} ativos · {len(os_)} em sobrevenda · {len(ob)} em sobrecompra</div>"
                  f"<div class=ln>Maior alta: {top}</div><div class=ln>Maior queda: {bot}</div></a>")
     h.append(f"</div></main><script>{JS}</script></body></html>")
+    return "".join(h)
+
+
+SIMBOLOS = [("Cripto", [("BTC", "BINANCE:BTCUSDT"), ("ETH", "BINANCE:ETHUSDT"), ("SOL", "BINANCE:SOLUSDT"), ("AAVE", "BINANCE:AAVEUSDT"), ("UNI", "BINANCE:UNIUSDT"), ("PENDLE", "BINANCE:PENDLEUSDT")]),
+            ("Brasil", [("IBOV", "BMFBOVESPA:IBOV"), ("PETR4", "BMFBOVESPA:PETR4"), ("VALE3", "BMFBOVESPA:VALE3"), ("ITUB4", "BMFBOVESPA:ITUB4"), ("BBAS3", "BMFBOVESPA:BBAS3"), ("MGLU3", "BMFBOVESPA:MGLU3"), ("MRVE3", "BMFBOVESPA:MRVE3")]),
+            ("EUA", [("S&P 500", "AMEX:SPY"), ("Nasdaq", "NASDAQ:QQQ"), ("NVDA", "NASDAQ:NVDA"), ("AMD", "NASDAQ:AMD"), ("MSFT", "NASDAQ:MSFT"), ("AMZN", "NASDAQ:AMZN"), ("EWZ", "AMEX:EWZ")]),
+            ("Outros", [("Dólar/Real", "FX_IDC:USDBRL"), ("DXY", "TVC:DXY"), ("Ouro", "TVC:GOLD"), ("Brent", "TVC:UKOIL"), ("US 10 anos", "TVC:US10Y")])]
+
+GJS = """
+(function(){
+var dark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches,SS=window.localStorage;
+function get(k){try{return SS.getItem(k)}catch(e){return null}}function put(k,v){try{SS.setItem(k,v)}catch(e){}}
+function chart(sym){put('gsym',sym);var c=document.getElementById('tvc');c.innerHTML='';var d=document.createElement('div');d.className='tradingview-widget-container__widget';d.style.height='100%';c.appendChild(d);
+ var s=document.createElement('script');s.src='https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';s.async=true;
+ s.text=JSON.stringify({autosize:true,symbol:sym,interval:'60',timezone:'America/Sao_Paulo',theme:dark?'dark':'light',style:'1',locale:'br',allow_symbol_change:true,withdateranges:true,hide_side_toolbar:false,save_image:false,studies:['RSI@tv-basicstudies'],support_host:'https://www.tradingview.com'});
+ c.appendChild(s);document.querySelectorAll('.sy button').forEach(function(b){b.classList.toggle('on',b.dataset.s==sym)})}
+document.querySelectorAll('.sy button').forEach(function(b){b.onclick=function(){chart(b.dataset.s)}});
+var f=document.getElementById('qs');if(f)f.addEventListener('keydown',function(e){if(e.key=='Enter'&&f.value.trim())chart(f.value.trim().toUpperCase())});
+var t=document.getElementById('tvt');if(t){var s=document.createElement('script');s.src='https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js';s.async=true;
+ s.text=JSON.stringify({symbols:[{proName:'BINANCE:BTCUSDT',title:'BTC'},{proName:'BINANCE:ETHUSDT',title:'ETH'},{proName:'BMFBOVESPA:IBOV',title:'Ibovespa'},{proName:'AMEX:SPY',title:'S&P 500'},{proName:'NASDAQ:QQQ',title:'Nasdaq'},{proName:'FX_IDC:USDBRL',title:'USD/BRL'},{proName:'TVC:DXY',title:'DXY'},{proName:'TVC:GOLD',title:'Ouro'}],showSymbolLogo:true,colorTheme:dark?'dark':'light',isTransparent:true,displayMode:'adaptive',locale:'br'});t.appendChild(s)}
+chart(get('gsym')||'BINANCE:BTCUSDT');
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){})}
+})();
+"""
+
+
+def graficos(arq, titulo, paginas):
+    h = [cabeca(titulo, paginas, arq).replace("<meta http-equiv=refresh content=330>", ""), f"<h1>{titulo}</h1><p class=sub>Gráficos do TradingView com RSI. Cripto e EUA em tempo quase real; ações da B3 com 15 minutos de atraso. Escolha um ativo ou digite um símbolo (ex.: NASDAQ:NVDA) e tecle Enter.</p>",
+         "<div class=tvt id=tvt></div><div class=bar><input id=qs placeholder='Símbolo TradingView, ex.: BMFBOVESPA:PETR4'></div>"]
+    for grupo, L in SIMBOLOS:
+        h.append(f"<div class=sy><span class=mu style='align-self:center;min-width:60px'>{grupo}</span>" + "".join(f"<button data-s='{s}'>{H.escape(n)}</button>" for n, s in L) + "</div>")
+    h.append(f"<div class=tvw id=tvc></div></main><script>{GJS}</script></body></html>")
     return "".join(h)
