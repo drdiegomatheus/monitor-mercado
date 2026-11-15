@@ -350,13 +350,16 @@ GJS = """
 (function(){
 var dark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches,SS=window.localStorage;
 function get(k){try{return SS.getItem(k)}catch(e){return null}}function put(k,v){try{SS.setItem(k,v)}catch(e){}}
-function chart(sym){put('gsym',sym);var c=document.getElementById('tvc');c.innerHTML='';var d=document.createElement('div');d.className='tradingview-widget-container__widget';d.style.height='100%';c.appendChild(d);
+function chart(sym){put('gsym',sym);var w=document.getElementById('tvc');w.innerHTML='';var c=document.createElement('div');c.className='tradingview-widget-container';c.style.cssText='height:100%;width:100%';
+ var d=document.createElement('div');d.className='tradingview-widget-container__widget';d.style.cssText='height:100%;width:100%';c.appendChild(d);
  var s=document.createElement('script');s.src='https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';s.async=true;
- s.text=JSON.stringify({autosize:true,symbol:sym,interval:'60',timezone:'America/Sao_Paulo',theme:dark?'dark':'light',style:'1',locale:'br',allow_symbol_change:true,withdateranges:true,hide_side_toolbar:false,save_image:false,studies:['RSI@tv-basicstudies'],support_host:'https://www.tradingview.com'});
- c.appendChild(s);document.querySelectorAll('.sy button').forEach(function(b){b.classList.toggle('on',b.dataset.s==sym)})}
+ s.text=JSON.stringify({autosize:true,symbol:sym,interval:'60',timezone:'America/Sao_Paulo',theme:dark?'dark':'light',style:'1',locale:'br',allow_symbol_change:true,withdateranges:true,hide_side_toolbar:false,save_image:false,studies:['RSI@tv-basicstudies']});
+ c.appendChild(s);w.appendChild(c);
+ setTimeout(function(){if(!w.querySelector('iframe')){w.innerHTML='<iframe style="width:100%;height:100%;border:0" src="https://s.tradingview.com/widgetembed/?symbol='+encodeURIComponent(sym)+'&interval=60&hidesidetoolbar=0&symboledit=1&saveimage=0&studies=RSI%40tv-basicstudies&theme='+(dark?'dark':'light')+'&style=1&timezone=America%2FSao_Paulo&locale=br"></iframe>'}},4000);
+ document.querySelectorAll('.sy button').forEach(function(b){b.classList.toggle('on',b.dataset.s==sym)})}
 document.querySelectorAll('.sy button').forEach(function(b){b.onclick=function(){chart(b.dataset.s)}});
 var f=document.getElementById('qs');if(f)f.addEventListener('keydown',function(e){if(e.key=='Enter'&&f.value.trim())chart(f.value.trim().toUpperCase())});
-var t=document.getElementById('tvt');if(t){var s=document.createElement('script');s.src='https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js';s.async=true;
+var t0=document.getElementById('tvt');if(t0){var t=document.createElement('div');t.className='tradingview-widget-container';var dd=document.createElement('div');dd.className='tradingview-widget-container__widget';t.appendChild(dd);t0.appendChild(t);var s=document.createElement('script');s.src='https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js';s.async=true;
  s.text=JSON.stringify({symbols:[{proName:'BINANCE:BTCUSDT',title:'BTC'},{proName:'BINANCE:ETHUSDT',title:'ETH'},{proName:'BMFBOVESPA:IBOV',title:'Ibovespa'},{proName:'AMEX:SPY',title:'S&P 500'},{proName:'NASDAQ:QQQ',title:'Nasdaq'},{proName:'FX_IDC:USDBRL',title:'USD/BRL'},{proName:'TVC:DXY',title:'DXY'},{proName:'TVC:GOLD',title:'Ouro'}],showSymbolLogo:true,colorTheme:dark?'dark':'light',isTransparent:true,displayMode:'adaptive',locale:'br'});t.appendChild(s)}
 chart(get('gsym')||'BINANCE:BTCUSDT');
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){})}
