@@ -38,11 +38,6 @@
    "bdr": "AMZO34",
    "setor": "Varejo online e veículos"
   },
-  "GOOG": {
-   "grupo": "nasdaq",
-   "bdr": "GOGL35",
-   "setor": "Internet e mídia"
-  },
   "MSFT": {
    "grupo": "nasdaq",
    "bdr": "MSFT34",
@@ -210,6 +205,18 @@
    "grupo": "nasdaq",
    "bdr": "GOGL34",
    "setor": "Internet e mídia"
+  },
+  "STRC": {
+   "grupo": "nasdaq",
+   "setor": "Bitcoin (tesouraria)"
+  },
+  "ASST": {
+   "grupo": "nasdaq",
+   "setor": "Bitcoin (tesouraria)"
+  },
+  "SATA": {
+   "grupo": "nasdaq",
+   "setor": "Bitcoin (tesouraria)"
   }
  },
  "valor_mercado": true
