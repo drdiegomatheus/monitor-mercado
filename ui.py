@@ -1,0 +1,290 @@
+"""Visual do painel (páginas HTML). Recebe os dados prontos de monitor.py e devolve HTML."""
+import html as H
+import datetime as dt
+import pandas as pd
+
+BRT = dt.timezone(dt.timedelta(hours=-3))
+
+CSS = """
+:root{--bg:#f4f6fa;--card:#fff;--card2:#eef1f7;--line:#e2e7f0;--tx:#0f1729;--mu:#6b7690;--ac:#4f46e5;--gr:#16a34a;--rd:#dc2626;
+--grbg:rgba(22,163,74,.14);--rdbg:rgba(220,38,38,.12);--os:#16a34a;--ob:#dc2626;--shadow:0 1px 2px rgba(15,23,41,.06),0 4px 14px rgba(15,23,41,.04)}
+@media (prefers-color-scheme:dark){:root{--bg:#0a0e16;--card:#121826;--card2:#1a2234;--line:#222d42;--tx:#e8eefb;--mu:#8793ab;--ac:#8b8cf8;--gr:#34d399;--rd:#f87171;
+--grbg:rgba(52,211,153,.14);--rdbg:rgba(248,113,113,.14);--os:#10b981;--ob:#ef4444;--shadow:none}}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Inter","Segoe UI",system-ui,sans-serif;font-variant-numeric:tabular-nums}
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:14px;padding:10px 16px;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding-top:max(10px,env(safe-area-inset-top))}
+.brand{display:flex;align-items:center;gap:8px;font-weight:800;letter-spacing:-.02em;font-size:16px;color:var(--tx);text-decoration:none}
+.logo{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#4f46e5,#06b6d4);display:grid;place-items:center;color:#fff;font-size:13px}
+nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1}nav::-webkit-scrollbar{display:none}
+nav a{padding:6px 12px;border-radius:999px;color:var(--mu);text-decoration:none;font-weight:600;font-size:13px;white-space:nowrap}
+nav a:hover{color:var(--tx);background:var(--card2)}nav a.at{background:var(--tx);color:var(--bg)}
+.stamp{display:flex;align-items:center;gap:7px;color:var(--mu);font-size:12px;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--gr);animation:p 2s infinite}
+@keyframes p{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--gr) 60%,transparent)}70%{box-shadow:0 0 0 7px transparent}100%{box-shadow:0 0 0 0 transparent}}
+main{max-width:1180px;margin:0 auto;padding:18px 16px 60px}
+h1{font-size:26px;letter-spacing:-.03em;margin:6px 0 2px}.sub{color:var(--mu);margin:0 0 16px}
+.alert{display:flex;gap:10px;align-items:flex-start;background:var(--rdbg);border:1px solid color-mix(in srgb,var(--rd) 40%,transparent);border-radius:14px;padding:12px 14px;margin:0 0 16px}
+.alert b{color:var(--rd)}.alert .it{display:inline-block;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:2px 8px;margin:4px 4px 0 0;font-size:12.5px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin:0 0 18px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow)}
+.kpi .l{color:var(--mu);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.kpi .v{font-size:30px;font-weight:800;letter-spacing:-.03em;margin:2px 0 6px}
+.chips{display:flex;flex-wrap:wrap;gap:5px}.chip{background:var(--card2);border-radius:8px;padding:3px 8px;font-size:12px;font-weight:600}
+.chip i{font-style:normal;color:var(--mu);font-weight:500;margin-left:4px}
+.mv{display:flex;justify-content:space-between;padding:4px 0;font-weight:600}.mv span:last-child{font-weight:700}
+.up{color:var(--gr)}.dn{color:var(--rd)}.mu{color:var(--mu)}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 14px}
+.bar input{flex:1;min-width:180px;background:var(--card);border:1px solid var(--line);color:var(--tx);border-radius:12px;padding:10px 14px;font-size:14px;outline:none}
+.bar input:focus{border-color:var(--ac)}
+.seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:3px}
+.seg button{border:0;background:none;color:var(--mu);font-weight:600;font-size:13px;padding:6px 12px;border-radius:9px;cursor:pointer}
+.seg button.on{background:var(--tx);color:var(--bg)}
+.sec{background:var(--card);border:1px solid var(--line);border-radius:18px;margin:0 0 18px;box-shadow:var(--shadow);overflow:hidden}
+.sh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:14px 18px 10px}
+.sh h2{margin:0;font-size:17px;letter-spacing:-.02em}.sh .m{color:var(--mu);font-size:12.5px}
+.pill{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px}
+.pill.g{background:var(--grbg);color:var(--gr)}.pill.r{background:var(--rdbg);color:var(--rd)}
+.sc{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:13.5px}
+th{background:var(--card);color:var(--mu);font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;text-align:right;padding:8px 10px;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap;user-select:none}
+th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--card);z-index:2;padding-left:18px}
+th.so::after{content:" ▲";font-size:9px}th.so.d::after{content:" ▼"}
+td{text-align:right;padding:8px 10px;border-bottom:1px solid color-mix(in srgb,var(--line) 55%,transparent);white-space:nowrap}
+tr:hover td,tr:hover td:first-child{background:var(--card2)}
+td.tk{font-weight:700}
+tr.band td{background:var(--card2);color:var(--mu);font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:6px 18px;text-align:left;position:static}
+.r{display:inline-block;min-width:42px;text-align:center;border-radius:8px;padding:2px 7px;font-weight:700}
+.r.os{background:var(--os);color:#fff}.r.lo{background:var(--grbg);color:var(--gr)}.r.hi{background:var(--rdbg);color:var(--rd)}.r.ob{background:var(--ob);color:#fff}
+.var{font-weight:600}.var.up::before{content:"▲ ";font-size:9px}.var.dn::before{content:"▼ ";font-size:9px}
+.tag{display:inline-block;font-size:11px;font-weight:600;border-radius:6px;padding:1px 6px;margin-left:3px}
+.tag.os{background:var(--grbg);color:var(--gr)}.tag.ob{background:var(--rdbg);color:var(--rd)}
+.ext small{color:var(--mu);margin-left:6px;font-size:11px}
+.dia{display:inline-block;border-radius:8px;padding:2px 8px;font-weight:700;font-size:12px}
+.dia.d3{background:var(--rd);color:#fff}.dia.d7{background:#f59e0b;color:#1b1200}.dia.d14{background:rgba(250,204,21,.28)}.dia.d0{color:var(--mu);font-weight:500}
+.cal{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;padding:4px 18px 18px}
+.ev{display:flex;gap:12px;align-items:center;background:var(--card2);border-radius:12px;padding:10px 12px}
+.ev .dt{min-width:46px;text-align:center;font-weight:800;font-size:19px;line-height:1.05}.ev .dt small{display:block;font-size:11px;color:var(--mu);font-weight:600;text-transform:uppercase}
+.ev .tx{flex:1;font-weight:600}.ev .tx small{display:block;color:var(--mu);font-weight:500}
+details{margin:0 0 18px;color:var(--mu);font-size:13px}summary{cursor:pointer;font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin:6px 0 20px}
+a.tile{display:block;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px 20px;color:var(--tx);text-decoration:none;box-shadow:var(--shadow);transition:transform .15s,border-color .15s}
+a.tile:hover{transform:translateY(-2px);border-color:var(--ac)}
+a.tile .tt{font-size:20px;font-weight:800;letter-spacing:-.02em;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+a.tile .tt span{color:var(--mu);font-weight:400}
+a.tile .ln{color:var(--mu);font-size:13px;margin-top:3px}
+a.tile.big{background:linear-gradient(135deg,#4f46e5,#0891b2);color:#fff;border:0}a.tile.big .ln,a.tile.big .tt span{color:#dbeafe}
+.foot{color:var(--mu);font-size:12px;margin:0 0 18px}
+@media (max-width:700px){.kpis{grid-template-columns:1fr 1fr;gap:8px}.kpi{padding:11px 12px}.kpi .v{font-size:24px}.kpi .l{font-size:10.5px}h1{font-size:22px}.tx2{display:none}main{padding:14px 10px 50px}th,td{padding:7px 8px}td:first-child,th:first-child{padding-left:12px}}
+@media print{.top,.bar{display:none}}
+"""
+
+JS = """
+(function(){
+var SS=window.sessionStorage,g=function(k){try{return SS.getItem(k)}catch(e){return null}},s=function(k,v){try{SS.setItem(k,v)}catch(e){}};
+var q=document.getElementById('q'),chips=document.querySelectorAll('.seg button'),mode=g('mode')||'all';
+function aplica(){var t=(q?q.value:'').toLowerCase().trim();
+ document.querySelectorAll('tr[data-t]').forEach(function(r){var ok=(!t||r.dataset.t.indexOf(t)>-1)&&(mode=='all'||(mode=='os'&&r.dataset.os=='1')||(mode=='ob'&&r.dataset.ob=='1'));r.style.display=ok?'':'none'});
+ document.querySelectorAll('tr.band').forEach(function(b){var n=b.nextElementSibling,v=false;while(n&&!n.classList.contains('band')){if(n.style.display!='none')v=true;n=n.nextElementSibling}b.style.display=v?'':'none'});
+ chips.forEach(function(c){c.classList.toggle('on',c.dataset.m==mode)});s('mode',mode);if(q)s('q',q.value)}
+if(q){q.value=g('q')||'';q.addEventListener('input',aplica)}
+chips.forEach(function(c){c.onclick=function(){mode=c.dataset.m;aplica()}});
+document.querySelectorAll('table.s').forEach(function(t){t.querySelectorAll('th').forEach(function(th,i){th.onclick=function(){
+ var d=th.classList.contains('so')&&!th.classList.contains('d');t.querySelectorAll('th').forEach(function(x){x.classList.remove('so','d')});th.classList.add('so');if(d)th.classList.add('d');
+ var dir=d?-1:1,rows=[].slice.call(t.querySelectorAll('tr[data-t]'));t.querySelectorAll('tr.band').forEach(function(b){b.remove()});
+ rows.sort(function(a,b){var x=a.cells[i],y=b.cells[i],vx=x.dataset.v,vy=y.dataset.v;
+  if(vx===''||vx===undefined)return 1;if(vy===''||vy===undefined)return -1;return(parseFloat(vx)-parseFloat(vy))*dir});
+ rows.forEach(function(r){t.tBodies[0].appendChild(r)})}})});
+aplica();
+var y=g('y');if(y){window.scrollTo(0,parseInt(y))}
+var fim=Date.now()+300000,cd=document.getElementById('cd');
+setInterval(function(){var r=Math.max(0,Math.round((fim-Date.now())/1000));if(cd)cd.textContent=Math.floor(r/60)+':'+('0'+(r%60)).slice(-2);
+ if(r<=0){s('y',window.scrollY);location.reload()}},1000);
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){})}
+})();
+"""
+
+
+def num(v, n=2):
+    if v is None or v != v: return "–"
+    s = f"{v:,.{n}f}" if abs(v) >= 1 else f"{v:.4f}"
+    return s.replace(",", "X").replace(".", ",").replace("X", ".")
+
+
+def pc(v, juros=False):
+    if v != v: return "–"
+    if juros: return f"{v:+.1f} bp".replace(".", ",")
+    return f"{v*100:+.2f}%".replace(".", ",")
+
+
+def var(v, juros=False):
+    if v != v: return "<td data-v=''>–</td>"
+    c = "up" if v > 0 else "dn" if v < 0 else "mu"
+    return f"<td data-v='{v:.6f}'><span class='var {c}'>{pc(v, juros)}</span></td>"
+
+
+def rsi_td(v, star=False):
+    if v != v: return "<td data-v=''><span class=mu>–</span></td>"
+    c = "os" if v <= 30 else "lo" if v <= 40 else "ob" if v >= 70 else "hi" if v >= 60 else ""
+    return f"<td data-v='{v:.2f}'><span class='r {c}'>{v:.0f}{'*' if star else ''}</span></td>"
+
+
+def dias_badge(n):
+    return "d3" if n <= 3 else "d7" if n <= 7 else "d14" if n <= 14 else "d0"
+
+
+def ext_td(r):
+    e = r.get("ext")
+    if not e: return "<td data-v='' class=mu>–</td>"
+    c = "up" if e["var"] > 0 else "dn" if e["var"] < 0 else "mu"
+    return (f"<td class=ext data-v='{e['var']:.4f}' title='{e['fase']}-mercado, {e['hora']} (Brasília)'>"
+            f"{num(e['preco'])} <span class='var {c}'>{e['var']:+.2f}%</span><small>{e['fase']} {e['hora'][-5:]}</small></td>")
+
+
+def tags(sinal):
+    if not sinal: return ""
+    out = []
+    for p in sinal.split(" + "):
+        c = "os" if "sobrevenda" in p else "ob"
+        out.append(f"<span class='tag {c}'>{'↓' if c == 'os' else '↑'} {p.split()[-1]}</span>")
+    return "".join(out)
+
+
+def agrega(sel):
+    """KPIs: sobrevenda, sobrecompra e maiores movimentos (ignora juros)."""
+    L = [r for x in sel if not x[4] for r in x[1]]
+    os_ = sorted([r for r in L if r["rd"] <= 30], key=lambda r: r["rd"])
+    ob = sorted([r for r in L if r["rd"] >= 70], key=lambda r: -r["rd"])
+    mv = sorted([r for r in L if r["dia"] == r["dia"]], key=lambda r: r["dia"])
+    return L, os_, ob, mv
+
+
+def limpo(r): return H.escape(r["rot"].replace("** ", ""))
+
+
+def kpis(sel):
+    L, os_, ob, mv = agrega(sel)
+    def chips(rs, lim=9):
+        if not rs: return "<span class=mu>nenhum agora</span>"
+        return ("<div class=chips>" + "".join(f"<span class=chip>{limpo(r)}<i>{r['rd']:.0f}</i></span>" for r in rs[:lim])
+                + (f"<span class=chip><i>+{len(rs)-lim}</i></span>" if len(rs) > lim else "") + "</div>")
+    def movers(rs):
+        return "".join(f"<div class=mv><span>{limpo(r)}</span><span class='{'up' if r['dia'] > 0 else 'dn'}'>{pc(r['dia'])}</span></div>" for r in rs)
+    return ("<div class=kpis>"
+            f"<div class=kpi><div class=l>Sobrevenda · RSI diário ≤ 30</div><div class='v up'>{len(os_)}</div>{chips(os_)}</div>"
+            f"<div class=kpi><div class=l>Sobrecompra · RSI diário ≥ 70</div><div class='v dn'>{len(ob)}</div>{chips(ob)}</div>"
+            f"<div class=kpi><div class=l>Maiores altas</div>{movers(list(reversed(mv[-3:]))) or '<span class=mu>–</span>'}</div>"
+            f"<div class=kpi><div class=l>Maiores quedas</div>{movers(mv[:3]) or '<span class=mu>–</span>'}</div>"
+            "</div>")
+
+
+def secao(nome, L, com_res, tempos, e_juros):
+    tem_ext = any(r.get("ext") for r in L)
+    ns = sum(1 for r in L if r["rd"] <= 30); nc = sum(1 for r in L if r["rd"] >= 70)
+    h = [f"<section class=sec><div class=sh><h2>{H.escape(nome)}</h2><span class=m>{len(L)} ativos</span>"
+         + (f"<span class='pill g'>{ns} em sobrevenda</span>" if ns else "") + (f"<span class='pill r'>{nc} em sobrecompra</span>" if nc else "")
+         + "</div><div class=sc><table class=s><thead><tr><th>Ativo</th><th>Preço</th>" + ("<th>Fora do pregão</th>" if tem_ext else "")
+         + "<th>Dia</th><th>Semana</th>" + "".join(f"<th>RSI {t.upper() if t.endswith('h') else t}</th>" for t in tempos)
+         + "<th>RSI D</th><th>RSI S</th>" + ("" if e_juros else "<th>RSI M</th>") + "<th>Sinal</th>" + ("<th>Resultado</th>" if com_res else "") + "<th>Dado de</th></tr></thead><tbody>"]
+    ant = None; ncol = 8 + (1 if tem_ext else 0) + len(tempos) + (0 if e_juros else 1) + (1 if com_res else 0)
+    for r in sorted(L, key=lambda r: r["ord"]):
+        if r["setor"] and r["setor"] != ant:
+            h.append(f"<tr class=band><td colspan={ncol}>{H.escape(r['setor'])}</td></tr>")
+        ant = r["setor"]
+        j = bool(r.get("juros"))
+        os_ = "1" if r["rd"] <= 30 else "0"; ob = "1" if r["rd"] >= 70 else "0"
+        busca = f"{r['rot']} {r['nome']} {r['setor']} {r.get('info', '')}".lower()
+        star = r["rm"] == r["rm"] and r["nm"] < 30
+        row = [f"<tr data-t='{H.escape(busca, quote=True)}' data-os={os_} data-ob={ob}><td class=tk data-v='{r['ord']}' title='{H.escape(r.get('info', ''), quote=True)}'>{H.escape(r['rot'])}</td>",
+               f"<td data-v='{r['preco']:.6f}'>{num(r['preco']) + ('%' if j else '')}</td>"]
+        if tem_ext: row.append(ext_td(r))
+        row += [var(r["dia"], j), var(r["sem"], j)]
+        row += [rsi_td(r["tf"].get(t, float("nan"))) for t in tempos]
+        row += [rsi_td(r["rd"]), rsi_td(r["rw"])]
+        if not e_juros: row.append(rsi_td(r["rm"], star))
+        row.append(f"<td data-v='' style='text-align:left'>{tags(r['sinal'])}</td>")
+        if com_res:
+            if r.get("res"):
+                dd, n, est = r["res"]
+                row.append(f"<td data-v='{n}'><span class='dia {dias_badge(n)}'>{'~' if est else ''}{dd:%d/%m} · {n}d</span></td>")
+            else: row.append("<td data-v='' class=mu>–</td>")
+        row.append(f"<td class=mu data-v='{r['data']:%Y%m%d}'>{r['data']:%d/%m}</td></tr>")
+        h.append("".join(row))
+    h.append("</tbody></table></div></section>")
+    return "".join(h)
+
+
+def calendario(eventos):
+    hoje = pd.Timestamp.today().normalize(); L = []
+    for e in eventos:
+        d = pd.Timestamp(e["data"]); n = (d - hoje).days
+        if n >= 0: L.append((d, n, e))
+    if not L: return ""
+    L.sort(key=lambda x: x[0])
+    meses = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
+    h = ["<section class=sec><div class=sh><h2>Calendário</h2><span class=m>juros, inflação e feriados · vermelho ≤ 3 dias, laranja ≤ 7, amarelo ≤ 14</span></div><div class=cal>"]
+    for d, n, e in L:
+        h.append(f"<div class=ev><div class=dt>{d.day:02d}<small>{meses[d.month-1]}</small></div><div class=tx>{H.escape(e['evento'])}<small>{H.escape(e['regiao'])} · {d:%d/%m/%Y}</small></div>"
+                 f"<span class='dia {dias_badge(n)}'>{'hoje' if n == 0 else f'{n}d'}</span></div>")
+    h.append("</div></section><p class=foot>Datas de resultados: nos EUA vêm do Yahoo. Na B3, as marcadas com ~ são estimativas (data do 4T do ano anterior mais 52 semanas) até a empresa publicar o calendário oficial. Para fixar uma data na B3, edite categorias/brasil/resultados_manual.json.</p>")
+    return "".join(h)
+
+
+def alerta(sel, eventos, com_eventos=True):
+    prox = []
+    for x in sel:
+        for r in x[1]:
+            if r.get("res") and r["res"][1] <= 7:
+                prox.append((r["res"][1], f"Resultado {r['nome']} · {'~' if r['res'][2] else ''}{r['res'][0]:%d/%m}"))
+    if com_eventos:
+        for e in eventos:
+            n = (pd.Timestamp(e["data"]) - pd.Timestamp.today().normalize()).days
+            if 0 <= n <= 7: prox.append((n, f"{e['evento']} · {pd.Timestamp(e['data']):%d/%m}"))
+    if not prox: return ""
+    prox.sort()
+    return ("<div class=alert><div>🔔</div><div><b>Atenção, próximos 7 dias</b><br>" +
+            "".join(f"<span class=it>{'hoje' if n == 0 else f'em {n}d'} · {H.escape(t)}</span>" for n, t in prox) + "</div></div>")
+
+
+def cabeca(titulo, paginas, atual):
+    agora = dt.datetime.now(BRT)
+    nav = "".join(f"<a class='{'at' if a == atual else ''}' href='{a}'>{t}</a>" for a, t, _ in paginas)
+    return (f"<!doctype html><html lang=pt-br><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1,viewport-fit=cover'>"
+            f"<title>{titulo} · Monitor</title><meta http-equiv=refresh content=330><meta name=theme-color content='#0a0e16'>"
+            "<link rel=manifest href=manifest.webmanifest><link rel=icon href=icon.svg type='image/svg+xml'><link rel=apple-touch-icon href=apple-touch-icon.png>"
+            "<meta name=apple-mobile-web-app-capable content=yes><meta name=mobile-web-app-capable content=yes><meta name=apple-mobile-web-app-title content=Monitor>"
+            f"<style>{CSS}</style></head><body><header class=top><a class=brand href=index.html><span class=logo>◢</span>Monitor</a><nav>"
+            f"<a class='{'at' if atual == 'index.html' else ''}' href=index.html>Início</a>{nav}</nav>"
+            f"<div class=stamp><span class=dot></span><span>{agora:%H:%M}</span><span class=tx2>· próxima em <b id=cd>5:00</b></span></div></header><main>")
+
+
+def pagina(arq, titulo, sel, paginas, eventos, com_cal):
+    h = [cabeca(titulo, paginas, arq), f"<h1>{H.escape(titulo)}</h1><p class=sub>Atualizado em {dt.datetime.now(BRT):%d/%m/%Y às %H:%M} (Brasília) · recarrega sozinho a cada 5 minutos</p>",
+         alerta(sel, eventos, com_cal), kpis(sel) if sel else "",
+         "<div class=bar><input id=q type=search placeholder='Buscar ativo ou setor…' autocomplete=off><div class=seg>"
+         "<button data-m=all>Todos</button><button data-m=os>Sobrevenda</button><button data-m=ob>Sobrecompra</button></div></div>"]
+    for nome, L, com_res, tempos, e_juros, _ in sel:
+        h.append(secao(nome, L, com_res, tempos, e_juros))
+    if not sel: h.append("<p class=mu>Sem dados coletados ainda.</p>")
+    if com_cal: h.append(calendario(eventos))
+    h.append("<details><summary>Como ler</summary><p>RSI de 14 períodos: <b>D</b> diário, <b>S</b> semanal, <b>M</b> mensal (30 dias); nas criptos também 15 min, 30 min, 1H e 4H. "
+             "Verde forte = sobrevenda (RSI ≤ 30), verde claro = 30–40, vermelho claro = 60–70, vermelho forte = sobrecompra (≥ 70). "
+             "* no RSI mensal = menos de 30 meses de histórico. Dia = último preço contra o fechamento anterior; Semana = contra o fechamento da semana anterior. "
+             "A candle do momento ainda está em andamento. ** antes do nome (Brasil) = as 2 melhores do setor. Clique no título de uma coluna para ordenar.</p></details>")
+    h.append(f"</main><script>{JS}</script></body></html>")
+    return "".join(h)
+
+
+def inicio(paginas, secoes, eventos):
+    h = [cabeca("Início", paginas, "index.html"), "<h1>Monitor de mercado</h1><p class=sub>RSI, variações e calendário · atualizado a cada 5 minutos</p>",
+         alerta(secoes, eventos), "<div class=tiles>"]
+    for arq, titulo, chaves in paginas:
+        sel = [x for x in secoes if chaves is None or x[5] in chaves]
+        L, os_, ob, mv = agrega(sel)
+        big = " big" if chaves is None else ""
+        top = f"{limpo(mv[-1])} {pc(mv[-1]['dia'])}" if mv else "–"
+        bot = f"{limpo(mv[0])} {pc(mv[0]['dia'])}" if mv else "–"
+        h.append(f"<a class='tile{big}' href='{arq}'><div class=tt>{titulo}<span>→</span></div>"
+                 f"<div class=ln>{len(L)} ativos · {len(os_)} em sobrevenda · {len(ob)} em sobrecompra</div>"
+                 f"<div class=ln>Maior alta: {top}</div><div class=ln>Maior queda: {bot}</div></a>")
+    h.append(f"</div></main><script>{JS}</script></body></html>")
+    return "".join(h)
