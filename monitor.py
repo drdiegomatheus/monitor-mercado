@@ -614,6 +614,7 @@ def painel():
     for cdir in sorted(glob.glob(os.path.join(base, "*", "config.json"))):
         pasta = os.path.dirname(cdir); cfg = json.load(open(cdir, encoding="utf-8"))
         if SO_PAINEL and os.path.basename(pasta) != SO_PAINEL: continue
+        if cfg.get("oculto"): continue
         A = especificar(cfg); L = []; EV = ler_eventos(pasta)
         hoje = pd.Timestamp.today().normalize()
         for nome, v in A.items():

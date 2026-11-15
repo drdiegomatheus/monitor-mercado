@@ -1,0 +1,14 @@
+{
+ "nome": "Pares (M2ST34 x BITH11)",
+ "moeda": "R$",
+ "semana": "FRI",
+ "sufixo": ".SA",
+ "rrg": false,
+ "sem_eventos": true,
+ "oculto": true,
+ "benchmarks": {},
+ "ativos": {
+  "M2ST34": {"setor": "Bitcoin (BDR alavancado)"},
+  "BITH11": {"setor": "Bitcoin (ETF)"}
+ }
+}

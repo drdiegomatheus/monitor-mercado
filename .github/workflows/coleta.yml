@@ -34,7 +34,7 @@ jobs:
           h=$(date -u +%H); m=$(date -u +%M); d=$(date -u +%u)
           python monitor.py --salvar --cat cripto
           if [ "$d" -le 5 ] && { { [ "$h" -ge 13 ] && [ "$h" -le 20 ]; } || { [ "$h" = "21" ] && [ "$m" -lt 5 ]; }; }; then
-            for c in brasil eua setores commodities macro; do python monitor.py --salvar --cat $c; done
+            for c in brasil eua setores commodities macro pares; do python monitor.py --salvar --cat $c; done
           fi
           for c in $(python monitor.py --faltando); do python monitor.py --salvar --cat $c; done
           if [ "$m" -lt 5 ] && { [ "$h" = "13" ] || [ "$h" = "02" ]; }; then python monitor.py --salvar --cat juros; fi
