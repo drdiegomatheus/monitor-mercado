@@ -81,6 +81,7 @@ td.fu{animation:fu 1s}td.fd{animation:fd 1s}
 .tvw{height:70vh;min-height:420px;background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin:0 0 16px}
 .tvt{margin:0 0 14px;border-radius:12px;overflow:hidden}
 .sy{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}.sy button{border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:999px;padding:5px 12px;font-weight:600;font-size:12.5px;cursor:pointer}.sy button.on{background:var(--tx);color:var(--bg)}
+.osc{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;padding:4px 18px 18px}.osc .kpi{box-shadow:none;background:var(--card2);border:0}
 .foot{color:var(--mu);font-size:12px;margin:0 0 18px}
 @media (max-width:700px){.kpis{grid-template-columns:1fr 1fr;gap:8px}.kpi{padding:11px 12px}.kpi .v{font-size:24px}.kpi .l{font-size:10.5px}h1{font-size:22px}.tx2{display:none}main{padding:14px 10px 50px}th,td{padding:7px 8px}td:first-child,th:first-child{padding-left:12px}}
 @media print{.top,.bar{display:none}}
@@ -213,16 +214,32 @@ def kpis(sel):
         if not rs: return "<span class=mu>nenhum agora</span>"
         return ("<div class=chips>" + "".join(f"<span class=chip>{limpo(r)}<i>{r['rd']:.0f}</i></span>" for r in rs[:lim])
                 + (f"<span class=chip><i>+{len(rs)-lim}</i></span>" if len(rs) > lim else "") + "</div>")
-    def top(chave, alta, n=5):
-        rs = sorted([r for r in L if r.get(chave) == r.get(chave) and r.get(chave) is not None], key=lambda r: r[chave], reverse=alta)
-        rs = [r for r in rs if (r[chave] > 0) == alta][:n]
-        return "".join(f"<div class=mv><span>{limpo(r)}</span><span class='{'up' if alta else 'dn'}'>{pc(r[chave])}</span></div>" for r in rs) or "<span class=mu>–</span>"
     cards = [f"<div class=kpi><div class=l>Sobrevenda · RSI diário ≤ 30</div><div class='v up'>{len(os_)}</div>{chips(os_)}</div>",
-             f"<div class=kpi><div class=l>Sobrecompra · RSI diário ≥ 70</div><div class='v dn'>{len(ob)}</div>{chips(ob)}</div>"]
-    for chave, nome in (("dia", "dia"), ("sem", "semana"), ("mes", "mês")):
-        cards.append(f"<div class=kpi><div class=l>Maiores altas · {nome}</div>{top(chave, True)}</div>")
-        cards.append(f"<div class=kpi><div class=l>Maiores quedas · {nome}</div>{top(chave, False)}</div>")
+             f"<div class=kpi><div class=l>Sobrecompra · RSI diário ≥ 70</div><div class='v dn'>{len(ob)}</div>{chips(ob)}</div>",
+             f"<div class=kpi><div class=l>Maiores altas · dia</div>{top5(L, 'dia', True)}</div>",
+             f"<div class=kpi><div class=l>Maiores quedas · dia</div>{top5(L, 'dia', False)}</div>"]
     return "<div class=kpis>" + "".join(cards) + "</div>"
+
+
+def top5(L, chave, alta, n=5):
+    rs = sorted([r for r in L if r.get(chave) is not None and r.get(chave) == r.get(chave)], key=lambda r: r[chave], reverse=alta)
+    rs = [r for r in rs if (r[chave] > 0) == alta][:n]
+    return "".join(f"<div class=mv><span>{limpo(r)}</span><span class='{'up' if alta else 'dn'}'>{pc(r[chave])}</span></div>" for r in rs) or "<span class=mu>–</span>"
+
+
+def oscilacoes(arq, titulo, paginas, secoes):
+    h = [cabeca(titulo, paginas, arq), f"<h1>{titulo}</h1><p class=sub>Maiores altas e quedas por período · atualizado em {dt.datetime.now(BRT):%d/%m/%Y às %H:%M} (Brasília)</p>"]
+    for grupo, chave in (("Brasil", "brasil"), ("EUA", "eua"), ("Cripto", "cripto")):
+        L = [r for x in secoes if x[5] == chave and not x[4] for r in x[1]]
+        if not L: continue
+        h.append(f"<section class=sec><div class=sh><h2>{grupo}</h2><span class=m>{len(L)} ativos</span></div><div class=osc>")
+        for per, k, leg in (("Dia", "dia", "último preço contra o fechamento anterior"), ("Semana", "sem", "contra o fechamento da semana anterior"), ("Mês", "mes", "contra o fechamento do mês anterior")):
+            h.append(f"<div class=kpi><div class=l>{per} <span class=mu style='text-transform:none;letter-spacing:0;font-weight:500'>· {leg}</span></div>"
+                     f"<div class='l up' style='margin-top:10px'>▲ Maiores altas</div>{top5(L, k, True)}"
+                     f"<div class='l dn' style='margin-top:14px'>▼ Maiores quedas</div>{top5(L, k, False)}</div>")
+        h.append("</div></section>")
+    h.append(f"</main><script>{JS}</script></body></html>")
+    return "".join(h)
 
 
 def secao(nome, L, com_res, tempos, e_juros):
@@ -328,6 +345,9 @@ def inicio(paginas, secoes, eventos):
     h = [cabeca("Início", paginas, "index.html"), "<h1>Monitor de mercado</h1><p class=sub>RSI, variações e calendário · atualizado a cada 5 minutos</p>",
          alerta(secoes, eventos), "<div class=tiles>"]
     for arq, titulo, chaves in paginas:
+        if chaves == "oscilacoes":
+            h.append(f"<a class=tile href='{arq}'><div class=tt>{titulo}<span>→</span></div><div class=ln>Maiores altas e quedas: dia, semana e mês</div><div class=ln>Brasil, EUA e cripto</div></a>")
+            continue
         if chaves == "graficos":
             h.append(f"<a class=tile href='{arq}'><div class=tt>{titulo}<span>→</span></div><div class=ln>TradingView: gráficos interativos com RSI</div><div class=ln>Cripto, B3, EUA, dólar, ouro e petróleo</div></a>")
             continue
