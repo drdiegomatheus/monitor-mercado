@@ -213,14 +213,16 @@ def kpis(sel):
         if not rs: return "<span class=mu>nenhum agora</span>"
         return ("<div class=chips>" + "".join(f"<span class=chip>{limpo(r)}<i>{r['rd']:.0f}</i></span>" for r in rs[:lim])
                 + (f"<span class=chip><i>+{len(rs)-lim}</i></span>" if len(rs) > lim else "") + "</div>")
-    def movers(rs):
-        return "".join(f"<div class=mv><span>{limpo(r)}</span><span class='{'up' if r['dia'] > 0 else 'dn'}'>{pc(r['dia'])}</span></div>" for r in rs)
-    return ("<div class=kpis>"
-            f"<div class=kpi><div class=l>Sobrevenda · RSI diário ≤ 30</div><div class='v up'>{len(os_)}</div>{chips(os_)}</div>"
-            f"<div class=kpi><div class=l>Sobrecompra · RSI diário ≥ 70</div><div class='v dn'>{len(ob)}</div>{chips(ob)}</div>"
-            f"<div class=kpi><div class=l>Maiores altas</div>{movers(list(reversed(mv[-3:]))) or '<span class=mu>–</span>'}</div>"
-            f"<div class=kpi><div class=l>Maiores quedas</div>{movers(mv[:3]) or '<span class=mu>–</span>'}</div>"
-            "</div>")
+    def top(chave, alta, n=5):
+        rs = sorted([r for r in L if r.get(chave) == r.get(chave) and r.get(chave) is not None], key=lambda r: r[chave], reverse=alta)
+        rs = [r for r in rs if (r[chave] > 0) == alta][:n]
+        return "".join(f"<div class=mv><span>{limpo(r)}</span><span class='{'up' if alta else 'dn'}'>{pc(r[chave])}</span></div>" for r in rs) or "<span class=mu>–</span>"
+    cards = [f"<div class=kpi><div class=l>Sobrevenda · RSI diário ≤ 30</div><div class='v up'>{len(os_)}</div>{chips(os_)}</div>",
+             f"<div class=kpi><div class=l>Sobrecompra · RSI diário ≥ 70</div><div class='v dn'>{len(ob)}</div>{chips(ob)}</div>"]
+    for chave, nome in (("dia", "dia"), ("sem", "semana"), ("mes", "mês")):
+        cards.append(f"<div class=kpi><div class=l>Maiores altas · {nome}</div>{top(chave, True)}</div>")
+        cards.append(f"<div class=kpi><div class=l>Maiores quedas · {nome}</div>{top(chave, False)}</div>")
+    return "<div class=kpis>" + "".join(cards) + "</div>"
 
 
 def secao(nome, L, com_res, tempos, e_juros):

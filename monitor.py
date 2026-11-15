@@ -621,7 +621,7 @@ def painel():
             if d is None: continue
             r = linha_painel(nome, limpar(d), cfg.get("semana", "FRI"), dict(info=" · ".join(x for x in [v.get("grupo", "")] if x), rot=rotulo(nome, v), moeda=cfg.get("moeda", "")), juros=cfg.get("tipo") == "juros")
             if r:
-                r["tf"] = {}; r["rs"] = {}
+                r["tf"] = {}; r["rs"] = {}; r["mes"] = float("nan")
                 dd = limpar(d); cc = dd.close; fim = cfg.get("semana", "FRI"); ww = semanal(dd, fim); lab = lambda ix: int(ix.strftime("%Y%m%d"))
                 try:
                     if cfg.get("tipo") != "juros":
@@ -630,6 +630,7 @@ def painel():
                         e = rsi_est(ww.close)
                         if e: r["rs"]["S"] = (e, "d", lab(ww.index[-1]))
                         mm = mensal_serie(cc); e = rsi_est(mm)
+                        if len(mm) > 1: r["mes"] = float(mm.iloc[-1] / mm.iloc[-2] - 1)
                         if e: r["rs"]["M"] = (e, "d", lab(mm.index[-1]))
                         cb = os.path.basename(pasta); y0 = A[nome]["yahoo"][0]
                         src = "cr" if cb == "cripto" else "us" if (cb == "eua" or (cb in ("setores", "macro") and not any(ch in y0 for ch in "^=.-"))) else None
@@ -683,6 +684,12 @@ def painel():
 if __name__ == "__main__":
     if "--mercado" in sys.argv: atualizar_mercado("--forcar" in sys.argv); sys.exit(0)
     if "--eventos" in sys.argv: atualizar_eventos("--forcar" in sys.argv); sys.exit(0)
+    if "--faltando" in sys.argv:
+        for cdir in sorted(glob.glob(os.path.join(RAIZ, "categorias", "*", "config.json"))):
+            pasta = os.path.dirname(cdir); cfg = json.load(open(cdir, encoding="utf-8"))
+            if cfg.get("tipo") == "juros": continue
+            if any(not os.path.exists(os.path.join(pasta, "dados", f"{n}_1D.csv")) for n in especificar(cfg)): print(os.path.basename(pasta))
+        sys.exit(0)
     if "--ext" in sys.argv: atualizar_ext(); sys.exit(0)
     if "--painel" in sys.argv: painel(); sys.exit(0)
     offline = "--csv" in sys.argv
