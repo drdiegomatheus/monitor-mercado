@@ -1,5 +1,5 @@
 {
- "nome": "Pares (M2ST34 x BITH11)",
+ "nome": "Pares (M2ST34, BITH11, NVDC34)",
  "moeda": "R$",
  "semana": "FRI",
  "sufixo": ".SA",
@@ -9,6 +9,7 @@
  "benchmarks": {},
  "ativos": {
   "M2ST34": {"setor": "Bitcoin (BDR alavancado)"},
-  "BITH11": {"setor": "Bitcoin (ETF)"}
+  "BITH11": {"setor": "Bitcoin (ETF)"},
+  "NVDC34": {"setor": "Nvidia (BDR)"}
  }
 }
