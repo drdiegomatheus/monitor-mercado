@@ -348,6 +348,9 @@ def inicio(paginas, secoes, eventos):
         if chaves == "oscilacoes":
             h.append(f"<a class=tile href='{arq}'><div class=tt>{titulo}<span>→</span></div><div class=ln>Maiores altas e quedas: dia, semana e mês</div><div class=ln>Brasil, EUA e cripto</div></a>")
             continue
+        if chaves == "spread":
+            h.append(f"<a class=tile href='{arq}'><div class=tt>{titulo}<span>→</span></div><div class=ln>Relação entre ativos para permutar</div><div class=ln>Esticado x descontado, com a sobra em R$</div></a>")
+            continue
         if chaves == "graficos":
             h.append(f"<a class=tile href='{arq}'><div class=tt>{titulo}<span>→</span></div><div class=ln>TradingView: gráficos interativos com RSI</div><div class=ln>Cripto, B3, EUA, dólar, ouro e petróleo</div></a>")
             continue
