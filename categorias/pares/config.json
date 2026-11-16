@@ -43,10 +43,6 @@
    "setor": "Software, nuvem e hardware · MSFT",
    "grupo": "BDR"
   },
-  "P1LT34": {
-   "setor": "Software, nuvem e hardware · PLTR",
-   "grupo": "BDR"
-  },
   "TSLA34": {
    "setor": "Varejo online e veículos · TSLA",
    "grupo": "BDR"
@@ -131,10 +127,6 @@
    "setor": "Bancos e pagamentos · NU",
    "grupo": "BDR"
   },
-  "ELIL34": {
-   "setor": "Saúde e farmacêuticas · LLY",
-   "grupo": "BDR"
-  },
   "ABBV34": {
    "setor": "Saúde e farmacêuticas · ABBV",
    "grupo": "BDR"
@@ -170,6 +162,18 @@
   "BITH11": {
    "setor": "Bitcoin (ETF)",
    "grupo": "ETF"
+  },
+  "LILY34": {
+   "setor": "Saúde e farmacêuticas · LLY",
+   "grupo": "BDR"
+  },
+  "P2LT34": {
+   "setor": "Software, nuvem e hardware · PLTR",
+   "grupo": "BDR"
+  },
+  "MRVL34": {
+   "setor": "Semicondutores · MRVL",
+   "grupo": "BDR"
   }
  }
 }
