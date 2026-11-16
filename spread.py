@@ -118,18 +118,13 @@ function renderDetail(){var el=document.getElementById('spd');if(!sel||!BY[sel])
   document.getElementById('spdt').textContent='Sobra em R$ por lote ('+na+' '+S+' − '+nb+' '+B+')';
   document.getElementById('spdif').innerHTML=svg(dif,[{v:mean(dif),c:'#94a3b8',t:'média',d:''}],function(v){return'R$ '+f2(v)},'#0891b2')}
  ['sa','sb','sq'].forEach(function(id){document.getElementById(id).oninput=calc});calc()}
-function renderAlerts(){var out=[];for(var i=0;i<A.length;i++)for(var j=i+1;j<A.length;j++){var p=pair(A[i].n,A[j].n);if(!p)continue;if(Math.abs(p.z20)>=2&&(p.z60===null||Math.sign(p.z60)==Math.sign(p.z20)&&Math.abs(p.z60)>=1.5))out.push(p)}
- out.sort(function(a,b){return Math.abs(b.z20)-Math.abs(a.z20)});var el=document.getElementById('spa');
- if(!out.length){el.innerHTML='<div class=sp-card><div class=sp-det style="padding-top:14px"><b>Sem alertas agora</b><br><span class=mu>Nenhum par com z de 20d acima de 2 e z de 60d acima de 1,5 na mesma direção.</span></div></div>';return}
- el.innerHTML='<div class=alert><div>🔔</div><div><b>Pares esticados agora</b> (z 20d ≥ 2 e z 60d ≥ 1,5)<br>'+out.slice(0,8).map(function(p){var s=p.z20>0?p.x:p.y,b=p.z20>0?p.y:p.x;return'<span class=sp-al data-x="'+p.x+'" data-y="'+p.y+'">'+s+' → '+b+' · z '+f2(Math.abs(p.z20))+'</span>'}).join('')+'</div></div>';
- el.querySelectorAll('.sp-al').forEach(function(e){e.onclick=function(){base=e.dataset.x;sel=e.dataset.y;st('spbase',base);st('sppar',sel);render();window.scrollTo(0,0)}})}
 function renderHeat(){var h='<div class=sc><table class=sp-hm><thead><tr><th></th>'+A.map(function(x){return'<th>'+x.n+'</th>'}).join('')+'</tr></thead><tbody>';
  A.forEach(function(r){h+='<tr><td>'+r.n+'</td>';A.forEach(function(c){if(r.n==c.n){h+='<td class=mu>–</td>';return}var p=pair(r.n,c.n);if(!p){h+='<td class=mu>–</td>';return}var z=p.z20,al=Math.min(Math.abs(z)/3,1);
   var bg=z>0?'rgba(220,38,38,'+(.1+.6*al)+')':'rgba(22,163,74,'+(.1+.6*al)+')';h+='<td data-x="'+r.n+'" data-y="'+c.n+'" style="background:'+bg+'">'+(z>0?'+':'')+f2(z,1)+'</td>'});h+='</tr>'});
  h+='</tbody></table></div>';document.getElementById('sph').innerHTML=h;
  document.querySelectorAll('#sph td[data-x]').forEach(function(t){t.onclick=function(){base=t.dataset.x;sel=t.dataset.y;st('spbase',base);st('sppar',sel);render();window.scrollTo(0,0)}})}
 function render(){renderBase();renderTable();renderDetail()}
-renderAlerts();render();renderHeat();
+render();renderHeat();
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){})}
 })();
 """
@@ -163,7 +158,7 @@ def pagina(arq, titulo, paginas, ativos):
     if len(ativos) < 2:
         h.append("<p class=mu>Preciso de pelo menos 2 ativos com histórico coletado.</p></main></body></html>")
         return "".join(h)
-    h.append("<div id=spa></div><div class=sp-base id=spb></div><div class=sp-card><h2>Relação com os outros ativos</h2><div class=m>Clique numa linha para abrir os detalhes e a conta da troca. Clique no título de uma coluna para ordenar. z positivo = o ativo da esquerda está caro em relação ao da direita.</div><div class=sp-flt id=spf></div><div id=spt></div></div>")
+    h.append("<div class=sp-base id=spb></div><div class=sp-card><h2>Relação com os outros ativos</h2><div class=m>Clique numa linha para abrir os detalhes e a conta da troca. Clique no título de uma coluna para ordenar. z positivo = o ativo da esquerda está caro em relação ao da direita.</div><div class=sp-flt id=spf></div><div id=spt></div></div>")
     h.append("<div id=spd></div><div class=sp-card><h2>Mapa de todos contra todos (z 20d)</h2><div class=m>Vermelho: o ativo da linha está esticado contra o da coluna. Verde: está descontado. Clique numa célula para abrir.</div><div id=sph></div></div>")
     h.append("<details><summary>Como ler</summary><p><b>Relação</b> = preço do ativo da esquerda ÷ preço do outro. <b>z 20d / 60d</b> = quantos desvios-padrão a relação de hoje está acima (+) ou abaixo (−) da média dos últimos 20 / 60 pregões; acima de +2 ou abaixo de −2 é raro. "
              "<b>Percentil</b> = em que posição a relação está nos últimos 250 pregões. <b>RSI da relação</b> = RSI de 14 períodos calculado sobre a própria relação (diário e 30 min). "
