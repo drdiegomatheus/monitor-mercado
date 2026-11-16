@@ -1,5 +1,5 @@
 {
- "nome": "Pares (M2ST34, BITH11, NVDC34)",
+ "nome": "Spread (BDRs, ETF e ações da B3)",
  "moeda": "R$",
  "semana": "FRI",
  "sufixo": ".SA",
@@ -7,9 +7,169 @@
  "sem_eventos": true,
  "oculto": true,
  "benchmarks": {},
+ "spread_acoes": [
+  "PETR4",
+  "PRIO3",
+  "ITUB4",
+  "BBDC4",
+  "ITSA4",
+  "BBAS3",
+  "VALE3",
+  "CMIG4",
+  "TAEE11",
+  "RENT3",
+  "MGLU3",
+  "MRVE3",
+  "DIRR3"
+ ],
  "ativos": {
-  "M2ST34": {"setor": "Bitcoin (BDR alavancado)"},
-  "BITH11": {"setor": "Bitcoin (ETF)"},
-  "NVDC34": {"setor": "Nvidia (BDR)"}
+  "ITLC34": {
+   "setor": "Semicondutores · INTC",
+   "grupo": "BDR"
+  },
+  "NVDC34": {
+   "setor": "Semicondutores · NVDA",
+   "grupo": "BDR"
+  },
+  "A1MD34": {
+   "setor": "Semicondutores · AMD",
+   "grupo": "BDR"
+  },
+  "AMZO34": {
+   "setor": "Varejo online e veículos · AMZN",
+   "grupo": "BDR"
+  },
+  "MSFT34": {
+   "setor": "Software, nuvem e hardware · MSFT",
+   "grupo": "BDR"
+  },
+  "P1LT34": {
+   "setor": "Software, nuvem e hardware · PLTR",
+   "grupo": "BDR"
+  },
+  "TSLA34": {
+   "setor": "Varejo online e veículos · TSLA",
+   "grupo": "BDR"
+  },
+  "AVGO34": {
+   "setor": "Semicondutores · AVGO",
+   "grupo": "BDR"
+  },
+  "TSMC34": {
+   "setor": "Semicondutores · TSM",
+   "grupo": "BDR"
+  },
+  "ASML34": {
+   "setor": "Semicondutores · ASML",
+   "grupo": "BDR"
+  },
+  "CSCO34": {
+   "setor": "Software, nuvem e hardware · CSCO",
+   "grupo": "BDR"
+  },
+  "M1TA34": {
+   "setor": "Internet e mídia · META",
+   "grupo": "BDR"
+  },
+  "MUTC34": {
+   "setor": "Semicondutores · MU",
+   "grupo": "BDR"
+  },
+  "M1RV34": {
+   "setor": "Semicondutores · MRVL",
+   "grupo": "BDR"
+  },
+  "M2ST34": {
+   "setor": "Bitcoin (tesouraria) · MSTR",
+   "grupo": "BDR"
+  },
+  "NFLX34": {
+   "setor": "Internet e mídia · NFLX",
+   "grupo": "BDR"
+  },
+  "MELI34": {
+   "setor": "Varejo online e veículos · MELI",
+   "grupo": "BDR"
+  },
+  "D1EL34": {
+   "setor": "Software, nuvem e hardware · DELL",
+   "grupo": "BDR"
+  },
+  "ORCL34": {
+   "setor": "Software, nuvem e hardware · ORCL",
+   "grupo": "BDR"
+  },
+  "IBMB34": {
+   "setor": "Software, nuvem e hardware · IBM",
+   "grupo": "BDR"
+  },
+  "BERK34": {
+   "setor": "Holding (Berkshire) · BRK.B",
+   "grupo": "BDR"
+  },
+  "MSBR34": {
+   "setor": "Bancos e pagamentos · MS",
+   "grupo": "BDR"
+  },
+  "BOAC34": {
+   "setor": "Bancos e pagamentos · BAC",
+   "grupo": "BDR"
+  },
+  "MSCD34": {
+   "setor": "Bancos e pagamentos · MA",
+   "grupo": "BDR"
+  },
+  "VISA34": {
+   "setor": "Bancos e pagamentos · V",
+   "grupo": "BDR"
+  },
+  "JPMC34": {
+   "setor": "Bancos e pagamentos · JPM",
+   "grupo": "BDR"
+  },
+  "ROXO34": {
+   "setor": "Bancos e pagamentos · NU",
+   "grupo": "BDR"
+  },
+  "ELIL34": {
+   "setor": "Saúde e farmacêuticas · LLY",
+   "grupo": "BDR"
+  },
+  "ABBV34": {
+   "setor": "Saúde e farmacêuticas · ABBV",
+   "grupo": "BDR"
+  },
+  "JNJB34": {
+   "setor": "Saúde e farmacêuticas · JNJ",
+   "grupo": "BDR"
+  },
+  "WALM34": {
+   "setor": "Consumo básico e varejo · WMT",
+   "grupo": "BDR"
+  },
+  "COWC34": {
+   "setor": "Consumo básico e varejo · COST",
+   "grupo": "BDR"
+  },
+  "PGCO34": {
+   "setor": "Consumo básico e varejo · PG",
+   "grupo": "BDR"
+  },
+  "EXXO34": {
+   "setor": "Petróleo e gás · XOM",
+   "grupo": "BDR"
+  },
+  "CHVX34": {
+   "setor": "Petróleo e gás · CVX",
+   "grupo": "BDR"
+  },
+  "GOGL34": {
+   "setor": "Internet e mídia · GOOGL",
+   "grupo": "BDR"
+  },
+  "BITH11": {
+   "setor": "Bitcoin (ETF)",
+   "grupo": "ETF"
+  }
  }
 }

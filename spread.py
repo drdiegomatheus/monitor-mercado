@@ -8,7 +8,7 @@ import pandas as pd
 import ui
 
 CSS = """
-.sp-base{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.sp-base{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}.sp-base button{padding:7px 12px!important;font-size:13px!important}
 .sp-base button{border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:12px;padding:9px 16px;font-weight:800;font-size:14px;cursor:pointer;letter-spacing:-.01em}
 .sp-base button small{display:block;color:var(--mu);font-weight:500;font-size:11px}
 .sp-base button.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}.sp-base button.on small{color:var(--bg);opacity:.7}
@@ -30,7 +30,9 @@ CSS = """
 .sp-line{display:flex;justify-content:space-between;padding:3px 0}.sp-line b{font-weight:700}
 .sp-big{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
 .sp-svg{width:100%;height:auto;display:block}
-.sp-hm td{text-align:center;padding:8px 6px;cursor:pointer;font-weight:700;font-size:12.5px}.sp-hm th{cursor:default;text-align:center}
+.sp-hm td{text-align:center;padding:5px 3px;cursor:pointer;font-weight:700;font-size:10.5px}.sp-hm th{cursor:default;text-align:center;font-size:9.5px;padding:5px 2px;letter-spacing:0}.sp-hm td:first-child,.sp-hm th:first-child{padding-left:10px;font-size:11px}
+.sp-grp{display:flex;flex-wrap:wrap;gap:6px;align-items:center;width:100%}.sp-grp>span{min-width:48px;font-size:12px;font-weight:700}
+.sp-flt{display:flex;gap:6px;padding:0 18px 10px;flex-wrap:wrap}.sp-flt button{border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:999px;padding:4px 12px;font-weight:600;font-size:12px;cursor:pointer}.sp-flt button.on{background:var(--tx);color:var(--bg)}
 .sp-hm td:first-child{text-align:left;font-weight:800}
 .sp-al{display:inline-block;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:3px 9px;margin:4px 4px 0 0;font-size:12.5px;cursor:pointer;font-weight:600}
 """
@@ -51,12 +53,11 @@ function corr(a,b){var n=Math.min(a.length,b.length);a=a.slice(-n);b=b.slice(-n)
 function rets(c){var o=[];for(var i=1;i<c.length;i++)o.push(c[i]/c[i-1]-1);return o}
 function swap(pS,pB){var best=null;for(var i=0;i<LOTS.length;i++){var a=LOTS[i],b=Math.floor(a*pS/pB);if(b<1)continue;var cash=a*pS-b*pB,pct=cash/(a*pS),c={a:a,b:b,cash:cash,pct:pct};if(pct<=0.01)return c;if(!best||pct<best.pct)best=c}return best}
 var CACHE={};
-function pair(xn,yn){var k=xn+'|'+yn;if(CACHE[k])return CACHE[k];var X=BY[xn],Y=BY[yn];var al=align(X.dt,X.dc,Y.dt,Y.dc);var n=al.t.length;if(n<30)return null;
+function pair(xn,yn,full){var k=xn+'|'+yn;if(CACHE[k]){var c0=CACHE[k];if(full&&!c0.full){var am0=align(BY[xn].mt,BY[xn].mc,BY[yn].mt,BY[yn].mc);c0.rsiM=am0.x.length>20?rsi(am0.x.map(function(v,i){return v/am0.y[i]}),14):null;c0.full=1}return c0}var X=BY[xn],Y=BY[yn];var al=align(X.dt,X.dc,Y.dt,Y.dc);var n=al.t.length;if(n<30)return null;
  var r=al.x.map(function(v,i){return v/al.y[i]});var win=r.slice(-250),cur=r[n-1],c=0;win.forEach(function(v){if(v<=cur)c++});
- var am=align(X.mt,X.mc,Y.mt,Y.mc),rm=am.x.map(function(v,i){return v/am.y[i]});
  var o={x:xn,y:yn,al:al,r:r,n:n,ratio:cur,z20:zs(r,20,n-1),z60:n>=60?zs(r,60,n-1):null,perc:c/win.length*100,v1:cur/r[n-2]-1,v5:n>6?cur/r[n-6]-1:null,
-  rsiR:rsi(r,14),rsiM:rm.length>20?rsi(rm,14):null,rsiX:rsi(al.x,14),rsiY:rsi(al.y,14),cor:corr(rets(al.x.slice(-61)),rets(al.y.slice(-61))),px:al.x[n-1],py:al.y[n-1]};
- CACHE[k]=o;return o}
+  rsiR:rsi(r,14),rsiM:null,rsiX:rsi(al.x,14),rsiY:rsi(al.y,14),cor:corr(rets(al.x.slice(-61)),rets(al.y.slice(-61))),px:al.x[n-1],py:al.y[n-1]};
+ CACHE[k]=o;if(full)return pair(xn,yn,true);return o}
 function f2(v,n){return v===null||v===undefined||isNaN(v)?'–':v.toLocaleString('pt-BR',{minimumFractionDigits:n===undefined?2:n,maximumFractionDigits:n===undefined?2:n})}
 function pc(v){return v===null||isNaN(v)?'–':'<span class="var '+(v>=0?'up':'dn')+'">'+f2(Math.abs(v*100))+'%</span>'}
 function zc(z){if(z===null)return'–';var bg=Math.abs(z)>=2?(z>0?'var(--ob)':'var(--os)'):Math.abs(z)>=1?(z>0?'var(--rdbg)':'var(--grbg)'):'var(--card2)';var fg=Math.abs(z)>=2?'#fff':Math.abs(z)>=1?(z>0?'var(--rd)':'var(--gr)'):'var(--mu)';
@@ -68,9 +69,12 @@ function swtxt(p){ // direção: z>0 vende X compra Y ; z<0 vende Y compra X
  var s,b,ps,pb;if(p.z20>=0){s=p.x;b=p.y;ps=p.px;pb=p.py}else{s=p.y;b=p.x;ps=p.py;pb=p.px}var w=swap(ps,pb);if(!w)return'–';
  return'<span class="sp-sw">'+w.a+' '+s+' → '+w.b+' '+b+'<small>sobra R$ '+f2(w.cash)+'</small></span>'}
 var base=st('spbase');if(!BY[base])base=A[0].n;var sel=st('sppar');
-function others(){return A.filter(function(x){return x.n!==base}).map(function(x){return pair(base,x.n)}).filter(Boolean)}
-function renderBase(){document.getElementById('spb').innerHTML=A.map(function(x){return'<button data-n="'+x.n+'" class="'+(x.n==base?'on':'')+'">'+x.n+'<small>R$ '+f2(x.dc[x.dc.length-1])+'</small></button>'}).join('');
- document.querySelectorAll('#spb button').forEach(function(b){b.onclick=function(){base=b.dataset.n;st('spbase',base);sel=null;render()}})}
+var flt=st('spflt')||'Todos';function others(){return A.filter(function(x){return x.n!==base&&(flt=='Todos'||x.g==flt)}).map(function(x){return pair(base,x.n,true)}).filter(Boolean)}
+function renderBase(){var gs=[];A.forEach(function(x){if(gs.indexOf(x.g)<0)gs.push(x.g)});
+ document.getElementById('spb').innerHTML=gs.map(function(g){return'<div class=sp-grp><span class=mu>'+g+'</span>'+A.filter(function(x){return x.g==g}).map(function(x){return'<button data-n="'+x.n+'" class="'+(x.n==base?'on':'')+'">'+x.n+'<small>R$ '+f2(x.dc[x.dc.length-1])+'</small></button>'}).join('')+'</div>'}).join('');
+ document.querySelectorAll('#spb button').forEach(function(b){b.onclick=function(){base=b.dataset.n;st('spbase',base);sel=null;render()}});
+ document.getElementById('spf').innerHTML=['Todos'].concat(gs).map(function(g){return'<button data-g="'+g+'" class="'+(g==flt?'on':'')+'">'+g+'</button>'}).join('');
+ document.querySelectorAll('#spf button').forEach(function(b){b.onclick=function(){flt=b.dataset.g;st('spflt',flt);sel=null;render()}})}
 var sortK='abs',sortD=-1;
 function renderTable(){var L=others();var key={abs:function(p){return Math.abs(p.z20)},z20:function(p){return p.z20},z60:function(p){return p.z60===null?-99:p.z60},perc:function(p){return p.perc},v5:function(p){return p.v5===null?-99:p.v5},rsiR:function(p){return p.rsiR===null?-1:p.rsiR},rsiM:function(p){return p.rsiM===null?-1:p.rsiM},cor:function(p){return p.cor}}[sortK];
  L.sort(function(a,b){return(key(a)-key(b))*sortD});
@@ -89,7 +93,7 @@ function svg(vals,lines,fmt,color){var W=340,Hh=190,pl=6,pr=62,pt=10,pb=18,mn=Ma
  o+='<circle cx='+X(vals.length-1)+' cy='+Y(vals[vals.length-1])+' r=3.5 fill="'+(color||'var(--ac)')+'"/><text x='+(W-pr+4)+' y='+(Y(vals[vals.length-1])-6)+' font-size=11 font-weight=700 fill="var(--tx)">'+fmt(vals[vals.length-1])+'</text></svg>';return o}
 function hist(p,th){var r=p.r,n=p.n,ev=[],last=-9,i;for(i=20;i<n-5;i++){var z=zs(r,20,i);if(Math.abs(z)>=th&&i-last>=5){last=i;var ch=r[i+5]/r[i]-1;ev.push(z>0?-ch:ch)}}
  if(!ev.length)return null;var w=ev.filter(function(v){return v>0}).length,s=ev.slice().sort(function(a,b){return a-b});return{n:ev.length,win:w/ev.length,med:s[Math.floor(s.length/2)],worst:s[0],best:s[s.length-1]}}
-function renderDetail(){var el=document.getElementById('spd');if(!sel||!BY[sel]){el.innerHTML='';return}var p=pair(base,sel);if(!p){el.innerHTML='';return}
+function renderDetail(){var el=document.getElementById('spd');if(!sel||!BY[sel]){el.innerHTML='';return}var p=pair(base,sel,true);if(!p){el.innerHTML='';return}
  var up=p.z20>=0,S=up?p.x:p.y,B=up?p.y:p.x,pS=up?p.px:p.py,pB=up?p.py:p.px,w=swap(pS,pB)||{a:1,b:1};
  var key='sp_'+S+'_'+B,saved=st(key),a=w.a,b=w.b;if(saved){var q=saved.split(',');a=+q[0]||a;b=+q[1]||b}
  var qty=+(st('spq_'+S)||10000);
@@ -132,20 +136,22 @@ if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch
 
 
 def dados(raiz):
-    """Lê os fechamentos dos ativos da categoria 'pares' (diário e 30 min)."""
-    pasta = os.path.join(raiz, "categorias", "pares")
-    cfg = json.load(open(os.path.join(pasta, "config.json"), encoding="utf-8"))
+    """Fechamentos diários e de 30 min: ações da B3 (categoria brasil) e BDRs/ETF (categoria pares)."""
+    cats = os.path.join(raiz, "categorias")
+    cfg = json.load(open(os.path.join(cats, "pares", "config.json"), encoding="utf-8"))
+    lista = [(n, "Ações", "", "brasil") for n in cfg.get("spread_acoes", [])]
+    lista += [(n, a.get("grupo", "BDR"), a.get("setor", ""), "pares") for n, a in cfg["ativos"].items()]
     out = []
-    for n, a in cfg["ativos"].items():
-        f1 = os.path.join(pasta, "dados", f"{n}_1D.csv")
+    for n, g, setor, cat in lista:
+        f1 = os.path.join(cats, cat, "dados", f"{n}_1D.csv")
         if not os.path.exists(f1): continue
         d = pd.read_csv(f1).dropna().tail(520)
         if len(d) < 30: continue
-        item = {"n": n, "s": a.get("setor", ""), "dt": [int(t) // 86400 for t in d["time"]], "dc": [round(float(x), 4) for x in d["close"]]}
-        f3 = os.path.join(pasta, "dados", f"{n}_30m.csv")
+        item = {"n": n, "g": g, "s": setor, "dt": [int(t) // 86400 for t in d["time"]], "dc": [round(float(x), 4) for x in d["close"]]}
+        f3 = os.path.join(cats, cat, "dados", f"{n}_30m.csv")
         if os.path.exists(f3):
-            m = pd.read_csv(f3).dropna().tail(900)
-            item["mt"] = [int(t) for t in m["time"]]; item["mc"] = [round(float(x), 4) for x in m["close"]]
+            m = pd.read_csv(f3).dropna().tail(700)
+            item["mt"] = [int(t) for t in m["time"]]; item["mc"] = [round(float(x), 3) for x in m["close"]]
         out.append(item)
     return out
 
@@ -157,7 +163,7 @@ def pagina(arq, titulo, paginas, ativos):
     if len(ativos) < 2:
         h.append("<p class=mu>Preciso de pelo menos 2 ativos com histórico coletado.</p></main></body></html>")
         return "".join(h)
-    h.append("<div id=spa></div><div class=sp-base id=spb></div><div class=sp-card><h2>Relação com os outros ativos</h2><div class=m>Clique numa linha para abrir os detalhes e a conta da troca. Clique no título de uma coluna para ordenar. z positivo = o ativo da esquerda está caro em relação ao da direita.</div><div id=spt></div></div>")
+    h.append("<div id=spa></div><div class=sp-base id=spb></div><div class=sp-card><h2>Relação com os outros ativos</h2><div class=m>Clique numa linha para abrir os detalhes e a conta da troca. Clique no título de uma coluna para ordenar. z positivo = o ativo da esquerda está caro em relação ao da direita.</div><div class=sp-flt id=spf></div><div id=spt></div></div>")
     h.append("<div id=spd></div><div class=sp-card><h2>Mapa de todos contra todos (z 20d)</h2><div class=m>Vermelho: o ativo da linha está esticado contra o da coluna. Verde: está descontado. Clique numa célula para abrir.</div><div id=sph></div></div>")
     h.append("<details><summary>Como ler</summary><p><b>Relação</b> = preço do ativo da esquerda ÷ preço do outro. <b>z 20d / 60d</b> = quantos desvios-padrão a relação de hoje está acima (+) ou abaixo (−) da média dos últimos 20 / 60 pregões; acima de +2 ou abaixo de −2 é raro. "
              "<b>Percentil</b> = em que posição a relação está nos últimos 250 pregões. <b>RSI da relação</b> = RSI de 14 períodos calculado sobre a própria relação (diário e 30 min). "
