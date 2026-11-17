@@ -129,13 +129,13 @@ function renderDetail(){var el=document.getElementById('spd');if(!sel||!BY[sel])
  var key='sp_'+S+'_'+B,saved=st(key),a=w.a,b=w.b;if(saved){var q=saved.split(',');a=+q[0]||a;b=+q[1]||b}
  var qty=+(st('spq_'+S)||10000);
  var s=sig(p.z20,p.z60),n=p.n;
- CTX={p:p,na:0,nb:0};
+ CTX={p:p,na:0,nb:0};var recn=[p.x,p.y].filter(function(q){return BY[q].rec}).map(function(q){return q+' antes de '+dstr(BY[q].rec)});
  var h1=hist(p,1),h2=hist(p,2);
  function ht(h,t){return h?'<div class=sp-line><span>'+t+'</span><b>'+h.n+' casos · compensou em '+f2(h.win*100,0)+'% · mediana '+f2(h.med*100)+'% · pior '+f2(h.worst*100)+'%</b></div>':'<div class=sp-line><span>'+t+'</span><b>sem casos</b></div>'}
  var o='<div class=sp-card><h2>'+p.x+' ÷ '+p.y+' <span class="sp-sig '+s[0]+'" style="margin-left:8px">'+s[1]+'</span></h2><div class=m>Relação hoje '+f2(p.ratio,4)+' ('+p.x+' vale '+f2(p.ratio,2)+' × '+p.y+') · z 20d '+f2(p.z20)+' · percentil '+f2(p.perc,0)+'% dos últimos '+Math.min(250,n)+' dias</div><div class=sp-det><div class=sp-grid>'
  +'<div class=sp-box><h3>Troca: sair de '+S+' para '+B+'</h3><div class=sp-in>Vender <input id=sa type=number min=1 value='+a+'> '+S+' por <input id=sb type=number min=1 value='+b+'> '+B+'</div>'
  +'<div id=spc></div><div class=sp-in>Tenho <input id=sq type=number min=0 value='+qty+' style="width:110px"> '+S+'</div><div id=spc2></div></div>'
- +'<div class=sp-box style="grid-column:1/-1"><h3>Relação '+p.x+' ÷ '+p.y+' <span class=sp-wb></span></h3><div id=spch1 class=sp-ch></div></div>'
+ +'<div class=sp-box style="grid-column:1/-1"><h3>Relação '+p.x+' ÷ '+p.y+' <span class=sp-wb></span></h3><div id=spch1 class=sp-ch></div>'+(recn.length?'<div class=mu style="font-size:12px;margin-top:6px">⚠ '+recn.join(' e ')+': histórico reconstruído (MSTR × dólar × fator fixo), erro típico de ~1%. Vale para ver tendência, não o preço exato.</div>':'')+'</div>'
  +'<div class=sp-box style="grid-column:1/-1"><h3><span id=spdt></span> <span class=sp-wb></span></h3><div id=spch2 class=sp-ch></div></div>'
  +'<div class=sp-box><h3>No histórico deste par</h3><div class=mu style="font-size:12.5px;margin-bottom:6px">Quando '+S+' ficou esticado contra '+B+' (z 20d), em quantos casos a relação caiu nos 5 pregões seguintes, ou seja, sair compensou</div>'+ht(h1,'|z| ≥ 1')+ht(h2,'|z| ≥ 2')+'<div class=sp-line><span>RSI da relação D / 30m</span><b>'+f2(p.rsiR,0)+' / '+f2(p.rsiM,0)+'</b></div><div class=sp-line><span>Correlação 60d</span><b>'+f2(p.cor)+'</b></div></div>'
  +'</div></div></div>';el.innerHTML=o;
@@ -158,6 +158,9 @@ if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch
 """
 
 
+RECONSTRUIR = {"M2ST34": "MSTR"}
+
+
 def dados(raiz):
     """Fechamentos diários e de 30 min: ações da B3 (categoria brasil) e BDRs/ETF (categoria pares)."""
     cats = os.path.join(raiz, "categorias")
@@ -169,9 +172,28 @@ def dados(raiz):
     for n, g, setor, cat in lista:
         f1 = os.path.join(cats, cat, "dados", f"{n}_1D.csv")
         if not os.path.exists(f1): continue
-        d = pd.read_csv(f1).dropna().tail(520)
+        d = pd.read_csv(f1).dropna()
         if len(d) < 30: continue
-        item = {"n": n, "g": g, "s": setor, "dt": [int(t) // 86400 for t in d["time"]], "dc": [round(float(x), 4) for x in d["close"]]}
+        dts = [int(t) // 86400 for t in d["time"]]; cls = [float(x) for x in d["close"]]
+        rec = None
+        if n in RECONSTRUIR and len(d) < 500:
+            try:
+                ms = pd.read_csv(os.path.join(cats, "eua", "dados", RECONSTRUIR[n] + "_1D.csv")).dropna()
+                us = pd.read_csv(os.path.join(cats, "macro", "dados", "USDBRL_1D.csv")).dropna()
+                ms = pd.Series(ms["close"].values, index=[int(t) // 86400 for t in ms["time"]])
+                us = pd.Series(us["close"].values, index=[int(t) // 86400 for t in us["time"]])
+                sint = (ms * us).dropna()
+                real = pd.Series(cls, index=dts)
+                razao = (real / sint).dropna().median()
+                antigo = sint[sint.index < dts[0]] * razao
+                if len(antigo) > 20:
+                    rec = dts[0]
+                    dts = [int(i) for i in antigo.index] + dts; cls = [float(v) for v in antigo.values] + cls
+            except Exception as e:
+                print("reconstrução falhou", n, e)
+        dts, cls = dts[-520:], cls[-520:]
+        item = {"n": n, "g": g, "s": setor, "dt": dts, "dc": [round(x, 4) for x in cls]}
+        if rec: item["rec"] = rec
         f3 = os.path.join(cats, cat, "dados", f"{n}_30m.csv")
         if os.path.exists(f3):
             m = pd.read_csv(f3).dropna().tail(700)
