@@ -29,7 +29,10 @@ CSS = """
 .sp-in input:focus{border-color:var(--ac)}
 .sp-line{display:flex;justify-content:space-between;padding:3px 0}.sp-line b{font-weight:700}
 .sp-big{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
-.sp-svg{width:100%;height:auto;display:block}
+.sp-svg{display:block;max-width:100%;touch-action:pan-y}.sp-ch{position:relative}
+.sp-tip{display:none;position:absolute;pointer-events:none;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px 9px;font-size:12px;line-height:1.35;box-shadow:0 4px 14px rgba(0,0,0,.18);z-index:5;white-space:nowrap}
+.sp-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px;margin-top:8px}.sp-stats div{background:var(--card);border-radius:10px;padding:6px 9px}.sp-stats small{display:block;color:var(--mu);font-size:10.5px}.sp-stats b{font-size:13.5px}
+.sp-wb{float:right;display:inline-flex;gap:4px}.sp-wb button{border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:999px;padding:1px 9px;font-size:11.5px;font-weight:600;cursor:pointer}.sp-wb button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
 .sp-hm td{text-align:center;padding:5px 3px;cursor:pointer;font-weight:700;font-size:10.5px}.sp-hm th{cursor:default;text-align:center;font-size:9.5px;padding:5px 2px;letter-spacing:0}.sp-hm td:first-child,.sp-hm th:first-child{padding-left:10px;font-size:11px}
 .sp-grp{display:flex;flex-wrap:wrap;gap:6px;align-items:center;width:100%}.sp-grp>span{min-width:48px;font-size:12px;font-weight:700}
 .sp-flt{display:flex;gap:6px;padding:0 18px 10px;flex-wrap:wrap}.sp-flt button{border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:999px;padding:4px 12px;font-weight:600;font-size:12px;cursor:pointer}.sp-flt button.on{background:var(--tx);color:var(--bg)}
@@ -80,13 +83,44 @@ function renderTable(){var L=others();var key={abs:function(p){return Math.abs(p
  h+='</tbody></table></div>';document.getElementById('spt').innerHTML=h;
  document.querySelectorAll('#spt th[data-k]').forEach(function(t){t.onclick=function(){var k=t.dataset.k;if(k=='ratio')return;if(sortK==k)sortD=-sortD;else{sortK=k;sortD=-1}renderTable();renderDetail()}});
  document.querySelectorAll('#spt tbody tr').forEach(function(t){t.onclick=function(){sel=t.dataset.y;st('sppar',sel);renderTable();renderDetail()}})}
-function svg(vals,lines,fmt,color){var W=340,Hh=190,pl=6,pr=62,pt=10,pb=18,mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals);lines.forEach(function(l){mn=Math.min(mn,l.v);mx=Math.max(mx,l.v)});
- var pad=(mx-mn)*.06||1;mn-=pad;mx+=pad;function X(i){return pl+(W-pl-pr)*i/(vals.length-1)}function Y(v){return pt+(Hh-pt-pb)*(1-(v-mn)/(mx-mn))}
- var o='<svg class=sp-svg viewBox="0 0 '+W+' '+Hh+'">';
- lines.forEach(function(l){o+='<line x1='+pl+' x2='+(W-pr)+' y1='+Y(l.v)+' y2='+Y(l.v)+' stroke="'+l.c+'" stroke-width=1 stroke-dasharray="'+(l.d||'')+'" opacity=.8 vector-effect="non-scaling-stroke"/><text x='+(W-pr+4)+' y='+(Y(l.v)+3)+' font-size=10 fill="'+l.c+'">'+l.t+'</text>'});
+var WIN=+(st('spwin')||120),CTX=null;
+function dstr(d){var t=new Date(d*86400000);return('0'+t.getUTCDate()).slice(-2)+'/'+('0'+(t.getUTCMonth()+1)).slice(-2)+'/'+String(t.getUTCFullYear()).slice(-2)}
+function winBar(n){var o=[60,120,250,0].filter(function(w){return w==0||w<n});return'<span class=sp-wb>'+o.map(function(w){return'<button data-w='+w+' class="'+((WIN==w||(WIN>=n&&w==0))?'on':'')+'">'+(w?w+'d':'Tudo')+'</button>'}).join('')+'</span>'}
+function chart(id,vals,dts,fmt,color,sig,rel){var el=document.getElementById(id);if(!el||!vals.length)return;
+ var N=vals.length,W=Math.max(el.clientWidth,280),Hh=240,pl=8,pr=88,pt=14,pb=22,col=color||'var(--ac)';
+ var m=mean(vals),sg=sd(vals),mn=Infinity,mx=-Infinity,imn=0,imx=0,cur=vals[N-1],i;
+ for(i=0;i<N;i++){if(vals[i]<mn){mn=vals[i];imn=i}if(vals[i]>mx){mx=vals[i];imx=i}}
+ var pad=(mx-mn)*.12||1,lo=mn-pad,hi=mx+pad;
+ function X(i){return pl+(W-pl-pr)*i/Math.max(N-1,1)}function Y(v){return pt+(Hh-pt-pb)*(1-(v-lo)/(hi-lo))}
+ var lines=[{v:m,c:'#64748b',t:'méd',d:'',w:1.4}];
+ if(sig){[[1,'#f59e0b'],[-1,'#f59e0b'],[2,'#ef4444'],[-2,'#22c55e']].forEach(function(q){var v=m+q[0]*sg;if(v>lo&&v<hi)lines.push({v:v,c:q[1],t:(q[0]>0?'+':'−')+Math.abs(q[0])+'σ',d:'4 3',w:1})})}
+ var o='<svg class=sp-svg width='+W+' height='+Hh+' viewBox="0 0 '+W+' '+Hh+'">';
+ for(i=0;i<=3;i++){var gv=lo+(hi-lo)*i/3;if(Math.abs(Y(gv)-Y(m))<13||Math.abs(Y(gv)-Y(cur))<13)continue;o+='<line x1='+pl+' x2='+(W-pr)+' y1='+Y(gv)+' y2='+Y(gv)+' stroke="var(--line)" stroke-width=1 opacity=.5 /><text x='+(W-pr+5)+' y='+(Y(gv)+3)+' font-size=9.5 fill="var(--mu)">'+fmt(gv)+'</text>'}
+ var tk=[0,Math.floor((N-1)/2),N-1];tk.forEach(function(j,k){o+='<text x='+X(j)+' y='+(Hh-6)+' font-size=9.5 fill="var(--mu)" text-anchor="'+(k==0?'start':k==2?'end':'middle')+'">'+dstr(dts[j])+'</text>'});
+ lines.forEach(function(l){o+='<line x1='+pl+' x2='+(W-pr)+' y1='+Y(l.v)+' y2='+Y(l.v)+' stroke="'+l.c+'" stroke-width='+l.w+' stroke-dasharray="'+l.d+'"/>'+(l.t=='méd'?'<text x='+(W-pr+5)+' y='+(Y(l.v)+3)+' font-size=10 font-weight=700 fill="'+l.c+'" paint-order=stroke stroke="var(--card2)" stroke-width=3>méd '+fmt(l.v)+'</text>':'<text x='+(W-pr-3)+' y='+(Y(l.v)-3)+' font-size=9 text-anchor="end" fill="'+l.c+'">'+l.t+'</text>')});
  var d='';vals.forEach(function(v,i){d+=(i?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)});
- o+='<path d="'+d+'" fill=none stroke="'+(color||'var(--ac)')+'" stroke-width=2 vector-effect="non-scaling-stroke"/>';
- o+='<circle cx='+X(vals.length-1)+' cy='+Y(vals[vals.length-1])+' r=3.5 fill="'+(color||'var(--ac)')+'"/><text x='+(W-pr+4)+' y='+(Y(vals[vals.length-1])-6)+' font-size=11 font-weight=700 fill="var(--tx)">'+fmt(vals[vals.length-1])+'</text></svg>';return o}
+ o+='<path d="'+d+'L'+X(N-1)+' '+Y(lo)+'L'+X(0)+' '+Y(lo)+'Z" fill="'+col+'" opacity=.07 /><path d="'+d+'" fill=none stroke="'+col+'" stroke-width=2 stroke-linejoin=round />';
+ function mk(j,v,up,c){var tx=X(j),an=tx>W-pr-70?'end':tx<pl+70?'start':'middle';return'<circle cx='+tx+' cy='+Y(v)+' r=3.2 fill="'+c+'"/><text x='+tx+' y='+(Y(v)+(up?-8:15))+' font-size=10 font-weight=700 text-anchor="'+an+'" fill="'+c+'" paint-order=stroke stroke="var(--card2)" stroke-width=3>'+fmt(v)+' · '+dstr(dts[j])+'</text>'}
+ if(imx!=N-1)o+=mk(imx,mx,true,'#ef4444');if(imn!=N-1)o+=mk(imn,mn,false,'#22c55e');
+ o+='<circle cx='+X(N-1)+' cy='+Y(cur)+' r=4.5 fill="'+col+'" stroke="var(--card2)" stroke-width=2 /><text x='+(W-pr+5)+' y='+(Y(cur)+(Math.abs(Y(cur)-Y(m))<14?(cur>=m?-8:16):4))+' font-size=11.5 font-weight=800 fill="var(--tx)">'+fmt(cur)+'</text>';
+ o+='<line id='+id+'vl x1=0 x2=0 y1='+pt+' y2='+(Hh-pb)+' stroke="var(--mu)" stroke-width=1 stroke-dasharray="3 3" style="display:none" /><circle id='+id+'dot r=4.5 fill="'+col+'" stroke="var(--tx)" stroke-width=1.5 style="display:none" /><rect id='+id+'hit x='+pl+' y=0 width='+(W-pl-pr)+' height='+Hh+' fill=transparent style="cursor:crosshair" /></svg><div class=sp-tip id='+id+'tip></div>';
+ var cnt=0;vals.forEach(function(v){if(v<=cur)cnt++});var pc2=cnt/N*100;
+ function dv(v){return rel?(v/m-1)*100:v-m}function dtx(v){var x=dv(v);return(x>=0?'+':'−')+(rel?f2(Math.abs(x),1)+'%':'R$ '+f2(Math.abs(x)))}
+ o+='<div class=sp-stats><div><small>Hoje</small><b>'+fmt(cur)+'</b></div><div><small>Média</small><b>'+fmt(m)+'</b></div><div><small>Máx · '+dstr(dts[imx])+'</small><b>'+fmt(mx)+'</b></div><div><small>Mín · '+dstr(dts[imn])+'</small><b>'+fmt(mn)+'</b></div><div><small>Hoje vs média</small><b>'+dtx(cur)+(sg>0?' · z '+f2((cur-m)/sg,1):'')+'</b></div><div><small>Percentil no período</small><b>'+f2(pc2,0)+'%</b></div></div>';
+ el.innerHTML=o;
+ var hit=document.getElementById(id+'hit'),vl=document.getElementById(id+'vl'),dot=document.getElementById(id+'dot'),tip=document.getElementById(id+'tip');
+ function mv(ev){var r=hit.getBoundingClientRect(),cx=(ev.touches?ev.touches[0].clientX:ev.clientX)-r.left,j=Math.round(cx/r.width*(N-1));j=Math.max(0,Math.min(N-1,j));var v=vals[j],px=X(j);
+  vl.setAttribute('x1',px);vl.setAttribute('x2',px);vl.style.display='';dot.setAttribute('cx',px);dot.setAttribute('cy',Y(v));dot.style.display='';
+  var z=sg>0?(v-m)/sg:0;tip.innerHTML='<b>'+dstr(dts[j])+'</b><br>'+fmt(v)+'<br><span style="color:'+(v>=m?'var(--gr)':'var(--rd)')+'">'+dtx(v)+' vs média</span>'+(sg>0?'<br>z '+f2(z,1):'');
+  tip.style.display='block';var tw=tip.offsetWidth,left=px+12;if(left+tw>W-4)left=px-tw-12;tip.style.left=left+'px';tip.style.top=Math.max(2,Math.min(Y(v)-30,Hh-70))+'px';if(ev.cancelable&&ev.touches)ev.preventDefault()}
+ function lv(){vl.style.display='none';dot.style.display='none';tip.style.display='none'}
+ hit.addEventListener('mousemove',mv);hit.addEventListener('mouseleave',lv);hit.addEventListener('touchstart',mv,{passive:false});hit.addEventListener('touchmove',mv,{passive:false});hit.addEventListener('touchend',lv)}
+function drawCharts(){if(!CTX)return;var p=CTX.p,n=p.n,w=(!WIN||WIN>=n)?n:WIN,i0=n-w,dts=p.al.t.slice(i0);
+ chart('spch1',p.r.slice(i0),dts,function(v){return f2(v,3)},null,true,true);
+ if(CTX.na){var dif=[];for(var i=i0;i<n;i++)dif.push(CTX.na*p.al.x[i]-CTX.nb*p.al.y[i]);chart('spch2',dif,dts,function(v){return'R$ '+f2(v)},'#0891b2',false,false)}
+ document.querySelectorAll('.sp-wb').forEach(function(b){b.innerHTML=winBar(n).replace(/^<span class=sp-wb>|<\/span>$/g,'')});
+ document.querySelectorAll('.sp-wb button').forEach(function(b){b.onclick=function(){WIN=+b.dataset.w;st('spwin',String(WIN));drawCharts()}})}
+window.addEventListener('resize',function(){drawCharts()});
 function hist(p,th){var r=p.r,n=p.n,ev=[],last=-9,i;for(i=20;i<n-5;i++){var z=zs(r,20,i);if(z>=th&&i-last>=5){last=i;ev.push(-(r[i+5]/r[i]-1))}}
  if(!ev.length)return null;var w=ev.filter(function(v){return v>0}).length,s=ev.slice().sort(function(a,b){return a-b});return{n:ev.length,win:w/ev.length,med:s[Math.floor(s.length/2)],worst:s[0],best:s[s.length-1]}}
 function renderDetail(){var el=document.getElementById('spd');if(!sel||!BY[sel]){el.innerHTML='';return}var p=pair(base,sel,true);if(!p){el.innerHTML='';return}
@@ -94,15 +128,14 @@ function renderDetail(){var el=document.getElementById('spd');if(!sel||!BY[sel])
  var key='sp_'+S+'_'+B,saved=st(key),a=w.a,b=w.b;if(saved){var q=saved.split(',');a=+q[0]||a;b=+q[1]||b}
  var qty=+(st('spq_'+S)||10000);
  var s=sig(p.z20,p.z60),n=p.n;
- var win=Math.min(120,n),rr=p.r.slice(-win),w60=p.r.slice(-Math.min(60,n)),m=mean(w60),sg=sd(w60);
- var lines=[{v:m,c:'#94a3b8',t:'méd 60d',d:''},{v:m+sg,c:'#f59e0b',t:'+1σ',d:'4 3'},{v:m-sg,c:'#f59e0b',t:'−1σ',d:'4 3'},{v:m+2*sg,c:'#ef4444',t:'+2σ',d:'4 3'},{v:m-2*sg,c:'#22c55e',t:'−2σ',d:'4 3'}];
+ CTX={p:p,na:0,nb:0};
  var h1=hist(p,1),h2=hist(p,2);
  function ht(h,t){return h?'<div class=sp-line><span>'+t+'</span><b>'+h.n+' casos · compensou em '+f2(h.win*100,0)+'% · mediana '+f2(h.med*100)+'% · pior '+f2(h.worst*100)+'%</b></div>':'<div class=sp-line><span>'+t+'</span><b>sem casos</b></div>'}
  var o='<div class=sp-card><h2>'+p.x+' ÷ '+p.y+' <span class="sp-sig '+s[0]+'" style="margin-left:8px">'+s[1]+'</span></h2><div class=m>Relação hoje '+f2(p.ratio,4)+' ('+p.x+' vale '+f2(p.ratio,2)+' × '+p.y+') · z 20d '+f2(p.z20)+' · percentil '+f2(p.perc,0)+'% dos últimos '+Math.min(250,n)+' dias</div><div class=sp-det><div class=sp-grid>'
  +'<div class=sp-box><h3>Troca: sair de '+S+' para '+B+'</h3><div class=sp-in>Vender <input id=sa type=number min=1 value='+a+'> '+S+' por <input id=sb type=number min=1 value='+b+'> '+B+'</div>'
  +'<div id=spc></div><div class=sp-in>Tenho <input id=sq type=number min=0 value='+qty+' style="width:110px"> '+S+'</div><div id=spc2></div></div>'
- +'<div class=sp-box><h3>Relação '+p.x+' ÷ '+p.y+' (120 pregões)</h3>'+svg(rr,lines,function(v){return f2(v,3)})+'</div>'
- +'<div class=sp-box><h3 id=spdt></h3><div id=spdif></div></div>'
+ +'<div class=sp-box style="grid-column:1/-1"><h3>Relação '+p.x+' ÷ '+p.y+' <span class=sp-wb></span></h3><div id=spch1 class=sp-ch></div></div>'
+ +'<div class=sp-box style="grid-column:1/-1"><h3><span id=spdt></span> <span class=sp-wb></span></h3><div id=spch2 class=sp-ch></div></div>'
  +'<div class=sp-box><h3>No histórico deste par</h3><div class=mu style="font-size:12.5px;margin-bottom:6px">Quando '+S+' ficou esticado contra '+B+' (z 20d), em quantos casos a relação caiu nos 5 pregões seguintes, ou seja, sair compensou</div>'+ht(h1,'|z| ≥ 1')+ht(h2,'|z| ≥ 2')+'<div class=sp-line><span>RSI da relação D / 30m</span><b>'+f2(p.rsiR,0)+' / '+f2(p.rsiM,0)+'</b></div><div class=sp-line><span>Correlação 60d</span><b>'+f2(p.cor)+'</b></div></div>'
  +'</div></div></div>';el.innerHTML=o;
  function calc(){var na=+document.getElementById('sa').value,nb=+document.getElementById('sb').value,nq=+document.getElementById('sq').value;if(!(na>0&&nb>0))return;st(key,na+','+nb);st('spq_'+S,String(nq));
@@ -110,9 +143,7 @@ function renderDetail(){var el=document.getElementById('spd');if(!sel||!BY[sel])
   document.getElementById('spc').innerHTML='<div class=sp-line><span>Vende '+S+' (valor)</span><b>R$ '+f2(na*pS)+'</b></div><div class=sp-line><span>Recebe de '+B+' (valor)</span><b>R$ '+f2(nb*pB)+'</b></div>'
    +'<div class="sp-big '+(pos?'up':'dn')+'">'+(pos?'sobra':'falta')+' R$ '+f2(Math.abs(cash))+' por lote</div><div class=sp-line><span>Relação exata</span><b>1 '+S+' = '+f2(pS/pB,4)+' '+B+'</b></div>';
   document.getElementById('spc2').innerHTML='<div class=sp-line><span>Lotes completos</span><b>'+f2(lotes,0)+'</b></div><div class=sp-line><span>Compra '+B+'</span><b>'+f2(lotes*nb,0)+'</b></div><div class=sp-line><span>'+(pos?'Fica em caixa':'Precisa colocar')+'</span><b>R$ '+f2(Math.abs(tcash))+'</b></div><div class=sp-line><span>Custo B3 (0,03% × 2 pernas)</span><b>R$ '+f2(custo)+'</b></div>';
-  var dif=[];for(var i=n-win;i<n;i++){dif.push(na*(up?p.al.x[i]:p.al.y[i])-nb*(up?p.al.y[i]:p.al.x[i]))}
-  document.getElementById('spdt').textContent='Sobra em R$ por lote ('+na+' '+S+' − '+nb+' '+B+')';
-  document.getElementById('spdif').innerHTML=svg(dif,[{v:mean(dif),c:'#94a3b8',t:'média',d:''}],function(v){return'R$ '+f2(v)},'#0891b2')}
+  CTX.na=na;CTX.nb=nb;document.getElementById('spdt').textContent='Sobra em R$ por lote ('+na+' '+S+' − '+nb+' '+B+')';drawCharts()}
  ['sa','sb','sq'].forEach(function(id){document.getElementById(id).oninput=calc});calc()}
 function renderHeat(){var h='<div class=sc><table class=sp-hm><thead><tr><th></th>'+A.map(function(x){return'<th>'+x.n+'</th>'}).join('')+'</tr></thead><tbody>';
  A.forEach(function(r){h+='<tr><td>'+r.n+'</td>';A.forEach(function(c){if(r.n==c.n){h+='<td class=mu>–</td>';return}var p=pair(r.n,c.n);if(!p){h+='<td class=mu>–</td>';return}var z=p.z20,al=Math.min(Math.abs(z)/3,1);
