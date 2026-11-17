@@ -85,7 +85,7 @@ function renderTable(){var L=others();var key={abs:function(p){return Math.abs(p
  document.querySelectorAll('#spt tbody tr').forEach(function(t){t.onclick=function(){sel=t.dataset.y;st('sppar',sel);renderTable();renderDetail()}})}
 var WIN=+(st('spwin')||120),CTX=null;
 function dstr(d){var t=new Date(d*86400000);return('0'+t.getUTCDate()).slice(-2)+'/'+('0'+(t.getUTCMonth()+1)).slice(-2)+'/'+String(t.getUTCFullYear()).slice(-2)}
-function winBar(n){var o=[60,120,250,0].filter(function(w){return w==0||w<n});return'<span class=sp-wb>'+o.map(function(w){return'<button data-w='+w+' class="'+((WIN==w||(WIN>=n&&w==0))?'on':'')+'">'+(w?w+'d':'Tudo')+'</button>'}).join('')+'</span>'}
+function winBar(n){var o=[120,180,250,500,0].filter(function(w){return w==0||w<n});return'<span class=sp-wb>'+o.map(function(w){return'<button data-w='+w+' class="'+((WIN==w||(WIN>=n&&w==0))?'on':'')+'">'+(w==250?'1 ano':w==500?'2 anos':w?w+'d':'Tudo')+'</button>'}).join('')+'</span>'}
 function chart(id,vals,dts,fmt,color,sig,rel){var el=document.getElementById(id);if(!el||!vals.length)return;
  var N=vals.length,W=Math.max(el.clientWidth,280),Hh=240,pl=8,pr=88,pt=14,pb=22,col=color||'var(--ac)';
  var m=mean(vals),sg=sd(vals),mn=Infinity,mx=-Infinity,imn=0,imx=0,cur=vals[N-1],i;
