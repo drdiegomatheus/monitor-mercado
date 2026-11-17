@@ -205,6 +205,12 @@
   "ALOS3": {
    "setor": "Shoppings e imobiliário",
    "destaque": true
+  },
+  "IVVB11": {
+   "setor": "ETFs internacionais"
+  },
+  "NASD11": {
+   "setor": "ETFs internacionais"
   }
  },
  "valor_mercado": true

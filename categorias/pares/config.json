@@ -171,5 +171,9 @@
    "setor": "Espacial · SPCX",
    "grupo": "BDR"
   }
- }
+ },
+ "spread_etfs": [
+  "IVVB11",
+  "NASD11"
+ ]
 }

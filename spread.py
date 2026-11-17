@@ -132,6 +132,7 @@ def dados(raiz):
     cfg = json.load(open(os.path.join(cats, "pares", "config.json"), encoding="utf-8"))
     lista = [(n, "Ações", "", "brasil") for n in cfg.get("spread_acoes", [])]
     lista += [(n, a.get("grupo", "BDR"), a.get("setor", ""), "pares") for n, a in cfg["ativos"].items()]
+    lista += [(n, "ETF", "", "brasil") for n in cfg.get("spread_etfs", [])]
     out = []
     for n, g, setor, cat in lista:
         f1 = os.path.join(cats, cat, "dados", f"{n}_1D.csv")
