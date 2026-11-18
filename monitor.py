@@ -664,7 +664,7 @@ def painel():
     import ui
     PAGINAS = [("painel.html", "Todos", None), ("painel_cripto.html", "Cripto", ["cripto"]), ("painel_brasil.html", "Brasil", ["brasil"]),
                ("painel_eua.html", "EUA", ["eua"]), ("painel_outros.html", "Dados gerais", ["setores", "commodities", "macro", "juros"]),
-               ("painel_oscilacoes.html", "Oscilações", "oscilacoes"), ("painel_spread.html", "Spread", "spread"), ("painel_graficos.html", "Gráficos", "graficos")]
+               ("painel_oscilacoes.html", "Oscilações", "oscilacoes"), ("painel_spread.html", "Spread", "spread"), ("painel_mapa.html", "Mapa", "mapa"), ("painel_graficos.html", "Gráficos", "graficos")]
     f_m = os.path.join(RAIZ, "macro.json")
     macro_ev = json.load(open(f_m, encoding="utf-8")) if os.path.exists(f_m) else []
     f_l = os.path.join(RAIZ, "live.json")
@@ -677,6 +677,11 @@ def painel():
             if not SO_PAINEL:
                 import spread
                 open(os.path.join(RAIZ, arq), "w", encoding="utf-8").write(spread.pagina(arq, titulo, PAGINAS, spread.dados(RAIZ)))
+            continue
+        if chaves == "mapa":
+            if not SO_PAINEL:
+                import mapa
+                open(os.path.join(RAIZ, arq), "w", encoding="utf-8").write(mapa.pagina(arq, titulo, PAGINAS, mapa.dados(RAIZ)))
             continue
         if chaves == "graficos":
             if not SO_PAINEL: open(os.path.join(RAIZ, arq), "w", encoding="utf-8").write(ui.graficos(arq, titulo, PAGINAS))
