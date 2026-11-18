@@ -23,7 +23,7 @@ CSS = """
 JS = r"""
 function st(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
 var PER={d:{l:'Dia',k:1,u:3},w:{l:'5 dias',k:5,u:6},m:{l:'1 mês',k:21,u:12},q:{l:'3 meses',k:63,u:22},y:{l:'No ano',k:0,u:45}};
-var MAP=st('mpmap')||'br',PR=st('mpper')||'d',SZ=st('mpsz')||'cap';if(!MD[MAP])MAP='br';if(!PER[PR])PR='d';
+var MAP=st('mpmap')||'br',PR=st('mpper')||'d',SZ=st('mpsz')||'eq';if(!MD[MAP])MAP='br';if(!PER[PR])PR='d';
 function f2(v,d){return (v==null||v!==v)?'–':v.toLocaleString('pt-BR',{minimumFractionDigits:d==null?2:d,maximumFractionDigits:d==null?2:d})}
 function pc(v){return(v>=0?'+':'−')+f2(Math.abs(v))+'%'}
 function chg(a){var c=a.dc,n=c.length,k=PER[PR].k,i;if(PR=='y'){var y=new Date(a.dt[n-1]*864e5).getUTCFullYear();i=-1;for(var j=0;j<n;j++){if(new Date(a.dt[j]*864e5).getUTCFullYear()<y)i=j}if(i<0)return null}else{i=n-1-k;if(i<0)return null}return(c[n-1]/c[i]-1)*100}
@@ -50,7 +50,7 @@ function draw(){var D=MD[MAP],el=document.getElementById('mpmap'),W=el.clientWid
  document.getElementById('mpdate').textContent=ULT[MAP]}
 function bar(){var h='<div class=g><small>Mapa</small>'+Object.keys(MD).map(function(k){return'<button data-k=map data-v='+k+' class="'+(k==MAP?'on':'')+'">'+MD[k].t+'</button>'}).join('')+'</div>';
  h+='<div class=g><small>Período</small>'+Object.keys(PER).map(function(k){return'<button data-k=per data-v='+k+' class="'+(k==PR?'on':'')+'">'+PER[k].l+'</button>'}).join('')+'</div>';
- h+='<div class=g><small>Tamanho</small><button data-k=sz data-v=cap class="'+(SZ=='cap'?'on':'')+'">Valor de mercado</button><button data-k=sz data-v=eq class="'+(SZ=='eq'?'on':'')+'">Igual</button></div>';
+ h+='<div class=g><small>Tamanho</small><button data-k=sz data-v=eq class="'+(SZ=='eq'?'on':'')+'">Igual</button><button data-k=sz data-v=cap class="'+(SZ=='cap'?'on':'')+'">Valor de mercado</button></div>';
  var b=document.getElementById('mpbar');b.innerHTML=h;b.querySelectorAll('button').forEach(function(x){x.onclick=function(){var k=x.dataset.k,v=x.dataset.v;if(k=='map'){MAP=v;st('mpmap',v)}else if(k=='per'){PR=v;st('mpper',v)}else{SZ=v;st('mpsz',v)}bar();draw()}})}
 bar();draw();var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(draw,120)});
 """
@@ -109,9 +109,9 @@ def pagina(arq, titulo, paginas, mapas):
         d = max((a["dt"][-1] for a in m["a"]), default=None)
         ult[k] = "último pregão: " + (dt.datetime(1970, 1, 1) + dt.timedelta(days=d)).strftime("%d/%m/%Y") if d else ""
     h = [ui.cabeca(titulo, paginas, arq), f"<style>{CSS}</style><h1>{H.escape(titulo)}</h1>",
-         f"<p class=sub>Cada quadrado é um ativo: o tamanho é o valor de mercado e a cor é a variação no período. Nos BDRs, o preço e a variação são em R$ (já incluem o dólar). Atualizado em {agora:%d/%m %H:%M} · <span id=mpdate></span></p>",
+         f"<p class=sub>Cada quadrado é um ativo, agrupado por setor, e a cor é a variação no período (todos do mesmo tamanho; se quiser, dá para trocar para valor de mercado). Nos BDRs, o preço e a variação são em R$ (já incluem o dólar). Atualizado em {agora:%d/%m %H:%M} · <span id=mpdate></span></p>",
          "<div class=mp-bar id=mpbar></div><div class=mp-sum id=mpsum></div><div id=mpmap></div><div class=mp-leg><em>Queda</em><div style='display:flex;flex:1;justify-content:center' id=mpleg></div><em>Alta</em></div>",
          "<details style='margin-top:14px'><summary>Como ler</summary><p>Os quadrados ficam agrupados por setor e o setor mostra a variação média ponderada pelo valor de mercado. Verde = alta, vermelho = queda; quanto mais escuro, maior o movimento (a escala muda com o período). "
-         "Nos BDRs o tamanho usa o valor de mercado da empresa nos EUA convertido para R$; ETFs sem valor de mercado aparecem pequenos. Passe o mouse (ou toque) num quadrado para ver o setor, o preço e a variação. O botão Tamanho: Igual dá o mesmo espaço para todos.</p></details>",
+         "Nos BDRs o tamanho usa o valor de mercado da empresa nos EUA convertido para R$; ETFs sem valor de mercado aparecem pequenos. Passe o mouse (ou toque) num quadrado para ver o setor, o preço e a variação. O botão Tamanho alterna entre todos iguais e proporcional ao valor de mercado.</p></details>",
          "</main><script>var MD=" + json.dumps(mapas, separators=(",", ":"), ensure_ascii=False) + ";var ULT=" + json.dumps(ult, ensure_ascii=False) + ";" + JS + "</script></body></html>"]
     return "".join(h)
