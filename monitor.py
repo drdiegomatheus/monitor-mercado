@@ -149,11 +149,11 @@ def kraken(par, iv):
     if iv == "1d": d.index = d.index.normalize()
     return d[["open","high","low","close"]]
 
-def baixar(yts, kpar, iv):
+def baixar(yts, kpar, iv, mn=41):
     for t in yts:
         try: d = yahoo(t, iv)
         except Exception as e: print("yahoo", t, iv, e); d = None
-        if d is not None and len(d) > 40: return d, "Yahoo " + t
+        if d is not None and len(d) >= mn: return d, "Yahoo " + t
     if kpar:
         try:
             d = kraken(kpar, iv)
@@ -199,9 +199,9 @@ def carregar(cfg, pasta, offline):
     def um(nome, yts, kpar, bench=False):
         pre = "BENCH_" if bench else ""
         if offline: d, f, m = ler(pasta, pre+nome, "1D"), "csv", ler(pasta, pre+nome, "30m")
-        else: d, f = baixar(yts, kpar, "1d"); m, _ = baixar(yts, kpar, "30m") if not bench else (None, "")
+        else: mn = 1 if A.get(nome, {}).get("novo") else 41; d, f = baixar(yts, kpar, "1d", mn); m, _ = baixar(yts, kpar, "30m", mn) if not bench else (None, "")
         if d is not None and len(d) == 1 and A.get(nome, {}).get("novo"):   # IPO no 1º dia: cria o "fechamento anterior" com o preço da oferta (ou a abertura)
-            ref = float(A[nome].get("ipo") or d["open"].iloc[0]); ix = d.index[0] - pd.Timedelta(days=1)
+            ref = float(A[nome].get("ipo") or d["open"].iloc[0] or d["close"].iloc[0]); ix = d.index[0] - pd.Timedelta(days=1)
             d = pd.concat([pd.DataFrame({k: [ref] for k in ("open", "high", "low", "close")}, index=[ix]), d])
         if d is None or len(d) < (2 if A.get(nome, {}).get("novo") else 40): falhas.append(nome); return None, None, ""
         d = limpar(d); m = limpar(m) if m is not None and len(m) > 60 else None
