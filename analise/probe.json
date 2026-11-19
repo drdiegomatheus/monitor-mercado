@@ -1,0 +1,42 @@
+{
+ "ANT|1d": {
+  "n": 1,
+  "ult": "2026-11-19 00:00:00"
+ },
+ "ANT|rows": "Price      Adj Close Close  High   Low Open Volume\nTicker           ANT   ANT   ANT   ANT  ANT    ANT\nDate                                              \n2026-11-19      83.0  83.0  83.0  83.0  0.0      0",
+ "ANT|30m": {
+  "n": 1,
+  "ult": "2026-11-19 09:30:00-05:00"
+ },
+ "ANT|fast": {
+  "last": null,
+  "name": "USD"
+ },
+ "ANTH34.SA|1d": {
+  "n": 0,
+  "ult": null
+ },
+ "ANTH34.SA|30m": {
+  "n": 0,
+  "ult": null
+ },
+ "ANTH34.SA|fast": "'currency'",
+ "ANTH34|1d": {
+  "n": 0,
+  "ult": null
+ },
+ "ANTH34|30m": {
+  "n": 0,
+  "ult": null
+ },
+ "ANTH34|fast": "'currency'",
+ "ANT.US|1d": {
+  "n": 0,
+  "ult": null
+ },
+ "ANT.US|30m": {
+  "n": 0,
+  "ult": null
+ },
+ "ANT.US|fast": "'currency'"
+}
