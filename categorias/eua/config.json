@@ -222,7 +222,8 @@
    "grupo": "nasdaq",
    "bdr": "ANTH34",
    "setor": "Inteligência artificial",
-   "novo": true
+   "novo": true,
+   "ipo": 83.0
   }
  },
  "valor_mercado": true

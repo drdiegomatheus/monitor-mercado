@@ -200,6 +200,9 @@ def carregar(cfg, pasta, offline):
         pre = "BENCH_" if bench else ""
         if offline: d, f, m = ler(pasta, pre+nome, "1D"), "csv", ler(pasta, pre+nome, "30m")
         else: d, f = baixar(yts, kpar, "1d"); m, _ = baixar(yts, kpar, "30m") if not bench else (None, "")
+        if d is not None and len(d) == 1 and A.get(nome, {}).get("novo"):   # IPO no 1º dia: cria o "fechamento anterior" com o preço da oferta (ou a abertura)
+            ref = float(A[nome].get("ipo") or d["open"].iloc[0]); ix = d.index[0] - pd.Timedelta(days=1)
+            d = pd.concat([pd.DataFrame({k: [ref] for k in ("open", "high", "low", "close")}, index=[ix]), d])
         if d is None or len(d) < (2 if A.get(nome, {}).get("novo") else 40): falhas.append(nome); return None, None, ""
         d = limpar(d); m = limpar(m) if m is not None and len(m) > 60 else None
         if tempos and not bench and not offline:
