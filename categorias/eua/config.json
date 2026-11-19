@@ -217,6 +217,12 @@
   "SATA": {
    "grupo": "nasdaq",
    "setor": "Bitcoin (tesouraria)"
+  },
+  "ANT": {
+   "grupo": "nasdaq",
+   "bdr": "ANTH34",
+   "setor": "Inteligência artificial",
+   "novo": true
   }
  },
  "valor_mercado": true

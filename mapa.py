@@ -76,7 +76,7 @@ def dados(raiz):
         f = os.path.join(cats, cat, "dados", f"{n}_1D.csv")
         if not os.path.exists(f): return None
         d = pd.read_csv(f).dropna().tail(300)
-        if len(d) < 6: return None
+        if len(d) < 2: return None
         return [int(t) // 86400 for t in d["time"]], [round(float(x), 4) for x in d["close"]]
 
     mapas = {"br": {"t": "Brasil (B3)", "a": []}, "bdr": {"t": "BDRs em R$", "a": []}}

@@ -370,8 +370,8 @@ def inicio(paginas, secoes, eventos):
 
 
 SIMBOLOS = [("Cripto", [("BTC", "BINANCE:BTCUSDT"), ("ETH", "BINANCE:ETHUSDT"), ("SOL", "BINANCE:SOLUSDT"), ("AAVE", "BINANCE:AAVEUSDT"), ("UNI", "BINANCE:UNIUSDT"), ("PENDLE", "BINANCE:PENDLEUSDT")]),
-            ("Brasil", [("IBOV", "BMFBOVESPA:IBOV"), ("PETR4", "BMFBOVESPA:PETR4"), ("VALE3", "BMFBOVESPA:VALE3"), ("ITUB4", "BMFBOVESPA:ITUB4"), ("BBAS3", "BMFBOVESPA:BBAS3"), ("MGLU3", "BMFBOVESPA:MGLU3"), ("MRVE3", "BMFBOVESPA:MRVE3")]),
-            ("EUA", [("S&P 500", "AMEX:SPY"), ("Nasdaq", "NASDAQ:QQQ"), ("NVDA", "NASDAQ:NVDA"), ("AMD", "NASDAQ:AMD"), ("MSFT", "NASDAQ:MSFT"), ("AMZN", "NASDAQ:AMZN"), ("EWZ", "AMEX:EWZ")]),
+            ("Brasil", [("IBOV", "BMFBOVESPA:IBOV"), ("PETR4", "BMFBOVESPA:PETR4"), ("VALE3", "BMFBOVESPA:VALE3"), ("ITUB4", "BMFBOVESPA:ITUB4"), ("BBAS3", "BMFBOVESPA:BBAS3"), ("MGLU3", "BMFBOVESPA:MGLU3"), ("MRVE3", "BMFBOVESPA:MRVE3"), ("ANTH34", "BMFBOVESPA:ANTH34")]),
+            ("EUA", [("S&P 500", "AMEX:SPY"), ("Nasdaq", "NASDAQ:QQQ"), ("NVDA", "NASDAQ:NVDA"), ("AMD", "NASDAQ:AMD"), ("MSFT", "NASDAQ:MSFT"), ("AMZN", "NASDAQ:AMZN"), ("ANT", "NASDAQ:ANT"), ("EWZ", "AMEX:EWZ")]),
             ("Outros", [("Dólar/Real", "FX_IDC:USDBRL"), ("DXY", "TVC:DXY"), ("Ouro", "TVC:GOLD"), ("Brent", "TVC:UKOIL"), ("US 10 anos", "TVC:US10Y")])]
 
 GJS = """

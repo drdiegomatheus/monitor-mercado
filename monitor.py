@@ -200,7 +200,7 @@ def carregar(cfg, pasta, offline):
         pre = "BENCH_" if bench else ""
         if offline: d, f, m = ler(pasta, pre+nome, "1D"), "csv", ler(pasta, pre+nome, "30m")
         else: d, f = baixar(yts, kpar, "1d"); m, _ = baixar(yts, kpar, "30m") if not bench else (None, "")
-        if d is None or len(d) < 40: falhas.append(nome); return None, None, ""
+        if d is None or len(d) < (2 if A.get(nome, {}).get("novo") else 40): falhas.append(nome); return None, None, ""
         d = limpar(d); m = limpar(m) if m is not None and len(m) > 60 else None
         if tempos and not bench and not offline:
             for tf in ("15m", "1h"):
@@ -503,9 +503,9 @@ def rsi_mensal(c):
 
 def linha_painel(nome, d, fim, extra, juros=False):
     c = d.close
-    if len(c) < 20: return None
+    if len(c) < 2: return None       # ativos recém-listados (IPO) entram com poucos dias; RSI só com 15+
     w = semanal(d, fim)
-    rd = rsi(c).iloc[-1]; rw = rsi(w.close).iloc[-1] if len(w) > 15 else np.nan
+    rd = rsi(c).iloc[-1] if len(c) >= 15 else np.nan; rw = rsi(w.close).iloc[-1] if len(w) > 15 else np.nan
     rm, nm = (np.nan, 0) if juros else rsi_mensal(c)
     if juros:
         dia = (c.iloc[-1]-c.iloc[-2])*100

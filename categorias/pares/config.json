@@ -170,6 +170,11 @@
   "SPCX34": {
    "setor": "Espacial · SPCX",
    "grupo": "BDR"
+  },
+  "ANTH34": {
+   "setor": "Inteligência artificial · ANT",
+   "grupo": "BDR",
+   "novo": true
   }
  },
  "spread_etfs": [
