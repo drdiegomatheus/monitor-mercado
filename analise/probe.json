@@ -1,0 +1,10 @@
+{
+ "inicio": "2026-11-20T14:39:18.773Z",
+ "quotes": {},
+ "velas": {},
+ "erros": [
+  "quotes TypeError: TradingView.Client is not a constructor",
+  "velas TypeError: TradingView.Client is not a constructor"
+ ],
+ "fim": "2026-11-20T14:39:18.773Z"
+}
