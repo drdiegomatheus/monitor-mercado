@@ -211,7 +211,8 @@
   },
   "NASD11": {
    "setor": "ETFs internacionais"
-  }
+  },
+  "SPXB11": {"setor": "ETFs internacionais"}
  },
  "valor_mercado": true
 }
