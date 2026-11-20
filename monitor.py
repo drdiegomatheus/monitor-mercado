@@ -100,7 +100,9 @@ def limpa_yahoo(d, iv):
     if isinstance(d.columns, pd.MultiIndex): d.columns = d.columns.get_level_values(0)
     d = d.rename(columns=str.lower)
     if not set(["open","high","low","close"]) <= set(d.columns): return None
-    d = d[["open","high","low","close"]].dropna()
+    cols = ["open","high","low","close"] + (["volume"] if "volume" in d.columns else [])
+    d = d[cols].dropna(subset=["open","high","low","close"])
+    if "volume" in d.columns: d["volume"] = d["volume"].fillna(0)
     if d.empty: return None
     d.index = pd.to_datetime(d.index)
     d.index = (d.index.tz_convert("UTC") if d.index.tz is not None else d.index).tz_localize(None)
@@ -166,7 +168,7 @@ def ler(pasta, nome, suf):
     if not os.path.exists(f): return None
     d = pd.read_csv(f); d.index = pd.to_datetime(d.time, unit="s")
     if suf == "1D": d.index = d.index.normalize()
-    return d[["open","high","low","close"]]
+    return d[["open","high","low","close"] + (["volume"] if "volume" in d.columns else [])]
 
 def gravar(d, pasta, nome, suf):
     os.makedirs(pasta, exist_ok=True)
@@ -199,7 +201,7 @@ def carregar(cfg, pasta, offline):
     def um(nome, yts, kpar, bench=False):
         pre = "BENCH_" if bench else ""
         if offline: d, f, m = ler(pasta, pre+nome, "1D"), "csv", ler(pasta, pre+nome, "30m")
-        else: mn = 1 if A.get(nome, {}).get("novo") else 41; d, f = baixar(yts, kpar, "1d", mn); m, _ = baixar(yts, kpar, "30m", mn) if not bench else (None, "")
+        else: mn = 1 if A.get(nome, {}).get("novo") else 41; d, f = baixar(yts, kpar, "1d", mn); m, _ = baixar(yts, kpar, "30m", mn)
         if d is not None and len(d) == 1 and A.get(nome, {}).get("novo"):   # IPO no 1º dia: cria o "fechamento anterior" com o preço da oferta (ou a abertura)
             ref = float(A[nome].get("ipo") or d["open"].iloc[0] or d["close"].iloc[0]); ix = d.index[0] - pd.Timedelta(days=1)
             d = pd.concat([pd.DataFrame({k: [ref] for k in ("open", "high", "low", "close")}, index=[ix]), d])
@@ -667,7 +669,7 @@ def painel():
     import ui
     PAGINAS = [("painel.html", "Todos", None), ("painel_cripto.html", "Cripto", ["cripto"]), ("painel_brasil.html", "Brasil", ["brasil"]),
                ("painel_eua.html", "EUA", ["eua"]), ("painel_outros.html", "Dados gerais", ["setores", "commodities", "macro", "juros"]),
-               ("painel_oscilacoes.html", "Oscilações", "oscilacoes"), ("painel_spread.html", "Spread", "spread"), ("painel_mapa.html", "Mapa", "mapa"), ("painel_graficos.html", "Gráficos", "graficos")]
+               ("painel_oscilacoes.html", "Oscilações", "oscilacoes"), ("painel_spread.html", "Spread", "spread"), ("painel_mapa.html", "Mapa", "mapa"), ("painel_trades.html", "Trades", "trades"), ("painel_graficos.html", "Gráficos", "graficos")]
     f_m = os.path.join(RAIZ, "macro.json")
     macro_ev = json.load(open(f_m, encoding="utf-8")) if os.path.exists(f_m) else []
     f_l = os.path.join(RAIZ, "live.json")
@@ -685,6 +687,11 @@ def painel():
             if not SO_PAINEL:
                 import mapa
                 open(os.path.join(RAIZ, arq), "w", encoding="utf-8").write(mapa.pagina(arq, titulo, PAGINAS, mapa.dados(RAIZ)))
+            continue
+        if chaves == "trades":
+            if not SO_PAINEL:
+                import trades
+                open(os.path.join(RAIZ, arq), "w", encoding="utf-8").write(trades.pagina(arq, titulo, PAGINAS, trades.dados(RAIZ)))
             continue
         if chaves == "graficos":
             if not SO_PAINEL: open(os.path.join(RAIZ, arq), "w", encoding="utf-8").write(ui.graficos(arq, titulo, PAGINAS))
