@@ -1,0 +1,30 @@
+{
+ "NASD11": {
+  "preco": 21.9,
+  "vol_med_rs": 38179956,
+  "vol_med_cotas": 1771314,
+  "dias_c_volume": 23
+ },
+ "QQQI11": {
+  "preco": 97.48,
+  "vol_med_rs": 5242480,
+  "vol_med_cotas": 54609,
+  "dias_c_volume": 23
+ },
+ "QQQQ11": {
+  "preco": 127.64,
+  "vol_med_rs": 185169,
+  "vol_med_cotas": 1438,
+  "dias_c_volume": 23
+ },
+ "BQYL39": null,
+ "BQQQ39": null,
+ "QQQM39": null,
+ "QQQQ39": null,
+ "NDXB11": null,
+ "BNDQ39": null,
+ "TQQQ39": null,
+ "SQQQ39": null,
+ "QQQQ34": null,
+ "EQQQ39": null
+}
