@@ -207,6 +207,12 @@ def carregar(cfg, pasta, offline):
             d = pd.concat([pd.DataFrame({k: [ref] for k in ("open", "high", "low", "close")}, index=[ix]), d])
         if d is None or len(d) < (2 if A.get(nome, {}).get("novo") else 40): falhas.append(nome); return None, None, ""
         d = limpar(d); m = limpar(m) if m is not None and len(m) > 60 else None
+        for dia, fator in A.get(nome, {}).get("desdobra", []):    # desdobramento que o Yahoo não ajustou: divide os preços anteriores à data
+            for x in (d, m):
+                if x is None: continue
+                ant = x.index < pd.Timestamp(dia)
+                for c_ in ("open", "high", "low", "close"): x.loc[ant, c_] = x.loc[ant, c_] / fator
+                if "volume" in x.columns: x.loc[ant, "volume"] = x.loc[ant, "volume"] * fator
         if tempos and not bench and not offline:
             for tf in ("15m", "1h"):
                 if tf in tempos or ("4h" in tempos and tf == "1h"):

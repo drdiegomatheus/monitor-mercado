@@ -213,7 +213,7 @@
    "setor": "ETFs internacionais"
   },
   "SPXB11": {"setor": "ETFs internacionais"},
-  "SPXI11": {"setor": "ETFs internacionais"}
+  "SPXI11": {"setor": "ETFs internacionais", "desdobra": [["2026-01-22", 8]]}
  },
  "valor_mercado": true
 }
