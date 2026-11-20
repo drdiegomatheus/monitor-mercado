@@ -68,7 +68,11 @@ jobs:
         run: |
           git checkout -q main 2>/dev/null || true
           espera=$(( 300 - ($(date +%s) - T0) )); [ "$espera" -gt 0 ] && sleep "$espera"
-          outras=$(gh api "repos/${{ github.repository }}/actions/workflows/coleta.yml/runs?status=queued&per_page=5" -q '.total_count' || echo 0)
+          outras=0
+          for s in queued pending waiting; do
+            n=$(gh api "repos/${{ github.repository }}/actions/workflows/coleta.yml/runs?status=$s&per_page=5" -q '.total_count' || echo 0)
+            outras=$((outras + n))
+          done
           if [ "$outras" = "0" ]; then
             gh api -X POST "repos/${{ github.repository }}/actions/workflows/coleta.yml/dispatches" -f ref=main -f "inputs[modo]=agenda" || true
           fi
