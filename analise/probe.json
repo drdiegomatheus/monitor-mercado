@@ -1,0 +1,26 @@
+{
+ "agora_utc": "2026-11-20T14:21:46.892221",
+ "brapi_PETR4": [
+  200,
+  "{\"results\":[{\"symbol\":\"PETR4\",\"shortName\":\"PETR4\",\"longName\":\"Petroleo Brasileiro SA Pfd\",\"currency\":\"BRL\",\"regularMarketPrice\":42.67,\"regularMarketDayHigh\":43.6,\"regularMarketDayLow\":42.41,\"regularMarketDayRange\":\"42.41 - 43.6\",\"regularMarketChange\":-0.5,\"regularMarketChangePercent\":-1.16,\"regularMarketTime\":\"2026-11-20T14:20:30.000Z\",\"marketCap\":588547212774,\"regularMarketVolume\":39268400,\"regularMarketPreviousClose\":43.17,\"regularMarketOpen\":43.53,\"fiftyTwoWeekRange\":\"29.53 - 59.79\",\"fiftyTwoWeekLow\":29.53,\"fiftyTwoWeekHigh\":59.79,\"priceEarnings\":3.916511395239975,\"earningsPerShare\":10.8948647,\"logourl\":\"https://icons.brapi.dev/icons/PETR4.svg\"}],\"requestedAt\":\"2026-11-20T14:21:47.118Z\",\"took\":1}"
+ ],
+ "brapi_MGLU3": [
+  200,
+  "{\"results\":[{\"symbol\":\"MGLU3\",\"shortName\":\"MGLU3\",\"longName\":\"Magazine Luiza S.A.\",\"currency\":\"BRL\",\"regularMarketPrice\":8.2,\"regularMarketDayHigh\":8.75,\"regularMarketDayLow\":8.2,\"regularMarketDayRange\":\"8.2 - 8.75\",\"regularMarketChange\":-0.12,\"regularMarketChangePercent\":-1.44,\"regularMarketTime\":\"2026-11-20T14:21:30.000Z\",\"marketCap\":5779857751,\"regularMarketVolume\":60504400,\"regularMarketPreviousClose\":8.32,\"regularMarketOpen\":8.46,\"fiftyTwoWeekRange\":\"3.76 - 13.93\",\"fiftyTwoWeekLow\":3.76,\"fiftyTwoWeekHigh\":13.93,\"priceEarnings\":null,\"earningsPerShare\":-0.0085843,\"logourl\":\"https://icons.brapi.dev/icons/MGLU3.svg\"}],\"requestedAt\":\"2026-11-20T14:21:47.355Z\",\"took\":0}"
+ ],
+ "brapi_NVDC34": [
+  "ERR HTTP Error 401: Unauthorized",
+  "{\"error\":true,\"message\":\"Token de autenticação não fornecido\",\"code\":\"MISSING_TOKEN\"}"
+ ],
+ "brapi_M2ST34": [
+  "ERR HTTP Error 401: Unauthorized",
+  "{\"error\":true,\"message\":\"Token de autenticação não fornecido\",\"code\":\"MISSING_TOKEN\"}"
+ ],
+ "hg": [
+  200,
+  "{\"by\":\"symbol\",\"valid_key\":false,\"results\":{\"error\":true,\"message\":\"Desculpe. Essa consulta não é permitida sem uma chave válida.\"},\"execution_time\":0.0,\"from_cache\":true}"
+ ],
+ "yahoo1m_PETR4.SA": "float() argument must be a string or a real number, not 'Series'",
+ "yahoo1m_NVDC34.SA": "float() argument must be a string or a real number, not 'Series'",
+ "yahoo1m_M2ST34.SA": "float() argument must be a string or a real number, not 'Series'"
+}
