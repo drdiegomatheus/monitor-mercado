@@ -1,0 +1,910 @@
+{
+ "total": 96,
+ "cobertos": {
+  "ITUB4": {
+   "preco": 40.07,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 30824700,
+   "cap": 465312198061,
+   "ant": 40.19
+  },
+  "BBDC4": {
+   "preco": 13.83,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 60048700,
+   "cap": 148351745239,
+   "ant": 14.08
+  },
+  "BPAC11": {
+   "preco": 49.69,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 19857400,
+   "cap": 193295151208.51334,
+   "ant": 50.11
+  },
+  "ITSA4": {
+   "preco": 13.17,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 30299100,
+   "cap": 149307763450,
+   "ant": 13.15
+  },
+  "SANB11": {
+   "preco": 28.15,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 4063500,
+   "cap": 105541824542.825,
+   "ant": 28.15
+  },
+  "BBAS3": {
+   "preco": 14.3,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 66147900,
+   "cap": 81779075700,
+   "ant": 14.12
+  },
+  "BBSE3": {
+   "preco": 36.99,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 5161900,
+   "cap": 71689824658,
+   "ant": 36.66
+  },
+  "B3SA3": {
+   "preco": 14.28,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 73044800,
+   "cap": 69379281085,
+   "ant": 14.3
+  },
+  "PSSA3": {
+   "preco": 43.96,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 1963600,
+   "cap": 28232260318,
+   "ant": 44.66
+  },
+  "CXSE3": {
+   "preco": 20.57,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 4331700,
+   "cap": 61709999084,
+   "ant": 20.5
+  },
+  "PETR4": {
+   "preco": 42.67,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 39268400,
+   "cap": 588547212774,
+   "ant": 43.17
+  },
+  "PRIO3": {
+   "preco": 60.2,
+   "hora": "2026-11-20T14:33:30.000Z",
+   "vol": 9773600,
+   "cap": 50171743983,
+   "ant": 61.87
+  },
+  "VBBR3": {
+   "preco": 30.13,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 10150900,
+   "cap": 34603310982,
+   "ant": 30.39
+  },
+  "UGPA3": {
+   "preco": 31.36,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 9334700,
+   "cap": 34217217463,
+   "ant": 31.6
+  },
+  "VALE3": {
+   "preco": 58.48,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 23314600,
+   "cap": 233074023428,
+   "ant": 59
+  },
+  "GGBR4": {
+   "preco": 25.86,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 12830300,
+   "cap": 47546206142,
+   "ant": 25.59
+  },
+  "CMIN3": {
+   "preco": 5.02,
+   "hora": "2026-11-20T14:33:30.000Z",
+   "vol": 5617100,
+   "cap": 27117302094,
+   "ant": 5.07
+  },
+  "USIM5": {
+   "preco": 5.14,
+   "hora": "2026-11-20T14:33:30.000Z",
+   "vol": 14045500,
+   "cap": 6158412985,
+   "ant": 5.01
+  },
+  "EGIE3": {
+   "preco": 25.32,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 2820000,
+   "cap": 35862778381,
+   "ant": 25.49
+  },
+  "CMIG4": {
+   "preco": 10.94,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 13544600,
+   "cap": 37423023846,
+   "ant": 10.93
+  },
+  "CPFE3": {
+   "preco": 43.78,
+   "hora": "2026-11-20T14:33:30.000Z",
+   "vol": 1038300,
+   "cap": 50445701330,
+   "ant": 44.14
+  },
+  "TAEE11": {
+   "preco": 40.17,
+   "hora": "2026-11-20T14:33:30.000Z",
+   "vol": 2078700,
+   "cap": 13838520813,
+   "ant": 40.56
+  },
+  "ISAE4": {
+   "preco": 26.05,
+   "hora": "2026-11-20T14:30:30.000Z",
+   "vol": 2207600,
+   "cap": 20689097546,
+   "ant": 26.19
+  },
+  "CPLE3": {
+   "preco": 15.19,
+   "hora": "2026-11-20T14:33:30.000Z",
+   "vol": 59685800,
+   "cap": 45115377941,
+   "ant": 15.28
+  },
+  "AXIA3": {
+   "preco": 46,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 21044600,
+   "cap": 111924850586,
+   "ant": 46.3
+  },
+  "SBSP3": {
+   "preco": 27.35,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 19498000,
+   "cap": 96666092413,
+   "ant": 27.43
+  },
+  "SAPR11": {
+   "preco": 34.14,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 1757200,
+   "cap": 10318511154,
+   "ant": 33.79
+  },
+  "WEGE3": {
+   "preco": 51.13,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 10434400,
+   "cap": 214542083662,
+   "ant": 51.38
+  },
+  "MOTV3": {
+   "preco": 15.82,
+   "hora": "2026-11-20T14:29:30.000Z",
+   "vol": 14519200,
+   "cap": 31956368485,
+   "ant": 15.8
+  },
+  "RAIL3": {
+   "preco": 16.8,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 11188300,
+   "cap": 31213598778,
+   "ant": 16.74
+  },
+  "POMO4": {
+   "preco": 3.62,
+   "hora": "2026-11-20T14:30:30.000Z",
+   "vol": 33520400,
+   "cap": 4392346512,
+   "ant": 3.78
+  },
+  "EMBJ3": {
+   "preco": 110.15,
+   "hora": "2026-11-20T14:33:30.000Z",
+   "vol": 5513100,
+   "cap": 79612688481,
+   "ant": 109.79
+  },
+  "ABEV3": {
+   "preco": 16.08,
+   "hora": "2026-11-20T14:33:30.000Z",
+   "vol": 32940200,
+   "cap": 248924271788,
+   "ant": 16.07
+  },
+  "GMAT3": {
+   "preco": 4.18,
+   "hora": "2026-11-20T14:29:30.000Z",
+   "vol": 8849700,
+   "cap": 9629433765,
+   "ant": 4.05
+  },
+  "ASAI3": {
+   "preco": 9.38,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 18754000,
+   "cap": 12704210553,
+   "ant": 9.47
+  },
+  "SMTO3": {
+   "preco": 17.65,
+   "hora": "2026-11-20T14:33:30.000Z",
+   "vol": 2735900,
+   "cap": 5732704579,
+   "ant": 17.86
+  },
+  "LREN3": {
+   "preco": 9.1,
+   "hora": "2026-11-20T14:31:30.000Z",
+   "vol": 33759800,
+   "cap": 9133541637,
+   "ant": 9.47
+  },
+  "MGLU3": {
+   "preco": 8.2,
+   "hora": "2026-11-20T14:33:30.000Z",
+   "vol": 60504400,
+   "cap": 5779857751,
+   "ant": 8.32
+  },
+  "RENT3": {
+   "preco": 28.86,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 13832000,
+   "cap": 31063327080,
+   "ant": 29.45
+  },
+  "RIAA3": {
+   "preco": 5.8,
+   "hora": "2026-11-20T14:30:30.000Z",
+   "vol": 3446400,
+   "cap": 2911965605,
+   "ant": 6
+  },
+  "CYRE3": {
+   "preco": 18.43,
+   "hora": "2026-11-20T14:29:30.000Z",
+   "vol": 5577800,
+   "cap": 7990035604,
+   "ant": 19.1
+  },
+  "CURY3": {
+   "preco": 25.01,
+   "hora": "2026-11-20T14:30:30.000Z",
+   "vol": 3844200,
+   "cap": 7704270732,
+   "ant": 25.3
+  },
+  "DIRR3": {
+   "preco": 8.74,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 11506200,
+   "cap": 4544914039,
+   "ant": 8.93
+  },
+  "TEND3": {
+   "preco": 15.23,
+   "hora": "2026-11-20T14:30:30.000Z",
+   "vol": 8581900,
+   "cap": 1743045282,
+   "ant": 15.06
+  },
+  "MRVE3": {
+   "preco": 4.59,
+   "hora": "2026-11-20T14:30:30.000Z",
+   "vol": 21227900,
+   "cap": 2583410035,
+   "ant": 4.77
+  },
+  "JHSF3": {
+   "preco": 9.53,
+   "hora": "2026-11-20T14:29:30.000Z",
+   "vol": 6688300,
+   "cap": 6470451602,
+   "ant": 9.76
+  },
+  "RADL3": {
+   "preco": 13.72,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 9390500,
+   "cap": 23977031936,
+   "ant": 14.03
+  },
+  "RDOR3": {
+   "preco": 35.91,
+   "hora": "2026-11-20T14:30:30.000Z",
+   "vol": 5803000,
+   "cap": 79051507420,
+   "ant": 36.31
+  },
+  "HYPE3": {
+   "preco": 21.77,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 3368300,
+   "cap": 15314667814,
+   "ant": 21.97
+  },
+  "FLRY3": {
+   "preco": 21.51,
+   "hora": "2026-11-20T14:30:30.000Z",
+   "vol": 5532900,
+   "cap": 11749102420,
+   "ant": 20.98
+  },
+  "VIVT3": {
+   "preco": 35.22,
+   "hora": "2026-11-20T14:33:30.000Z",
+   "vol": 5284500,
+   "cap": 113227987411,
+   "ant": 35.56
+  },
+  "TIMS3": {
+   "preco": 22,
+   "hora": "2026-11-20T14:31:30.000Z",
+   "vol": 4657300,
+   "cap": 52336104004,
+   "ant": 22.2
+  },
+  "TOTS3": {
+   "preco": 31.11,
+   "hora": "2026-11-20T14:30:30.000Z",
+   "vol": 4097600,
+   "cap": 17741930433,
+   "ant": 31.93
+  },
+  "BMOB3": {
+   "preco": 24.66,
+   "hora": "2026-11-20T14:30:30.000Z",
+   "vol": 590500,
+   "cap": 2060549829,
+   "ant": 24.86
+  },
+  "MULT3": {
+   "preco": 26.4,
+   "hora": "2026-11-20T14:30:30.000Z",
+   "vol": 5285300,
+   "cap": 7962441462,
+   "ant": 26.67
+  },
+  "ALOS3": {
+   "preco": 25.75,
+   "hora": "2026-11-20T14:33:30.000Z",
+   "vol": 6759400,
+   "cap": 12966343819,
+   "ant": 26.21
+  },
+  "IVVB11": {
+   "preco": 481.17,
+   "hora": "2026-11-20T14:33:30.000Z",
+   "vol": 446461,
+   "cap": null,
+   "ant": 486.1
+  },
+  "NASD11": {
+   "preco": 21.9,
+   "hora": "2026-11-20T14:30:30.000Z",
+   "vol": 3197316,
+   "cap": null,
+   "ant": 22.17
+  },
+  "ITLC34": {
+   "preco": 55.08,
+   "hora": "2026-11-20T14:30:30.000Z",
+   "vol": 1077218,
+   "cap": 1761759705461.035,
+   "ant": 53.2
+  },
+  "NVDC34": {
+   "preco": 18.15,
+   "hora": "2026-11-20T14:33:30.000Z",
+   "vol": 33698786,
+   "cap": 20928720386876.86,
+   "ant": 18.34
+  },
+  "A1MD34": {
+   "preco": 362.8,
+   "hora": "2026-11-20T14:30:30.000Z",
+   "vol": 412880,
+   "cap": 4772839385133.85,
+   "ant": 385.4
+  },
+  "AMZO34": {
+   "preco": 77.03,
+   "hora": "2026-11-20T14:30:30.000Z",
+   "vol": 1344818,
+   "cap": 16555485995502.678,
+   "ant": 78.61
+  },
+  "MSFT34": {
+   "preco": 123.38,
+   "hora": "2026-11-20T14:31:30.000Z",
+   "vol": 490133,
+   "cap": 22013519018120.164,
+   "ant": 124
+  },
+  "TSLA34": {
+   "preco": 69.19,
+   "hora": "2026-11-20T14:31:30.000Z",
+   "vol": 1577411,
+   "cap": 8803998563129.09,
+   "ant": 70.31
+  },
+  "AVGO34": {
+   "preco": 29.55,
+   "hora": "2026-11-20T14:29:30.000Z",
+   "vol": 2119714,
+   "cap": 9844014097209.994,
+   "ant": 29.6
+  },
+  "TSMC34": {
+   "preco": 264.46,
+   "hora": "2026-11-20T14:29:30.000Z",
+   "vol": 218595,
+   "cap": 9793364605319.94,
+   "ant": 264.64
+  },
+  "ASML34": {
+   "preco": 149.06,
+   "hora": "2026-11-20T14:15:30.000Z",
+   "vol": 46067,
+   "cap": 3209539044402.7495,
+   "ant": 149.6
+  },
+  "CSCO34": {
+   "preco": 107.01,
+   "hora": "2026-11-20T14:27:30.000Z",
+   "vol": 5321,
+   "cap": 2220998432504.4614,
+   "ant": 113.72
+  },
+  "M1TA34": {
+   "preco": 127.61,
+   "hora": "2026-11-20T14:33:30.000Z",
+   "vol": 544484,
+   "cap": 9066519728179.656,
+   "ant": 128.8
+  },
+  "MUTC34": {
+   "preco": 689.99,
+   "hora": "2026-11-20T13:53:30.000Z",
+   "vol": 145012,
+   "cap": 4647113915776.323,
+   "ant": 689.62
+  },
+  "M2ST34": {
+   "preco": 7.38,
+   "hora": "2026-11-20T14:34:30.000Z",
+   "vol": 9238168,
+   "cap": 216403209256.39502,
+   "ant": 7.7
+  },
+  "NFLX34": {
+   "preco": 7.02,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 1626784,
+   "cap": 1428053683807.2576,
+   "ant": 7.01
+  },
+  "MELI34": {
+   "preco": 67.32,
+   "hora": "2026-11-20T14:29:30.000Z",
+   "vol": 2520326,
+   "cap": 408798365562.16534,
+   "ant": 69.26
+  },
+  "D1EL34": {
+   "preco": 75.28,
+   "hora": "2026-11-20T14:34:30.000Z",
+   "vol": 96092,
+   "cap": 1182135188209.3992,
+   "ant": 73.01
+  },
+  "ORCL34": {
+   "preco": 108.95,
+   "hora": "2026-11-20T14:00:30.000Z",
+   "vol": 200636,
+   "cap": 1988902426430.696,
+   "ant": 111.4
+  },
+  "IBMB34": {
+   "preco": 1332,
+   "hora": "2026-11-20T13:53:30.000Z",
+   "vol": 209,
+   "cap": 1258736744562.7605,
+   "ant": 1348.32
+  },
+  "BERK34": {
+   "preco": 169.23,
+   "hora": "2026-11-20T14:29:30.000Z",
+   "vol": 139149,
+   "cap": 7232372777650.208,
+   "ant": 168.15
+  },
+  "MSBR34": {
+   "preco": 208.22,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 421,
+   "cap": 1627016070868.5308,
+   "ant": 212.55
+  },
+  "BOAC34": {
+   "preco": 71.87,
+   "hora": "2026-11-20T14:29:30.000Z",
+   "vol": 29102,
+   "cap": 1993712958149.911,
+   "ant": 71.86
+  },
+  "MSCD34": {
+   "preco": 118.5,
+   "hora": "2026-11-20T14:29:30.000Z",
+   "vol": 17519,
+   "cap": 3246828272439.024,
+   "ant": 121.5
+  },
+  "VISA34": {
+   "preco": 120.9,
+   "hora": "2026-11-20T14:00:30.000Z",
+   "vol": 19884,
+   "cap": 4437402080440.214,
+   "ant": 121.72
+  },
+  "JPMC34": {
+   "preco": 190.08,
+   "hora": "2026-11-20T14:29:30.000Z",
+   "vol": 51964,
+   "cap": 5058770466882.809,
+   "ant": 189.5
+  },
+  "ROXO34": {
+   "preco": 11.7,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 20075396,
+   "cap": 340222925948.83997,
+   "ant": 12.23
+  },
+  "ABBV34": {
+   "preco": 105.62,
+   "hora": "2026-11-20T14:01:30.000Z",
+   "vol": 1953,
+   "cap": 2981498605312.3145,
+   "ant": 105.47
+  },
+  "JNJB34": {
+   "preco": 105.28,
+   "hora": "2026-11-20T14:01:30.000Z",
+   "vol": 4831,
+   "cap": 3825633013301.6064,
+   "ant": 108.73
+  },
+  "WALM34": {
+   "preco": 46.81,
+   "hora": "2026-11-20T13:54:30.000Z",
+   "vol": 39125,
+   "cap": 5948657733016.062,
+   "ant": 46.56
+  },
+  "COWC34": {
+   "preco": 166.99,
+   "hora": "2026-11-20T14:00:30.000Z",
+   "vol": 927,
+   "cap": 2883451156365.259,
+   "ant": 167.7
+  },
+  "PGCO34": {
+   "preco": 71.2,
+   "hora": "2026-11-20T13:54:30.000Z",
+   "vol": 11663,
+   "cap": 2314336256936.3477,
+   "ant": 71.59
+  },
+  "EXXO34": {
+   "preco": 117.69,
+   "hora": "2026-11-20T13:53:30.000Z",
+   "vol": 160448,
+   "cap": 3856697133129.09,
+   "ant": 117.7
+  },
+  "CHVX34": {
+   "preco": 122.17,
+   "hora": "2026-11-20T13:53:30.000Z",
+   "vol": 39702,
+   "cap": 2414393615538.3696,
+   "ant": 121.66
+  },
+  "GOGL34": {
+   "preco": 136.39,
+   "hora": "2026-11-20T14:31:30.000Z",
+   "vol": 766528,
+   "cap": 19771914716240.332,
+   "ant": 138.55
+  },
+  "BITH11": {
+   "preco": 82.5,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 151954,
+   "cap": null,
+   "ant": 82.38
+  },
+  "LILY34": {
+   "preco": 268.6,
+   "hora": "2026-11-20T14:29:30.000Z",
+   "vol": 32623,
+   "cap": 7561328811475.313,
+   "ant": 271.6
+  },
+  "P2LT34": {
+   "preco": 308.19,
+   "hora": "2026-11-20T14:32:30.000Z",
+   "vol": 204271,
+   "cap": 2202805061499.1074,
+   "ant": 312
+  },
+  "SPCX34": {
+   "preco": 54.7,
+   "hora": "2026-11-20T14:29:30.000Z",
+   "vol": 2538639,
+   "cap": 11491053143873.822,
+   "ant": 56.15
+  },
+  "ANTH34": {
+   "preco": 71.7,
+   "hora": "2026-11-20T14:33:30.000Z",
+   "vol": 6358938,
+   "cap": null,
+   "ant": 71.7
+  }
+ },
+ "faltando": {},
+ "campos": {
+  "symbol": 96,
+  "shortName": 96,
+  "longName": 96,
+  "currency": 96,
+  "regularMarketPrice": 96,
+  "regularMarketDayHigh": 96,
+  "regularMarketDayLow": 96,
+  "regularMarketDayRange": 96,
+  "regularMarketChange": 96,
+  "regularMarketChangePercent": 96,
+  "regularMarketTime": 96,
+  "marketCap": 96,
+  "regularMarketVolume": 96,
+  "regularMarketPreviousClose": 96,
+  "regularMarketOpen": 96,
+  "fiftyTwoWeekRange": 96,
+  "fiftyTwoWeekLow": 96,
+  "fiftyTwoWeekHigh": 96,
+  "priceEarnings": 96,
+  "earningsPerShare": 96,
+  "logourl": 96
+ },
+ "exemplos": {
+  "ITUB4": {
+   "symbol": "ITUB4",
+   "shortName": "ITUB4",
+   "longName": "Itau Unibanco Holding SA Pfd",
+   "currency": "BRL",
+   "regularMarketPrice": 40.07,
+   "regularMarketDayHigh": 40.41,
+   "regularMarketDayLow": 39.69,
+   "regularMarketDayRange": "39.69 - 40.41",
+   "regularMarketChange": -0.12,
+   "regularMarketChangePercent": -0.3,
+   "regularMarketTime": "2026-11-20T14:32:30.000Z",
+   "marketCap": 465312198061,
+   "regularMarketVolume": 30824700,
+   "regularMarketPreviousClose": 40.19,
+   "regularMarketOpen": 40.33,
+   "fiftyTwoWeekRange": "37.35 - 50.85",
+   "fiftyTwoWeekLow": 37.35,
+   "fiftyTwoWeekHigh": 50.85,
+   "priceEarnings": 9.692557025712972,
+   "earningsPerShare": 4.3316375,
+   "logourl": "https://icons.brapi.dev/icons/ITUB4.svg"
+  },
+  "BBDC4": {
+   "symbol": "BBDC4",
+   "shortName": "BBDC4",
+   "longName": "Banco Bradesco SA Pfd",
+   "currency": "BRL",
+   "regularMarketPrice": 13.83,
+   "regularMarketDayHigh": 14.19,
+   "regularMarketDayLow": 13.77,
+   "regularMarketDayRange": "13.77 - 14.19",
+   "regularMarketChange": -0.25,
+   "regularMarketChangePercent": -1.78,
+   "regularMarketTime": "2026-11-20T14:32:30.000Z",
+   "marketCap": 148351745239,
+   "regularMarketVolume": 60048700,
+   "regularMarketPreviousClose": 14.08,
+   "regularMarketOpen": 14.18,
+   "fiftyTwoWeekRange": "13.44 - 23",
+   "fiftyTwoWeekLow": 13.44,
+   "fiftyTwoWeekHigh": 23,
+   "priceEarnings": 5.59896360471236,
+   "earningsPerShare": 2.4701159,
+   "logourl": "https://icons.brapi.dev/icons/BBDC4.svg"
+  },
+  "BPAC11": {
+   "symbol": "BPAC11",
+   "shortName": "BPAC11",
+   "longName": "Banco BTG Pactual SA Units Cons of 1 Sh + 2 Pfd Shs A",
+   "currency": "BRL",
+   "regularMarketPrice": 49.69,
+   "regularMarketDayHigh": 51.31,
+   "regularMarketDayLow": 49.53,
+   "regularMarketDayRange": "49.53 - 51.31",
+   "regularMarketChange": -0.42,
+   "regularMarketChangePercent": -0.84,
+   "regularMarketTime": "2026-11-20T14:32:30.000Z",
+   "marketCap": 193295151208.51334,
+   "regularMarketVolume": 19857400,
+   "regularMarketPreviousClose": 50.11,
+   "regularMarketOpen": 50.32,
+   "fiftyTwoWeekRange": "48.73 - 84.59",
+   "fiftyTwoWeekLow": 48.73,
+   "fiftyTwoWeekHigh": 84.59,
+   "priceEarnings": null,
+   "earningsPerShare": null,
+   "logourl": "https://icons.brapi.dev/icons/BPAC11.svg"
+  },
+  "PETR4": {
+   "symbol": "PETR4",
+   "shortName": "PETR4",
+   "longName": "Petroleo Brasileiro SA Pfd",
+   "currency": "BRL",
+   "regularMarketPrice": 42.67,
+   "regularMarketDayHigh": 43.6,
+   "regularMarketDayLow": 42.41,
+   "regularMarketDayRange": "42.41 - 43.6",
+   "regularMarketChange": -0.5,
+   "regularMarketChangePercent": -1.16,
+   "regularMarketTime": "2026-11-20T14:32:30.000Z",
+   "marketCap": 588547212774,
+   "regularMarketVolume": 39268400,
+   "regularMarketPreviousClose": 43.17,
+   "regularMarketOpen": 43.53,
+   "fiftyTwoWeekRange": "29.53 - 59.79",
+   "fiftyTwoWeekLow": 29.53,
+   "fiftyTwoWeekHigh": 59.79,
+   "priceEarnings": 3.916511395239975,
+   "earningsPerShare": 10.8948647,
+   "logourl": "https://icons.brapi.dev/icons/PETR4.svg"
+  },
+  "IVVB11": {
+   "symbol": "IVVB11",
+   "shortName": "IVVB11",
+   "longName": "iShares S&P 500 Fundo de Investimento em Cotas de Fundo de Indice - Investimento no Exterior",
+   "currency": "BRL",
+   "regularMarketPrice": 481.17,
+   "regularMarketDayHigh": 495.75,
+   "regularMarketDayLow": 481.17,
+   "regularMarketDayRange": "481.17 - 495.75",
+   "regularMarketChange": -4.93,
+   "regularMarketChangePercent": -1.01,
+   "regularMarketTime": "2026-11-20T14:33:30.000Z",
+   "marketCap": null,
+   "regularMarketVolume": 446461,
+   "regularMarketPreviousClose": 486.1,
+   "regularMarketOpen": 492.51,
+   "fiftyTwoWeekRange": "372.4 - 495.75",
+   "fiftyTwoWeekLow": 372.4,
+   "fiftyTwoWeekHigh": 495.75,
+   "priceEarnings": null,
+   "earningsPerShare": null,
+   "logourl": "https://icons.brapi.dev/icons/IVVB11.svg"
+  },
+  "NVDC34": {
+   "symbol": "NVDC34",
+   "shortName": "NVDC34",
+   "longName": "NVIDIA Corporation Shs Unsponsored Brazilian Depository Receipt Repr 0.02083 Sh",
+   "currency": "BRL",
+   "regularMarketPrice": 18.15,
+   "regularMarketDayHigh": 19.46,
+   "regularMarketDayLow": 18.15,
+   "regularMarketDayRange": "18.15 - 19.46",
+   "regularMarketChange": -0.19,
+   "regularMarketChangePercent": -1.04,
+   "regularMarketTime": "2026-11-20T14:33:30.000Z",
+   "marketCap": 20928720386876.86,
+   "regularMarketVolume": 33698786,
+   "regularMarketPreviousClose": 18.34,
+   "regularMarketOpen": 18.73,
+   "fiftyTwoWeekRange": "17.41 - 25.88",
+   "fiftyTwoWeekLow": 17.41,
+   "fiftyTwoWeekHigh": 25.88,
+   "priceEarnings": 18.029204330982417,
+   "earningsPerShare": 1.0067,
+   "logourl": "https://icons.brapi.dev/icons/NVDC34.svg"
+  },
+  "M2ST34": {
+   "symbol": "M2ST34",
+   "shortName": "M2ST34",
+   "longName": "Strategy Inc -A- Unsponsored BDR",
+   "currency": "BRL",
+   "regularMarketPrice": 7.38,
+   "regularMarketDayHigh": 7.93,
+   "regularMarketDayLow": 7.29,
+   "regularMarketDayRange": "7.29 - 7.93",
+   "regularMarketChange": -0.32,
+   "regularMarketChangePercent": -4.16,
+   "regularMarketTime": "2026-11-20T14:34:30.000Z",
+   "marketCap": 216403209256.39502,
+   "regularMarketVolume": 9238168,
+   "regularMarketPreviousClose": 7.7,
+   "regularMarketOpen": 7.88,
+   "fiftyTwoWeekRange": "6.06 - 15.39",
+   "fiftyTwoWeekLow": 6.06,
+   "fiftyTwoWeekHigh": 15.39,
+   "priceEarnings": null,
+   "earningsPerShare": -0.0517694,
+   "logourl": "https://icons.brapi.dev/icons/M2ST34.svg"
+  }
+ },
+ "extras": {
+  "PETR4|fundamental": [
+   "200",
+   "{\"results\": [{\"symbol\": \"PETR4\", \"shortName\": \"PETR4\", \"longName\": \"Petroleo Brasileiro SA Pfd\", \"currency\": \"BRL\", \"regularMarketPrice\": 42.67, \"regularMarketDayHigh\": 43.6, \"regularMarketDayLow\": 42.41, \"regularMarketDayRange\": \"42.41 - 43.6\", \"regularMarketChange\": -0.5, \"regularMarketChangePercent\": -1.16, \"regularMarketTime\": \"2026-11-20T14:33:30.000Z\", \"marketCap\": 588547212774, \"regularMarketVolume\": 39268400, \"regularMarketPreviousClose\": 43.17, \"regularMarketOpen\": 43.53, \"fiftyTwoWeekRange\": \"29.53 - 59.79\", \"fiftyTwoWeekLow\": 29.53, \"fiftyTwoWeekHigh\": 59.79, \"priceEarnings\": 3.9165"
+  ],
+  "PETR4|dividends": [
+   "200",
+   "{\"results\": [{\"symbol\": \"PETR4\", \"shortName\": \"PETR4\", \"longName\": \"Petroleo Brasileiro SA Pfd\", \"currency\": \"BRL\", \"regularMarketPrice\": 42.67, \"regularMarketDayHigh\": 43.6, \"regularMarketDayLow\": 42.41, \"regularMarketDayRange\": \"42.41 - 43.6\", \"regularMarketChange\": -0.5, \"regularMarketChangePercent\": -1.16, \"regularMarketTime\": \"2026-11-20T14:33:30.000Z\", \"marketCap\": 588547212774, \"regularMarketVolume\": 39268400, \"regularMarketPreviousClose\": 43.17, \"regularMarketOpen\": 43.53, \"fiftyTwoWeekRange\": \"29.53 - 59.79\", \"fiftyTwoWeekLow\": 29.53, \"fiftyTwoWeekHigh\": 59.79, \"priceEarnings\": 3.9165"
+  ],
+  "PETR4|hist_1d_1mo": [
+   "200",
+   "{\"results\": [{\"symbol\": \"PETR4\", \"shortName\": \"PETR4\", \"longName\": \"Petroleo Brasileiro SA Pfd\", \"currency\": \"BRL\", \"regularMarketPrice\": 42.67, \"regularMarketDayHigh\": 43.6, \"regularMarketDayLow\": 42.41, \"regularMarketDayRange\": \"42.41 - 43.6\", \"regularMarketChange\": -0.5, \"regularMarketChangePercent\": -1.16, \"regularMarketTime\": \"2026-11-20T14:31:30.000Z\", \"marketCap\": 588547212774, \"regularMarketVolume\": 39268400, \"regularMarketPreviousClose\": 43.17, \"regularMarketOpen\": 43.53, \"fiftyTwoWeekRange\": \"29.53 - 59.79\", \"fiftyTwoWeekLow\": 29.53, \"fiftyTwoWeekHigh\": 59.79, \"priceEarnings\": 3.9165"
+  ],
+  "PETR4|hist_30m": [
+   "200",
+   "{\"results\": [{\"symbol\": \"PETR4\", \"shortName\": \"PETR4\", \"longName\": \"Petroleo Brasileiro SA Pfd\", \"currency\": \"BRL\", \"regularMarketPrice\": 42.67, \"regularMarketDayHigh\": 43.6, \"regularMarketDayLow\": 42.41, \"regularMarketDayRange\": \"42.41 - 43.6\", \"regularMarketChange\": -0.5, \"regularMarketChangePercent\": -1.16, \"regularMarketTime\": \"2026-11-20T14:27:30.000Z\", \"marketCap\": 588547212774, \"regularMarketVolume\": 39268400, \"regularMarketPreviousClose\": 43.17, \"regularMarketOpen\": 43.53, \"fiftyTwoWeekRange\": \"29.53 - 59.79\", \"fiftyTwoWeekLow\": 29.53, \"fiftyTwoWeekHigh\": 59.79, \"priceEarnings\": 3.9165"
+  ],
+  "PETR4|modules": [
+   "200",
+   "{\"results\": [{\"symbol\": \"PETR4\", \"shortName\": \"PETR4\", \"longName\": \"Petroleo Brasileiro SA Pfd\", \"currency\": \"BRL\", \"regularMarketPrice\": 42.67, \"regularMarketDayHigh\": 43.6, \"regularMarketDayLow\": 42.41, \"regularMarketDayRange\": \"42.41 - 43.6\", \"regularMarketChange\": -0.5, \"regularMarketChangePercent\": -1.16, \"regularMarketTime\": \"2026-11-20T14:32:30.000Z\", \"marketCap\": 588547212774, \"regularMarketVolume\": 39268400, \"regularMarketPreviousClose\": 43.17, \"regularMarketOpen\": 43.53, \"fiftyTwoWeekRange\": \"29.53 - 59.79\", \"fiftyTwoWeekLow\": 29.53, \"fiftyTwoWeekHigh\": 59.79, \"priceEarnings\": 3.9165"
+  ],
+  "NVDC34|fundamental": [
+   "200",
+   "{\"results\": [{\"symbol\": \"NVDC34\", \"shortName\": \"NVDC34\", \"longName\": \"NVIDIA Corporation Shs Unsponsored Brazilian Depository Receipt Repr 0.02083 Sh\", \"currency\": \"BRL\", \"regularMarketPrice\": 18.15, \"regularMarketDayHigh\": 19.46, \"regularMarketDayLow\": 18.15, \"regularMarketDayRange\": \"18.15 - 19.46\", \"regularMarketChange\": -0.19, \"regularMarketChangePercent\": -1.04, \"regularMarketTime\": \"2026-11-20T14:33:30.000Z\", \"marketCap\": 20928720386876.86, \"regularMarketVolume\": 33698786, \"regularMarketPreviousClose\": 18.34, \"regularMarketOpen\": 18.73, \"fiftyTwoWeekRange\": \"17.41 - 25.88\", \"fiftyTwoWeek"
+  ],
+  "NVDC34|dividends": [
+   "ERR HTTP Error 403: Forbidden",
+   "{\"error\":true,\"message\":\"Dividendos e JCP requer o plano Startup (R$ 119,99/mês). Seu plano atual: Gratuito.\",\"code\":\"FEATURE_NOT_AVAILABLE\",\"details\":{\"feature\":\"canAccessDividendsData\",\"featureLabel"
+  ],
+  "NVDC34|hist_1d_1mo": [
+   "200",
+   "{\"results\": [{\"symbol\": \"NVDC34\", \"shortName\": \"NVDC34\", \"longName\": \"NVIDIA Corporation Shs Unsponsored Brazilian Depository Receipt Repr 0.02083 Sh\", \"currency\": \"BRL\", \"regularMarketPrice\": 18.15, \"regularMarketDayHigh\": 19.46, \"regularMarketDayLow\": 18.15, \"regularMarketDayRange\": \"18.15 - 19.46\", \"regularMarketChange\": -0.19, \"regularMarketChangePercent\": -1.04, \"regularMarketTime\": \"2026-11-20T14:34:30.000Z\", \"marketCap\": 20928720386876.86, \"regularMarketVolume\": 33698786, \"regularMarketPreviousClose\": 18.34, \"regularMarketOpen\": 18.73, \"fiftyTwoWeekRange\": \"17.41 - 25.88\", \"fiftyTwoWeek"
+  ],
+  "NVDC34|hist_30m": [
+   "ERR HTTP Error 400: Bad Request",
+   "{\"error\":true,\"message\":\"O intervalo \\\"30m\\\" não está disponível no seu plano. Intervalos permitidos: 1d. Faça upgrade para o plano Startup (R$ 119,99/mês) para usar este intervalo.\",\"code\":\"INVALID_I"
+  ],
+  "NVDC34|modules": [
+   "200",
+   "{\"results\": [{\"symbol\": \"NVDC34\", \"shortName\": \"NVDC34\", \"longName\": \"NVIDIA Corporation Shs Unsponsored Brazilian Depository Receipt Repr 0.02083 Sh\", \"currency\": \"BRL\", \"regularMarketPrice\": 18.15, \"regularMarketDayHigh\": 19.46, \"regularMarketDayLow\": 18.15, \"regularMarketDayRange\": \"18.15 - 19.46\", \"regularMarketChange\": -0.19, \"regularMarketChangePercent\": -1.04, \"regularMarketTime\": \"2026-11-20T14:34:30.000Z\", \"marketCap\": 20928720386876.86, \"regularMarketVolume\": 33698786, \"regularMarketPreviousClose\": 18.34, \"regularMarketOpen\": 18.73, \"fiftyTwoWeekRange\": \"17.41 - 25.88\", \"fiftyTwoWeek"
+  ]
+ },
+ "available_NVDC": [
+  "200",
+  "{\"stocks\": [\"NVDC34\"], \"indexes\": []}"
+ ]
+}
