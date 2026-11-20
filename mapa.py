@@ -40,7 +40,7 @@ function draw(){var D=MD[MAP],el=document.getElementById('mpmap'),W=el.clientWid
  squar(S,0,0,W,H).forEach(function(r){var s=r.i,lab=r.h>34&&r.w>60,top=lab?16:0,sp=s.pw/s.w;
   o+='<div class=mp-s style="left:'+r.x+'px;top:'+r.y+'px;width:'+r.w+'px;height:'+r.h+'px">'+(lab?'<div class=mp-sl>'+s.n+' · '+pc(sp)+'</div>':'');
   squar(s.it,0,top,r.w-4,r.h-4-top).forEach(function(c){var a=c.i.a,cc=cor(c.i.p),m=Math.min(c.w,c.h),fs=Math.min(26,m/3.4,c.w/(Math.max(a.n.length,6)*.8)),show=fs>=7.5&&c.h>fs*2.3,pr=c.h>fs*4.3&&c.w>fs*7;
-   o+='<div class="mp-c" style="left:'+c.x+'px;top:'+c.y+'px;width:'+c.w+'px;height:'+c.h+'px;background:'+cc[0]+';color:'+cc[1]+';font-size:'+fs+'px" title="'+a.n+' · '+a.s+' · R$ '+f2(a.dc[a.dc.length-1])+' · '+PER[PR].l+' '+pc(c.i.p)+'">'+(show?'<b>'+a.n+'</b><i>'+pc(c.i.p)+'</i>'+(pr?'<u>R$ '+f2(a.dc[a.dc.length-1])+'</u>':''):'')+'</div>'});
+   o+='<div class="mp-c" style="left:'+c.x+'px;top:'+c.y+'px;width:'+c.w+'px;height:'+c.h+'px;background:'+cc[0]+';color:'+cc[1]+';font-size:'+fs+'px" title="'+a.n+' · '+a.s+' · '+D.cu+' '+f2(a.dc[a.dc.length-1])+' · '+PER[PR].l+' '+pc(c.i.p)+'">'+(show?'<b>'+a.n+'</b><i>'+pc(c.i.p)+'</i>'+(pr?'<u>'+D.cu+' '+f2(a.dc[a.dc.length-1])+'</u>':''):'')+'</div>'});
   o+='</div>'});
  el.innerHTML=o;
  var up=items.filter(function(i){return i.p>0.005}).length,dn=items.filter(function(i){return i.p<-0.005}).length,tw=0,tp=0;items.forEach(function(i){var w=SZ=='cap'?i.a.cap:1;tw+=w;tp+=i.p*w});
@@ -79,8 +79,12 @@ def dados(raiz):
         if len(d) < 2: return None
         return [int(t) // 86400 for t in d["time"]], [round(float(x), 4) for x in d["close"]]
 
-    mapas = {"br": {"t": "Brasil (B3)", "a": []}, "bdr": {"t": "BDRs em R$", "a": []}}
-    pend = {"br": [], "bdr": []}
+    ce = json.load(open(os.path.join(cats, "eua", "config.json"), encoding="utf-8"))
+    mapas = {"br": {"t": "Brasil (B3)", "a": [], "cu": "R$"}, "bdr": {"t": "BDRs em R$", "a": [], "cu": "R$"}, "eua": {"t": "EUA (US$)", "a": [], "cu": "US$"}}
+    pend = {"br": [], "bdr": [], "eua": []}
+    for n, a in ce["ativos"].items():
+        s = serie("eua", n)
+        if s: pend["eua"].append((n, a.get("setor", ""), s, cape.get(n)))
     for n, a in cb["ativos"].items():
         s = serie("brasil", n)
         if s: pend["br"].append((n, a.get("setor", ""), s, capb.get(n)))
