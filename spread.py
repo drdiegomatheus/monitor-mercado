@@ -37,12 +37,12 @@ CSS = """
 .sp-grp{display:flex;flex-wrap:wrap;gap:6px;align-items:center;width:100%}.sp-grp>span{min-width:48px;font-size:12px;font-weight:700}
 .sp-flt{display:flex;gap:6px;padding:0 18px 10px;flex-wrap:wrap}.sp-flt button{border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:999px;padding:4px 12px;font-weight:600;font-size:12px;cursor:pointer}.sp-flt button.on{background:var(--tx);color:var(--bg)}
 .sp-hm td:first-child{text-align:left;font-weight:800}
-.sp-al{display:inline-block;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:3px 9px;margin:4px 4px 0 0;font-size:12.5px;cursor:pointer;font-weight:600}
+.sp-search{margin:0 0 12px}.sp-search input{width:100%;max-width:420px;background:var(--card);border:1px solid var(--line);color:var(--tx);border-radius:12px;padding:10px 14px;font-size:14px;font-weight:600;outline:none}.sp-search input:focus{border-color:var(--ac)}#spr{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}#spr button{border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:10px;padding:6px 11px;font-weight:800;font-size:13px;cursor:pointer}#spr button small{display:block;color:var(--mu);font-weight:500;font-size:10.5px}#spcur{margin-top:6px;font-size:13px}.sp-al{display:inline-block;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:3px 9px;margin:4px 4px 0 0;font-size:12.5px;cursor:pointer;font-weight:600}
 """
 
 JS = r"""
 (function(){
-var A=SPDATA.a,BY={};A.forEach(function(x){BY[x.n]=x});
+var A=SPDATA.a,BY={};A.forEach(function(x){BY[x.n]=x});var CUR=A.filter(function(x){return x.c});
 var LOTS=[1,2,3,4,5,6,8,10,12,15,20,25,30,40,50,100];
 function st(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
 function mean(a){var s=0;for(var i=0;i<a.length;i++)s+=a[i];return s/a.length}
@@ -68,12 +68,19 @@ function rc(v){if(v===null)return'–';var c=v<=30?'os':v<40?'lo':v>=70?'ob':v>6
 function sig(z20,z60){var z=Math.abs(z20),same=z60===null||Math.sign(z60)==Math.sign(z20);if(z20>=2&&same)return['f','Bom para sair'];if(z20>=1)return['a','Esticado: considerar sair'];if(z20<=-2&&same)return['rf','Evite: está barato'];if(z20<=-1)return['rd','Barato: melhor esperar'];return['n','Neutro']}
 function swtxt(p){var w=swap(p.px,p.py);if(!w)return'–';return'<span class="sp-sw">'+w.a+' '+p.x+' → '+w.b+' '+p.y+'<small>sobra R$ '+f2(w.cash)+'</small></span>'}
 var base=st('spbase');if(!BY[base])base=A[0].n;var sel=st('sppar');
-var flt=st('spflt')||'Todos';function others(){return A.filter(function(x){return x.n!==base&&(flt=='Todos'||x.g==flt)}).map(function(x){return pair(base,x.n,true)}).filter(Boolean)}
-function renderBase(){var gs=[];A.forEach(function(x){if(gs.indexOf(x.g)<0)gs.push(x.g)});
- document.getElementById('spb').innerHTML=gs.map(function(g){return'<div class=sp-grp><span class=mu>'+g+'</span>'+A.filter(function(x){return x.g==g}).map(function(x){return'<button data-n="'+x.n+'" class="'+(x.n==base?'on':'')+'">'+x.n+'<small>R$ '+f2(x.dc[x.dc.length-1])+'</small></button>'}).join('')+'</div>'}).join('');
+var flt=st('spflt')||'Todos';function others(){return A.filter(function(x){return x.n!==base&&(flt=='Tudo'||(flt=='Todos'?x.c:x.g==flt))}).map(function(x){return pair(base,x.n,true)}).filter(Boolean)}
+function renderBase(){var gs=[],gf=[];CUR.forEach(function(x){if(gs.indexOf(x.g)<0)gs.push(x.g)});A.forEach(function(x){if(gf.indexOf(x.g)<0)gf.push(x.g)});
+ document.getElementById('spb').innerHTML=gs.map(function(g){return'<div class=sp-grp><span class=mu>'+g+'</span>'+CUR.filter(function(x){return x.g==g}).map(function(x){return'<button data-n="'+x.n+'" class="'+(x.n==base?'on':'')+'">'+x.n+'<small>R$ '+f2(x.dc[x.dc.length-1])+'</small></button>'}).join('')+'</div>'}).join('');
  document.querySelectorAll('#spb button').forEach(function(b){b.onclick=function(){base=b.dataset.n;st('spbase',base);sel=null;render()}});
- document.getElementById('spf').innerHTML=['Todos'].concat(gs).map(function(g){return'<button data-g="'+g+'" class="'+(g==flt?'on':'')+'">'+g+'</button>'}).join('');
+ document.getElementById('spf').innerHTML=['Todos'].concat(gf).concat(['Tudo']).map(function(g){return'<button data-g="'+g+'" class="'+(g==flt?'on':'')+'">'+(g=='Tudo'?'Todos os ativos':g)+'</button>'}).join('');renderBusca();
  document.querySelectorAll('#spf button').forEach(function(b){b.onclick=function(){flt=b.dataset.g;st('spflt',flt);sel=null;render()}})}
+function renderBusca(){var i=document.getElementById('sps'),r=document.getElementById('spr'),cur=document.getElementById('spcur');if(!i)return;
+ cur.innerHTML=BY[base]&&!BY[base].c?'Selecionado: <b>'+base+'</b> <small>'+(BY[base].s||'')+'</small>':'';
+ function lista(){var q=i.value.trim().toUpperCase();if(!q){r.innerHTML='';return}
+  var L=A.filter(function(x){return x.n.indexOf(q)==0}).concat(A.filter(function(x){return x.n.indexOf(q)>0||(x.s||'').toUpperCase().indexOf(q)>=0})).slice(0,14);
+  r.innerHTML=L.map(function(x){return'<button data-n="'+x.n+'">'+x.n+'<small>'+(x.s||x.g)+' · R$ '+f2(x.dc[x.dc.length-1])+'</small></button>'}).join('')||'<span class=mu>Nenhum ativo encontrado</span>';
+  r.querySelectorAll('button').forEach(function(b){b.onclick=function(){base=b.dataset.n;st('spbase',base);sel=null;i.value='';r.innerHTML='';render()}})}
+ i.oninput=lista;i.onkeydown=function(e){if(e.key=='Enter'){var b=r.querySelector('button');if(b)b.click()}}}
 var sortK='z20',sortD=-1;
 function renderTable(){var L=others();var key={abs:function(p){return Math.abs(p.z20)},z20:function(p){return p.z20},z60:function(p){return p.z60===null?-99:p.z60},perc:function(p){return p.perc},v5:function(p){return p.v5===null?-99:p.v5},rsiR:function(p){return p.rsiR===null?-1:p.rsiR},rsiM:function(p){return p.rsiM===null?-1:p.rsiM},cor:function(p){return p.cor}}[sortK];
  L.sort(function(a,b){return(key(a)-key(b))*sortD});
@@ -146,8 +153,8 @@ function renderDetail(){var el=document.getElementById('spd');if(!sel||!BY[sel])
   document.getElementById('spc2').innerHTML='<div class=sp-line><span>Lotes completos</span><b>'+f2(lotes,0)+'</b></div><div class=sp-line><span>Compra '+B+'</span><b>'+f2(lotes*nb,0)+'</b></div><div class=sp-line><span>'+(pos?'Fica em caixa':'Precisa colocar')+'</span><b>R$ '+f2(Math.abs(tcash))+'</b></div><div class=sp-line><span>Custo B3 (0,03% × 2 pernas)</span><b>R$ '+f2(custo)+'</b></div>';
   CTX.na=na;CTX.nb=nb;document.getElementById('spdt').textContent='Sobra em R$ por lote ('+na+' '+S+' − '+nb+' '+B+')';drawCharts()}
  ['sa','sb','sq'].forEach(function(id){document.getElementById(id).oninput=calc});calc()}
-function renderHeat(){var h='<div class=sc><table class=sp-hm><thead><tr><th></th>'+A.map(function(x){return'<th>'+x.n+'</th>'}).join('')+'</tr></thead><tbody>';
- A.forEach(function(r){h+='<tr><td>'+r.n+'</td>';A.forEach(function(c){if(r.n==c.n){h+='<td class=mu>–</td>';return}var p=pair(r.n,c.n);if(!p){h+='<td class=mu>–</td>';return}var z=p.z20,al=Math.min(Math.abs(z)/3,1);
+function renderHeat(){var h='<div class=sc><table class=sp-hm><thead><tr><th></th>'+CUR.map(function(x){return'<th>'+x.n+'</th>'}).join('')+'</tr></thead><tbody>';
+ CUR.forEach(function(r){h+='<tr><td>'+r.n+'</td>';CUR.forEach(function(c){if(r.n==c.n){h+='<td class=mu>–</td>';return}var p=pair(r.n,c.n);if(!p){h+='<td class=mu>–</td>';return}var z=p.z20,al=Math.min(Math.abs(z)/3,1);
   var bg=z>0?'rgba(22,163,74,'+(.1+.6*al)+')':'rgba(220,38,38,'+(.1+.6*al)+')';h+='<td data-x="'+r.n+'" data-y="'+c.n+'" style="background:'+bg+'">'+(z>0?'+':'')+f2(z,1)+'</td>'});h+='</tr>'});
  h+='</tbody></table></div>';document.getElementById('sph').innerHTML=h;
  document.querySelectorAll('#sph td[data-x]').forEach(function(t){t.onclick=function(){base=t.dataset.x;sel=t.dataset.y;st('spbase',base);st('sppar',sel);render();window.scrollTo(0,0)}})}
@@ -168,6 +175,10 @@ def dados(raiz):
     lista = [(n, "Ações", "", "brasil") for n in cfg.get("spread_acoes", [])]
     lista += [(n, a.get("grupo", "BDR"), a.get("setor", ""), "pares") for n, a in cfg["ativos"].items()]
     lista += [(n, "ETF", "", "brasil") for n in cfg.get("spread_etfs", [])]
+    ja = {x[0] for x in lista}
+    bcfg = json.load(open(os.path.join(cats, "brasil", "config.json"), encoding="utf-8"))
+    extras = {n for n in bcfg["ativos"] if n not in ja}
+    lista += [(n, "Outros B3", bcfg["ativos"][n].get("setor", ""), "brasil") for n in sorted(extras)]
     out = []
     for n, g, setor, cat in lista:
         f1 = os.path.join(cats, cat, "dados", f"{n}_1D.csv")
@@ -193,9 +204,10 @@ def dados(raiz):
                 print("reconstrução falhou", n, e)
         dts, cls = dts[-520:], cls[-520:]
         item = {"n": n, "g": g, "s": setor, "dt": dts, "dc": [round(x, 4) for x in cls]}
+        if n not in extras: item["c"] = 1
         if rec: item["rec"] = rec
         f3 = os.path.join(cats, cat, "dados", f"{n}_30m.csv")
-        if os.path.exists(f3):
+        if os.path.exists(f3) and n not in extras:
             m = pd.read_csv(f3).dropna().tail(700)
             item["mt"] = [int(t) for t in m["time"]]; item["mc"] = [round(float(x), 3) for x in m["close"]]
         out.append(item)
@@ -209,7 +221,7 @@ def pagina(arq, titulo, paginas, ativos):
     if len(ativos) < 2:
         h.append("<p class=mu>Preciso de pelo menos 2 ativos com histórico coletado.</p></main></body></html>")
         return "".join(h)
-    h.append("<div class=sp-base id=spb></div><div class=sp-card><h2>Relação com os outros ativos</h2><div class=m>Clique numa linha para abrir os detalhes e a conta da troca. Clique no título de uma coluna para ordenar. Verde (z positivo) = o ativo que você tem está caro em relação ao outro, bom momento para sair dele. Vermelho = está barato, melhor esperar.</div><div class=sp-flt id=spf></div><div id=spt></div></div>")
+    h.append("<div class=sp-search><input id=sps type=search placeholder='Digite o ativo que você tem (ex.: TAEE4, WEGE3, BOVX11) e clique…' autocomplete=off><div id=spr></div><div id=spcur></div></div><div class=sp-base id=spb></div><div class=sp-card><h2>Relação com os outros ativos</h2><div class=m>Clique numa linha para abrir os detalhes e a conta da troca. Clique no título de uma coluna para ordenar. Verde (z positivo) = o ativo que você tem está caro em relação ao outro, bom momento para sair dele. Vermelho = está barato, melhor esperar.</div><div class=sp-flt id=spf></div><div id=spt></div></div>")
     h.append("<div id=spd></div><div class=sp-card><h2>Mapa de todos contra todos (z 20d)</h2><div class=m>Linha = ativo que você tem; coluna = para onde iria. Verde: a linha está esticada contra a coluna (bom para sair). Vermelho: está barata. Clique numa célula para abrir.</div><div id=sph></div></div>")
     h.append("<details><summary>Como ler</summary><p><b>Relação</b> = preço do ativo da esquerda ÷ preço do outro. <b>z 20d / 60d</b> = quantos desvios-padrão a relação de hoje está acima (+, bom para sair do ativo da esquerda) ou abaixo (−) da média dos últimos 20 / 60 pregões; acima de +2 ou abaixo de −2 é raro. "
              "<b>Percentil</b> = em que posição a relação está nos últimos 250 pregões. <b>RSI da relação</b> = RSI de 14 períodos calculado sobre a própria relação (diário e 30 min). "
