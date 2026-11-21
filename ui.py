@@ -84,6 +84,27 @@ td.fu{animation:fu 1s}td.fd{animation:fd 1s}
 .osc{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;padding:4px 18px 18px}.osc .kpi{box-shadow:none;background:var(--card2);border:0}
 .foot{color:var(--mu);font-size:12px;margin:0 0 18px}
 @media (max-width:700px){.kpis{grid-template-columns:1fr 1fr;gap:8px}.kpi{padding:11px 12px}.kpi .v{font-size:24px}.kpi .l{font-size:10.5px}h1{font-size:22px}.tx2{display:none}main{padding:14px 10px 50px}th,td{padding:7px 8px}td:first-child,th:first-child{padding-left:12px}}
+.ic,.ng,.sbt{display:none}
+@media (min-width:900px){
+html{--sw:212px}html.col{--sw:62px}
+body{padding-left:var(--sw);transition:padding .15s}
+.top{position:fixed;left:0;top:0;bottom:0;width:var(--sw);z-index:30;flex-direction:column;align-items:stretch;gap:4px;padding:14px 10px;border-right:1px solid var(--line);border-bottom:0;background:var(--card);overflow-y:auto;overflow-x:hidden;backdrop-filter:none;transition:width .15s}
+.brand{padding:2px 6px 10px;white-space:nowrap}
+.sbt{display:flex;align-items:center;justify-content:center;width:100%;margin:0 0 6px;border:1px solid var(--line);background:var(--card2);color:var(--mu);border-radius:10px;padding:5px;cursor:pointer;font-size:14px;line-height:1}
+.sbt:hover{color:var(--tx)}
+nav{flex-direction:column;overflow:visible;flex:1;gap:2px}
+nav a{display:flex;align-items:center;gap:11px;border-radius:10px;padding:8px 10px;font-size:13.5px}
+nav a.at{background:var(--tx);color:var(--bg)}
+.ic{display:inline-grid;place-items:center;width:22px;height:22px;flex:none;font-style:normal;font-weight:800;font-size:13px}
+.ng{display:block;margin:12px 10px 3px;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mu);opacity:.8;white-space:nowrap}
+.stamp{flex-direction:column;align-items:flex-start;gap:3px;padding:10px 8px 0;border-top:1px solid var(--line);font-size:11.5px;white-space:normal}
+.stamp .tx2{display:block}
+html.col .t,html.col .brand .bn,html.col .ng,html.col .stamp span:not(.dot):not(.lvb),html.col .stamp .tx2{display:none}
+html.col .stamp{align-items:center}
+html.col nav a{justify-content:center;padding:8px 0}
+html.col .brand{justify-content:center;padding-left:0;padding-right:0}
+main{max-width:1280px}
+}
 @media print{.top,.bar{display:none}}
 """
 
@@ -314,13 +335,24 @@ def alerta(sel, eventos, com_eventos=True):
 
 def cabeca(titulo, paginas, atual):
     agora = dt.datetime.now(BRT)
-    nav = "".join(f"<a class='{'at' if a == atual else ''}' href='{a}'>{t}</a>" for a, t, _ in paginas)
+    ICO = {"Todos": "☰", "Cripto": "₿", "Brasil": "R$", "EUA": "$", "Dados gerais": "◍", "Oscilações": "↕", "Spread": "⇄", "Mapa": "▦", "Trades": "⇆", "Momento": "◐", "Momento Cripto": "₿", "Baleias": "🐋", "Gráficos": "▤"}
+    GRP = {"Oscilações": "Análises", "Momento Cripto": "Cripto", "Baleias": "Cripto", "Gráficos": "Outros"}
+    vistos = set()
+    nav = ""
+    for a, t, _ in paginas:
+        g = GRP.get(t)
+        if g and g not in vistos:
+            vistos.add(g)
+            nav += f"<div class=ng>{g}</div>"
+        nav += f"<a class='{'at' if a == atual else ''}' href='{a}' title='{t}'><i class=ic>{ICO.get(t, '•')}</i><span class=t>{t}</span></a>"
     return (f"<!doctype html><html lang=pt-br><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1,viewport-fit=cover'>"
             f"<title>{titulo} · Monitor</title><meta http-equiv=refresh content=330><meta name=theme-color content='#0a0e16'>"
             "<link rel=manifest href=manifest.webmanifest><link rel=icon href=icon.svg type='image/svg+xml'><link rel=apple-touch-icon href=apple-touch-icon.png>"
             "<meta name=apple-mobile-web-app-capable content=yes><meta name=mobile-web-app-capable content=yes><meta name=apple-mobile-web-app-title content=Monitor>"
-            f"<style>{CSS}</style></head><body><header class=top><a class=brand href=index.html><span class=logo>◢</span>Monitor</a><nav>"
-            f"<a class='{'at' if atual == 'index.html' else ''}' href=index.html>Início</a>{nav}</nav>"
+            "<script>try{if(localStorage.sbcol=='1')document.documentElement.classList.add('col')}catch(e){}</script>"
+            f"<style>{CSS}</style></head><body><header class=top><a class=brand href=index.html><span class=logo>◢</span><span class=bn>Monitor</span></a>"
+            "<button class=sbt type=button title='Recolher ou expandir o menu' onclick=\"var c=document.documentElement.classList.toggle('col');try{localStorage.sbcol=c?'1':'0'}catch(e){}\">☰</button><nav>"
+            f"<a class='{'at' if atual == 'index.html' else ''}' href=index.html title='Início'><i class=ic>⌂</i><span class=t>Início</span></a>{nav}</nav>"
             f"<div class=stamp><span class=dot></span><span>{agora:%H:%M}</span><span id=lv class=lvb title='Tempo real'>5 min</span><span class=tx2>· próxima em <b id=cd>5:00</b></span></div></header><main>")
 
 
