@@ -239,7 +239,14 @@ def github(repos):
 
 
 # ---------------------------------------------------------------- específicos de cada rede
-def btc_extra():
+def tenta(f, *a):
+    try: return f(*a)
+    except Exception as e:
+        print("  falha", f.__name__, str(e)[:80], file=sys.stderr)
+        return None
+
+
+def _bc():
     o = {}
     s = J("https://api.blockchain.info/stats")
     if s: o["bc"] = {k: s.get(k) for k in ("hash_rate", "n_tx", "minutes_between_blocks", "estimated_transaction_volume_usd", "miners_revenue_usd", "trade_volume_usd")}
@@ -249,6 +256,11 @@ def btc_extra():
             por = {}
             for x in d["values"]: por[dia(x["x"])] = x["y"]
             o["c_" + ch] = serie(sorted(por.items()), 370, 2)
+    return o
+
+
+def _chair():
+    o = {}
     b = J("https://api.blockchair.com/bitcoin/stats")
     if b and b.get("data"):
         d = b["data"]
@@ -256,6 +268,11 @@ def btc_extra():
                                            "hashrate_24h", "nodes", "average_transaction_fee_usd_24h", "median_transaction_fee_usd_24h", "market_dominance_percentage", "blockchain_size", "inflation_usd_24h")}
         h = num(d.get("blocks"))
         if h: o["halving_blocos"] = 1050000 - h; o["halving_dias"] = (1050000 - h) / 144
+    return o
+
+
+def _mempool():
+    o = {}
     da = J("https://mempool.space/api/v1/difficulty-adjustment")
     if da: o["dif"] = {k: da.get(k) for k in ("progressPercent", "difficultyChange", "remainingBlocks", "previousRetarget", "estimatedRetargetDate")}
     pl = J("https://mempool.space/api/v1/mining/pools/1w")
@@ -266,10 +283,25 @@ def btc_extra():
     if hr and hr.get("hashrates"): o["hash_s"] = serie([(dia(x["timestamp"]), x["avgHashrate"] / 1e18) for x in hr["hashrates"]], 370, 1)      # EH/s
     f = J("https://mempool.space/api/v1/fees/recommended")
     if f: o["taxas"] = f
+    return o
+
+
+def _ln():
+    o = {}
     ln = J("https://mempool.space/api/v1/lightning/statistics/latest")
     if ln and ln.get("latest"): o["ln"] = {k: ln["latest"].get(k) for k in ("channel_count", "node_count", "total_capacity", "med_capacity", "avg_fee_rate")}
     lh = J("https://mempool.space/api/v1/lightning/statistics/1y", tempo=60)
-    if lh: o["ln_s"] = serie([(dia(dt.datetime.fromisoformat(x["added"][:10]).replace(tzinfo=dt.timezone.utc).timestamp()), x["total_capacity"] / 1e8) for x in lh], 370, 0)   # BTC
+    if isinstance(lh, dict): lh = lh.get("history") or lh.get("data") or []
+    if lh and isinstance(lh, list) and isinstance(lh[0], dict):
+        o["ln_s"] = serie([(dia(dt.datetime.fromisoformat(x["added"][:10]).replace(tzinfo=dt.timezone.utc).timestamp()), x["total_capacity"] / 1e8) for x in lh], 370, 0)   # BTC
+    return o
+
+
+def btc_extra():
+    o = {}
+    for f in (_bc, _chair, _mempool, _ln):
+        r = tenta(f)
+        if r: o.update(r)
     return o
 
 
@@ -277,8 +309,8 @@ def eth_extra():
     o = {}
     sp = J("https://ultrasound.money/api/v2/fees/supply-parts")
     if sp:
-        o["beacon_stake"] = (num(sp.get("beaconBalancesSum")) or 0) / 1e18
-        o["deposits"] = (num(sp.get("beaconDepositsSum")) or 0) / 1e18
+        o["beacon_stake"] = (num(sp.get("beaconBalancesSum")) or 0) / 1e9      # gwei -> ETH
+        o["deposits"] = (num(sp.get("beaconDepositsSum")) or 0) / 1e9
     so = J("https://ultrasound.money/api/v2/fees/supply-over-time", tempo=90)
     if so:
         for k in ("d30", "d7", "d90", "since_merge", "since_burn"):
