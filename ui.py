@@ -354,6 +354,9 @@ def inicio(paginas, secoes, eventos):
         if chaves == "mapa":
             h.append(f"<a class=tile href='{arq}'><div class=tt>{titulo}<span>→</span></div><div class=ln>Mapa de calor das ações da B3 e dos BDRs</div><div class=ln>Quadrados por valor de mercado, cor pela variação</div></a>")
             continue
+        if chaves == "momento":
+            h.append(f"<a class=tile href='{arq}'><div class=tt>{titulo}<span>→</span></div><div class=ln>Semáforo de compra e venda por empresa</div><div class=ln>MM 200, RSI, máximas; detalhes ao clicar</div></a>")
+            continue
         if chaves == "trades":
             h.append(f"<a class=tile href='{arq}'><div class=tt>{titulo}<span>→</span></div><div class=ln>Day trade e swing curto: trocar um ativo por outro</div><div class=ln>Confluência de indicadores, nota de 0 a 10 em estrelas</div></a>")
             continue
