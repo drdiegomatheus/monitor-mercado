@@ -95,7 +95,7 @@ body{padding-left:var(--sw);transition:padding .15s}
 nav{flex-direction:column;overflow:visible;flex:1;gap:2px}
 nav a{display:flex;align-items:center;gap:11px;border-radius:10px;padding:8px 10px;font-size:13.5px}
 nav a.at{background:var(--tx);color:var(--bg)}
-.ic{display:inline-grid;place-items:center;width:22px;height:22px;flex:none;font-style:normal;font-weight:800;font-size:13px}
+.bdg{background:#ef4444;color:#fff;border-radius:999px;font-size:10px;font-weight:800;padding:1px 6px;margin-left:auto}html.col .bdg{display:none}.ic{display:inline-grid;place-items:center;width:22px;height:22px;flex:none;font-style:normal;font-weight:800;font-size:13px}
 .ng{display:block;margin:12px 10px 3px;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mu);opacity:.8;white-space:nowrap}
 .stamp{flex-direction:column;align-items:flex-start;gap:3px;padding:10px 8px 0;border-top:1px solid var(--line);font-size:11.5px;white-space:normal}
 .stamp .tx2{display:block}
@@ -333,10 +333,22 @@ def alerta(sel, eventos, com_eventos=True):
             "".join(f"<span class=it>{'hoje' if n == 0 else f'em {n}d'} · {H.escape(t)}</span>" for n, t in prox) + "</div></div>")
 
 
+def _novas_ops():
+    try:
+        import os, time
+        f = os.path.join(os.path.dirname(os.path.abspath(__file__)), "categorias", "cripto", "baleias.json")
+        e = json.load(open(f, encoding="utf-8"))
+        lim = time.time() - 3600
+        return sum(1 for x in e.get("eventos", []) if x["t"] >= lim and abs(x["d"]) >= 5e6)
+    except Exception:
+        return 0
+
+
 def cabeca(titulo, paginas, atual):
     agora = dt.datetime.now(BRT)
-    ICO = {"Todos": "☰", "Cripto": "₿", "Brasil": "R$", "EUA": "$", "Dados gerais": "◍", "Oscilações": "↕", "Spread": "⇄", "Mapa": "▦", "Trades": "⇆", "Momento": "◐", "Momento Cripto": "₿", "Baleias": "🐋", "Gráficos": "▤"}
-    GRP = {"Oscilações": "Análises", "Momento Cripto": "Cripto", "Baleias": "Cripto", "Gráficos": "Outros"}
+    n_ops = _novas_ops()
+    ICO = {"Todos": "☰", "Cripto": "₿", "Brasil": "R$", "EUA": "$", "Dados gerais": "◍", "Oscilações": "↕", "Spread": "⇄", "Mapa": "▦", "Trades": "⇆", "Momento": "◐", "Momento Cripto": "₿", "Baleias": "🐋", "Operações": "⚡", "Gráficos": "▤"}
+    GRP = {"Oscilações": "Análises", "Momento Cripto": "Cripto", "Baleias": "Cripto", "Operações": "Cripto", "Gráficos": "Outros"}
     vistos = set()
     nav = ""
     for a, t, _ in paginas:
@@ -344,7 +356,8 @@ def cabeca(titulo, paginas, atual):
         if g and g not in vistos:
             vistos.add(g)
             nav += f"<div class=ng>{g}</div>"
-        nav += f"<a class='{'at' if a == atual else ''}' href='{a}' title='{t}'><i class=ic>{ICO.get(t, '•')}</i><span class=t>{t}</span></a>"
+        bd = f"<span class=bdg title='Movimentações de baleias acima de US$ 5 mi na última hora'>{n_ops}</span>" if (t == "Operações" and n_ops) else ""
+        nav += f"<a class='{'at' if a == atual else ''}' href='{a}' title='{t}'><i class=ic>{ICO.get(t, '•')}</i><span class=t>{t}</span>{bd}</a>"
     return (f"<!doctype html><html lang=pt-br><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1,viewport-fit=cover'>"
             f"<title>{titulo} · Monitor</title><meta http-equiv=refresh content=330><meta name=theme-color content='#0a0e16'>"
             "<link rel=manifest href=manifest.webmanifest><link rel=icon href=icon.svg type='image/svg+xml'><link rel=apple-touch-icon href=apple-touch-icon.png>"
@@ -394,6 +407,9 @@ def inicio(paginas, secoes, eventos):
             continue
         if chaves == "baleias":
             h.append(f"<a class=tile href='{arq}'><div class=tt>{titulo}<span>→</span></div><div class=ln>Grandes carteiras da Hyperliquid em tempo real</div><div class=ln>Mapa de liquidação, heatmap, posições e movimentações</div></a>")
+            continue
+        if chaves == "operacoes":
+            h.append(f"<a class=tile href='{arq}'><div class=tt>{titulo}<span>→</span></div><div class=ln>O que as baleias abriram e fecharam agora</div><div class=ln>Feed com filtros e fluxo da última hora</div></a>")
             continue
         if chaves == "trades":
             h.append(f"<a class=tile href='{arq}'><div class=tt>{titulo}<span>→</span></div><div class=ln>Day trade e swing curto: trocar um ativo por outro</div><div class=ln>Confluência de indicadores, nota de 0 a 10 em estrelas</div></a>")

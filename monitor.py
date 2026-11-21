@@ -675,7 +675,7 @@ def painel():
     import ui
     PAGINAS = [("painel.html", "Todos", None), ("painel_cripto.html", "Cripto", ["cripto"]), ("painel_brasil.html", "Brasil", ["brasil"]),
                ("painel_eua.html", "EUA", ["eua"]), ("painel_outros.html", "Dados gerais", ["setores", "commodities", "macro", "juros"]),
-               ("painel_oscilacoes.html", "Oscilações", "oscilacoes"), ("painel_spread.html", "Spread", "spread"), ("painel_mapa.html", "Mapa", "mapa"), ("painel_trades.html", "Trades", "trades"), ("painel_momento.html", "Momento", "momento"), ("painel_momento_cripto.html", "Momento Cripto", "momento_cripto"), ("painel_baleias.html", "Baleias", "baleias"), ("painel_graficos.html", "Gráficos", "graficos")]
+               ("painel_oscilacoes.html", "Oscilações", "oscilacoes"), ("painel_spread.html", "Spread", "spread"), ("painel_mapa.html", "Mapa", "mapa"), ("painel_trades.html", "Trades", "trades"), ("painel_momento.html", "Momento", "momento"), ("painel_momento_cripto.html", "Momento Cripto", "momento_cripto"), ("painel_baleias.html", "Baleias", "baleias"), ("painel_operacoes.html", "Operações", "operacoes"), ("painel_graficos.html", "Gráficos", "graficos")]
     f_m = os.path.join(RAIZ, "macro.json")
     macro_ev = json.load(open(f_m, encoding="utf-8")) if os.path.exists(f_m) else []
     f_l = os.path.join(RAIZ, "live.json")
@@ -708,6 +708,11 @@ def painel():
             if not SO_PAINEL:
                 import baleias_pg
                 open(os.path.join(RAIZ, arq), "w", encoding="utf-8").write(baleias_pg.pagina(arq, titulo, PAGINAS, baleias_pg.dados(RAIZ)))
+            continue
+        if chaves == "operacoes":
+            if not SO_PAINEL:
+                import operacoes_pg
+                open(os.path.join(RAIZ, arq), "w", encoding="utf-8").write(operacoes_pg.pagina(arq, titulo, PAGINAS, operacoes_pg.dados(RAIZ)))
             continue
         if chaves == "trades":
             if not SO_PAINEL:
