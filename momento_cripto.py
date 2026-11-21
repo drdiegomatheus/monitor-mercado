@@ -10,6 +10,8 @@ from momento import _n, _clip, _banda, _ler, tecnica
 CSS = M0.CSS + """
 .mo-h{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin:0 0 12px}
 .mo-sec{margin:14px 0 2px;font-size:12px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;font-weight:800}
+.tip{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;margin-left:5px;border-radius:50%;background:var(--line);color:var(--mu);font-size:10px;font-weight:800;cursor:help;vertical-align:middle;text-transform:none;font-style:normal}.tip:hover{background:var(--ac);color:#fff}
+#tipbox{position:fixed;z-index:99;max-width:300px;background:#111827;color:#f9fafb;border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.45;box-shadow:0 8px 24px rgba(0,0,0,.35);display:none;pointer-events:none}
 .mo-k em{display:block;font-style:normal;color:var(--mu);font-size:10.5px;margin-top:1px}
 """
 
@@ -207,9 +209,9 @@ def sentimento(k, a, m, cg):
 
 
 # ----------------------------------------------------------------------------- detalhe: KPIs e gráficos
-def kp(lista, rot, val, sub=None):
+def kp(lista, rot, val, sub=None, tip=None):
     if val is None or val == "–": return
-    lista.append([rot, val, sub or ""])
+    lista.append([rot, val, sub or "", tip or ""])
 
 
 def ultimo(s):
@@ -350,22 +352,25 @@ def detalhe_onchain(k, a, cg, m, fu):
     return G, GR
 
 
+TIPS = {"fng": "Índice de 0 a 100 que resume o humor do mercado cripto (volatilidade, volume, redes sociais e dominância do BTC). Abaixo de 25 = medo extremo: vendedores exaustos, historicamente uma boa zona de acumulação. Acima de 75 = ganância extrema: mercado eufórico, risco maior de topo. Aqui é lido de forma contrária.", "fund": "Funding é a taxa que compradores e vendedores de contratos perpétuos (futuros sem vencimento) pagam uns aos outros para manter o preço do perpétuo colado ao preço à vista. Positivo = quem está comprado paga quem está vendido (otimismo e alavancagem na compra). Negativo = vendidos pagam comprados (pessimismo). Aparece anualizado para comparar: ≈ 10% ao ano é o normal. Muito acima disso indica compra esticada e risco de liquidações em cascata; negativo por muito tempo pode preceder um repique (short squeeze).", "fundh": "A Hyperliquid cobra o funding a cada hora. Este é o valor da última hora, em %. Para ter uma ideia: 0,0013% por hora equivale a ≈ 11% ao ano, o nível neutro de mercado. Valores negativos significam que os vendidos estão pagando.", "prem": "Diferença entre o preço do contrato perpétuo e o preço de referência (oráculo, ligado ao preço à vista). Positivo = perpétuo mais caro que o à vista: há mais demanda por compra alavancada, o que tende a elevar o funding. Negativo = perpétuo com desconto: mais gente querendo vender ou se proteger, pressão vendedora. Perto de zero = equilíbrio; variações de ±0,05% são ruído.", "oi": "Open interest é o valor total dos contratos de derivativos ainda abertos (posições que não foram zeradas). Sobe junto com o preço = dinheiro novo entrando na tendência de alta. Sobe com o preço caindo = vendidos acumulando (combustível para queda ou para um squeeze). Cai forte = liquidações e zeragem de posições. Comparado ao valor de mercado, mostra o nível de alavancagem do ativo.", "oi30": "Quanto o open interest (posições abertas) da OKX mudou em 30 dias. Queda junto com preço em baixa costuma indicar limpeza de alavancagem (capitulação), que muitas vezes antecede fundos. Alta junto com preço em alta indica alavancagem crescendo.", "ls": "Número de contas compradas dividido pelo de contas vendidas na OKX. Acima de 1 = mais contas compradas que vendidas. É um termômetro contrário: extremos de compra (acima de ≈ 2,5) mostram a multidão toda do mesmo lado, e o mercado costuma andar contra a maioria. Conta pessoas, não dinheiro: o varejo tende a ficar comprado.", "vol": "Volume financeiro negociado em contratos perpétuos nas últimas 24h, comparado ao volume à vista. Derivativos muito maiores que o à vista indicam um mercado dominado por especulação alavancada, com preços mais sujeitos a movimentos bruscos de liquidação."}
+
+
 def detalhe_sent(k, a, m, cg, se):
     hl, ok = a.get("hl") or {}, a.get("okx") or {}
     mc = num(cg.get("market_cap"))
     L = []
     fng = m.get("fng") or {}
     PT = {"Extreme Fear": "Medo extremo", "Fear": "Medo", "Neutral": "Neutro", "Greed": "Ganância", "Extreme Greed": "Ganância extrema"}
-    kp(L, "Medo e Ganância (mercado)", f"{br(fng.get('v'), 0)} · {PT.get(fng.get('c'), fng.get('c'))}" if fng else None, "índice contrário: medo extremo costuma ser zona de compra")
-    kp(L, "Funding anualizado (Hyperliquid, média 7d)", pc(media((hl.get("fund_s") or {}).get("v", [])[-7:]), 1, True), "positivo = comprados pagam vendidos")
-    kp(L, "Funding anualizado (OKX, 7d / 30d)", f"{pc(ok.get('fund_7d'), 1, True)} / {pc(ok.get('fund_30d'), 1, True)}" if ok.get("fund_7d") is not None else None, "referência neutra ≈ +10% ao ano")
-    kp(L, "Funding agora (Hyperliquid, por hora)", pc(hl["fund_h"] * 100, 4, True) if hl.get("fund_h") is not None else None)
-    kp(L, "Prêmio do perpétuo vs. oráculo", pc(hl["premio"] * 100, 3, True) if hl.get("premio") is not None else None)
+    kp(L, "Medo e Ganância (mercado)", f"{br(fng.get('v'), 0)} · {PT.get(fng.get('c'), fng.get('c'))}" if fng else None, "índice contrário: medo extremo costuma ser zona de compra", TIPS["fng"])
+    kp(L, "Funding anualizado (Hyperliquid, média 7d)", pc(media((hl.get("fund_s") or {}).get("v", [])[-7:]), 1, True), "positivo = comprados pagam vendidos", TIPS["fund"])
+    kp(L, "Funding anualizado (OKX, 7d / 30d)", f"{pc(ok.get('fund_7d'), 1, True)} / {pc(ok.get('fund_30d'), 1, True)}" if ok.get("fund_7d") is not None else None, "referência neutra ≈ +10% ao ano", TIPS["fund"])
+    kp(L, "Funding agora (Hyperliquid, por hora)", pc(hl["fund_h"] * 100, 4, True) if hl.get("fund_h") is not None else None, None, TIPS["fundh"])
+    kp(L, "Prêmio do perpétuo vs. oráculo", pc(hl["premio"] * 100, 3, True) if hl.get("premio") is not None else None, "perpétuo acima (+) ou abaixo (−) do preço à vista", TIPS["prem"])
     oi = (hl.get("oi_usd") or 0) + (ok.get("oi_usd") or 0)
-    kp(L, "Open interest (Hyperliquid + OKX)", usd(oi) if oi else None, f"{pc(oi / mc * 100, 1)} do valor de mercado" if oi and mc else "")
-    if ok.get("oi_s"): kp(L, "Open interest OKX: variação 30d", pc(mud(ok["oi_s"]), 1, True))
-    kp(L, "Razão compra/venda de contas (OKX)", br(ok.get("ls"), 2) if ok.get("ls") else None, ">2 = muitos comprados (risco de aperto); <1 = maioria vendida")
-    kp(L, "Volume de derivativos 24h (Hyperliquid)", usd(hl.get("vol24")) if hl.get("vol24") else None, f"spot (mercado): {usd(num(cg.get('total_volume')))}")
+    kp(L, "Open interest (Hyperliquid + OKX)", usd(oi) if oi else None, f"{pc(oi / mc * 100, 1)} do valor de mercado" if oi and mc else "", TIPS["oi"])
+    if ok.get("oi_s"): kp(L, "Open interest OKX: variação 30d", pc(mud(ok["oi_s"]), 1, True), None, TIPS["oi30"])
+    kp(L, "Razão compra/venda de contas (OKX)", br(ok.get("ls"), 2) if ok.get("ls") else None, ">2 = muitos comprados (risco de aperto); <1 = maioria vendida", TIPS["ls"])
+    kp(L, "Volume de derivativos 24h (Hyperliquid)", usd(hl.get("vol24")) if hl.get("vol24") else None, f"spot (mercado): {usd(num(cg.get('total_volume')))}", TIPS["vol"])
     GR = []
     def add(g):
         if g: GR.append(g)
@@ -426,8 +431,9 @@ document.addEventListener('click',function(e){var t=e.target;
  if(t.closest&&t.closest('.mo-p')&&t.classList.contains('x')||t.id=='mo-o'){document.getElementById('mo-o').style.display='none';return}
  var tr=t.closest&&t.closest('tr.mr');if(tr&&!t.closest('.mo-o')){CUR=R.filter(function(r){return r.i==tr.dataset.i})[0];TAB='tec';document.getElementById('mo-o').style.display='block';drawD()}});
 var SUBN={val:'Valuation',uso:'Uso e crescimento',cap:'Captura de valor',oferta:'Oferta e emissão',seg:'Segurança e desenvolvimento',fund:'Funding',fng:'Medo e Ganância',ls:'Compra/venda'};
-function subs(o){return'<div class=mo-g>'+Object.keys(o.sub).map(function(k){return'<div class=mo-k><small>'+SUBN[k]+'</small><b>'+sf({sc:o.sub[k]})+'</b></div>'}).join('')+'</div>'}
-function groups(G){return G.map(function(g){return'<div class=mo-sec>'+g[0]+'</div><div class=mo-g style="grid-template-columns:repeat(auto-fill,minmax(210px,1fr))">'+g[1].map(function(k){return'<div class=mo-k><small>'+k[0]+'</small><b style="font-size:14px">'+k[1]+'</b>'+(k[2]?'<em>'+k[2]+'</em>':'')+'</div>'}).join('')+'</div>'}).join('')}
+var SUBT={fund:"Funding é a taxa que compradores e vendedores de contratos perpétuos (futuros sem vencimento) pagam uns aos outros para manter o preço do perpétuo colado ao preço à vista. Positivo = quem está comprado paga quem está vendido (otimismo e alavancagem na compra). Negativo = vendidos pagam comprados (pessimismo). Aparece anualizado para comparar: ≈ 10% ao ano é o normal. Muito acima disso indica compra esticada e risco de liquidações em cascata; negativo por muito tempo pode preceder um repique (short squeeze).",fng:"Índice de 0 a 100 que resume o humor do mercado cripto (volatilidade, volume, redes sociais e dominância do BTC). Abaixo de 25 = medo extremo: vendedores exaustos, historicamente uma boa zona de acumulação. Acima de 75 = ganância extrema: mercado eufórico, risco maior de topo. Aqui é lido de forma contrária.",ls:"Número de contas compradas dividido pelo de contas vendidas na OKX. Acima de 1 = mais contas compradas que vendidas. É um termômetro contrário: extremos de compra (acima de ≈ 2,5) mostram a multidão toda do mesmo lado, e o mercado costuma andar contra a maioria. Conta pessoas, não dinheiro: o varejo tende a ficar comprado."};
+function subs(o){return'<div class=mo-g>'+Object.keys(o.sub).map(function(k){return'<div class=mo-k><small>'+SUBN[k]+(SUBT[k]?'<span class=tip data-tip="'+SUBT[k].replace(/"/g,'&quot;')+'">i</span>':'')+'</small><b>'+sf({sc:o.sub[k]})+'</b></div>'}).join('')+'</div>'}
+function groups(G){return G.map(function(g){return'<div class=mo-sec>'+g[0]+'</div><div class=mo-g style="grid-template-columns:repeat(auto-fill,minmax(210px,1fr))">'+g[1].map(function(k){return'<div class=mo-k><small>'+k[0]+(k[3]?'<span class=tip data-tip="'+k[3].replace(/"/g,'&quot;')+'">i</span>':'')+'</small><b style="font-size:14px">'+k[1]+'</b>'+(k[2]?'<em>'+k[2]+'</em>':'')+'</div>'}).join('')+'</div>'}).join('')}
 function chartsH(GR){return GR.map(function(g,i){return'<div class=mo-c><h4>'+g.t+'</h4><canvas data-gi="'+i+'"></canvas></div>'}).join('')}
 function drawCharts(GR){document.querySelectorAll('canvas[data-gi]').forEach(function(cv){var g=GR[+cv.dataset.gi];line(cv,g.s,{dates:g.dd,d:g.d})})}
 function drawD(){var r=CUR,t1=r.t1,h='<button class=x>✕</button><h2>'+r.n+' <span class=mu style="font-weight:500">· '+r.nome+'</span></h2><div class=mo-note>'+r.s+'</div>';
@@ -453,6 +459,10 @@ function drawD(){var r=CUR,t1=r.t1,h='<button class=x>✕</button><h2>'+r.n+' <s
   line(document.getElementById('c3'),[{v:c.rwd,c:'#4f46e5',l:'RSI diário'},{v:c.rww,c:'#16a34a',l:'RSI semanal'}],{min:0,max:100,d:0,lines:[{y:30,c:'#16a34a'},{y:70,c:'#dc2626'}]})}
  else if(GR)drawCharts(GR)}
 window.addEventListener('resize',function(){if(document.getElementById('mo-o').style.display=='block')drawD()});
+var TB=document.createElement('div');TB.id='tipbox';document.body.appendChild(TB);
+function tipShow(el){TB.textContent=el.dataset.tip;TB.style.display='block';var r=el.getBoundingClientRect(),w=TB.offsetWidth,h=TB.offsetHeight,x=Math.min(Math.max(8,r.left-8),innerWidth-w-8),y=r.bottom+8;if(y+h>innerHeight-8)y=Math.max(8,r.top-h-8);TB.style.left=x+'px';TB.style.top=y+'px'}
+document.addEventListener('mouseover',function(e){var t=e.target.closest&&e.target.closest('.tip');if(t)tipShow(t);else TB.style.display='none'});
+document.addEventListener('click',function(e){var t=e.target.closest&&e.target.closest('.tip');if(t){if(TB.style.display=='block'&&TB.textContent==t.dataset.tip)TB.style.display='none';else tipShow(t)}else TB.style.display='none'});
 build();
 """
 
