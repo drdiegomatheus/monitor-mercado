@@ -10,7 +10,7 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
       - run: pip install requests
-      - run: ONCHAIN_SAIDA=analise/probe_onchain.json python onchain.py
+      - run: ONCHAIN_VALIDADE=0 ONCHAIN_SAIDA=analise/probe_onchain.json python onchain.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: |
