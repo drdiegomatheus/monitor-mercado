@@ -24,8 +24,11 @@ jobs:
         run: |
           git fetch -q origin baleias && git show origin/baleias:baleias.json > baleias.json || echo "sem estado anterior"
           git show origin/baleias:carteiras.json > carteiras.json 2>/dev/null || true
+          git show origin/baleias:tradefi.json > tradefi.json 2>/dev/null || true
       - name: varredura
         run: timeout 330 python baleias.py
+      - name: baleias tradefi
+        run: timeout 150 python tradefi.py || true
       - name: carteiras vencedoras
         run: timeout 120 python carteiras.py || true
       - name: guardar estado
@@ -33,7 +36,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           [ -s baleias.json ] || exit 0
-          d=$(mktemp -d); cp baleias.json "$d"/; [ -s carteiras.json ] && cp carteiras.json "$d"/; cd "$d"
+          d=$(mktemp -d); cp baleias.json "$d"/; [ -s carteiras.json ] && cp carteiras.json "$d"/; [ -s tradefi.json ] && cp tradefi.json "$d"/; cd "$d"
           git init -q; git checkout -q -b baleias
           git -c user.name=bot -c user.email=bot@x add .
           git -c user.name=bot -c user.email=bot@x commit -qm "estado das baleias"

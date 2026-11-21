@@ -30,6 +30,7 @@ jobs:
           git checkout -q origin/dados -- . || true
           git fetch -q origin baleias && git show origin/baleias:baleias.json > categorias/cripto/baleias.json || true
           git show origin/baleias:carteiras.json > categorias/cripto/carteiras.json 2>/dev/null || true
+          git show origin/baleias:tradefi.json > categorias/cripto/tradefi.json 2>/dev/null || true
       - name: coleta
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.modo }}" != "agenda" ]; then python monitor.py --salvar; exit 0; fi

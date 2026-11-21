@@ -347,8 +347,8 @@ def _novas_ops():
 def cabeca(titulo, paginas, atual):
     agora = dt.datetime.now(BRT)
     n_ops = _novas_ops()
-    ICO = {"Todos": "☰", "Cripto": "₿", "Brasil": "R$", "EUA": "$", "Dados gerais": "◍", "Oscilações": "↕", "Spread": "⇄", "Mapa": "▦", "Trades": "⇆", "Momento": "◐", "Momento Cripto": "₿", "Baleias": "🐋", "Operações": "⚡", "Carteiras": "🏆", "Gráficos": "▤"}
-    GRP = {"Oscilações": "Análises", "Momento Cripto": "Cripto", "Baleias": "Cripto", "Operações": "Cripto", "Carteiras": "Cripto", "Gráficos": "Outros"}
+    ICO = {"Todos": "☰", "Cripto": "₿", "Brasil": "R$", "EUA": "$", "Dados gerais": "◍", "Oscilações": "↕", "Spread": "⇄", "Mapa": "▦", "Trades": "⇆", "Momento": "◐", "Momento Cripto": "₿", "Baleias": "🐋", "Operações": "⚡", "Carteiras": "🏆", "Baleias TradeFi": "🏛", "Gráficos": "▤"}
+    GRP = {"Oscilações": "Análises", "Momento Cripto": "Cripto", "Baleias": "Cripto", "Operações": "Cripto", "Carteiras": "Cripto", "Baleias TradeFi": "Cripto", "Gráficos": "Outros"}
     vistos = set()
     nav = ""
     for a, t, _ in paginas:
@@ -413,6 +413,9 @@ def inicio(paginas, secoes, eventos):
             continue
         if chaves == "carteiras":
             h.append(f"<a class=tile href='{arq}'><div class=tt>{titulo}<span>→</span></div><div class=ln>Carteiras vencedoras da Hyperliquid</div><div class=ln>Taxa de acerto, fator de lucro e posição atual</div></a>")
+            continue
+        if chaves == "tradefi":
+            h.append(f"<a class=tile href='{arq}'><div class=tt>{titulo}<span>→</span></div><div class=ln>Baleias de ações, índices e commodities</div><div class=ln>Ordenadas por lucro, com mapa de liquidação</div></a>")
             continue
         if chaves == "trades":
             h.append(f"<a class=tile href='{arq}'><div class=tt>{titulo}<span>→</span></div><div class=ln>Day trade e swing curto: trocar um ativo por outro</div><div class=ln>Confluência de indicadores, nota de 0 a 10 em estrelas</div></a>")
