@@ -209,6 +209,12 @@
    "setor": "Shoppings e imobiliário",
    "destaque": true
   },
+  "BOVA11": {
+   "setor": "ETFs Ibovespa"
+  },
+  "XBOV11": {
+   "setor": "ETFs Ibovespa"
+  },
   "IVVB11": {
    "setor": "ETFs internacionais"
   },
