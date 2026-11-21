@@ -26,6 +26,7 @@ def dados(raiz):
     contas = e.get("contas", {})
     ev = []
     for x in e.get("eventos", [])[::-1]:
+        if x["c"] not in B.MOEDAS: continue
         c = contas.get(x["a"], {})
         ev.append({**x, "av": c.get("av"), "pm": (c.get("pnl") or [0, 0, 0, 0])[2], "pw": (c.get("pnl") or [0, 0, 0, 0])[1], "pt": (c.get("pnl") or [0, 0, 0, 0])[3]})
     return {"ts": e.get("ts"), "ev": ev, "mark": e.get("mark", {}), "cob": e.get("cobertura", {})}

@@ -24,6 +24,9 @@ CSS = MC.CSS + """
 """
 
 
+MOEDAS = ("BTC", "ETH", "SOL", "HYPE")
+
+
 def dados(raiz):
     f = os.path.join(raiz, "categorias", "cripto", "baleias.json")
     if not os.path.exists(f): return None
@@ -37,13 +40,14 @@ def dados(raiz):
     for a, c in contas.items():
         for p in c["p"]:
             coin, szi, ent, ntl, liq, lev, up, tp = p
+            if coin not in MOEDAS: continue
             t = tot.setdefault(coin, [0, 0, 0, 0])
             i = 0 if szi > 0 else 1
             t[i] += ntl
             t[2 + i] += 1
             if liq: pos.setdefault(coin, []).append([round(liq, 4), ntl if szi > 0 else -ntl])
             linhas.append((ntl, a, c, p))
-    coins = sorted((k for k, v in tot.items() if v[0] + v[1] >= 5e6), key=lambda k: -(tot[k][0] + tot[k][1]))[:14]
+    coins = [k for k in MOEDAS if k in tot]
     for k in coins:
         pos[k] = sorted(pos.get(k, []), key=lambda x: -abs(x[1]))[:6000]
     linhas.sort(key=lambda x: -x[0])
@@ -52,9 +56,10 @@ def dados(raiz):
         top.append([a, c.get("nome"), p[0], "long" if p[1] > 0 else "short", ntl, p[2], p[4], p[5], p[6], c["av"], c["pnl"][2], p[7]])
     ranking = []
     for a, c in sorted(contas.items(), key=lambda x: -x[1]["av"])[:30]:
-        liq_ = sum(p[3] for p in c["p"] if p[1] > 0)
-        sho = sum(p[3] for p in c["p"] if p[1] < 0)
-        maior = max(c["p"], key=lambda p: p[3]) if c["p"] else None
+        liq_ = sum(p[3] for p in c["p"] if p[1] > 0 and p[0] in MOEDAS)
+        sho = sum(p[3] for p in c["p"] if p[1] < 0 and p[0] in MOEDAS)
+        pm_ = [p for p in c["p"] if p[0] in MOEDAS]
+        maior = max(pm_, key=lambda p: p[3]) if pm_ else None
         ranking.append([a, c.get("nome"), c["av"], c["pnl"], c.get("roi"), liq_, sho, (maior[0] + (" long" if maior[1] > 0 else " short") + " " + str(maior[3])) if maior else None])
     hist = e.get("hist", [])
     H_ = {"t": [h["t"] for h in hist], "px": {}, "tot": {}, "hm": {}, "passos": e.get("passos", {})}
@@ -64,7 +69,7 @@ def dados(raiz):
     for coin in e.get("passos", {}):
         H_["hm"][coin] = [h["hm"].get(coin) for h in hist]
     return {"ts": e.get("ts"), "cob": e.get("cobertura", {}), "mark": {k: mark.get(k) for k in coins}, "oi": {k: oi.get(k) for k in coins},
-            "coins": coins, "tot": {k: tot[k] for k in coins}, "pos": {k: pos[k] for k in coins}, "top": top, "rank": ranking, "ev": e.get("eventos", [])[-120:][::-1], "hist": H_}
+            "coins": coins, "tot": {k: tot[k] for k in coins}, "pos": {k: pos[k] for k in coins}, "top": top, "rank": ranking, "ev": [x for x in e.get("eventos", []) if x["c"] in MOEDAS][-120:][::-1], "hist": H_}
 
 
 JS = M0.LIB + r"""

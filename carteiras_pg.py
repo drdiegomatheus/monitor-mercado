@@ -24,7 +24,7 @@ def dados(raiz):
     for a, s in c["c"].items():
         if not s.get("nota") or a not in contas: continue
         ct = contas[a]
-        pos = sorted(ct["p"], key=lambda x: -x[3])[:4]
+        pos = sorted((x for x in ct["p"] if x[0] in B.MOEDAS), key=lambda x: -x[3])[:4]
         rk.append({"a": a, "n": s.get("nome"), "nota": s["nota"], "wr": s["wr"], "fl": s["fl"], "no": s["n"], "mg": s["mg"], "mp": s["mp"], "pnl": s["pnl"], "dd": s["dd"],
                    "pior": s["pior"], "lp": s.get("lp"), "at": s.get("ativos", []), "av": s["av"], "pa": s["pa"], "par": s.get("parcial"),
                    "pos": [[x[0], "long" if x[1] > 0 else "short", x[3], x[5], x[6]] for x in pos], "t": s["t"]})
@@ -34,11 +34,12 @@ def dados(raiz):
     for a, ct in contas.items():
         for p_ in ct["p"]:
             coin, szi, ntl = p_[0], p_[1], p_[3]
+            if coin not in B.MOEDAS: continue
             g = agg.setdefault(coin, [0, 0, 0, 0, 0, 0])
             i = 0 if szi > 0 else 1
             if a in top: g[i] += ntl; g[4 + i] += 1
             else: g[2 + i] += ntl
-    coins = sorted((k for k, g in agg.items() if g[0] + g[1] >= 3e6), key=lambda k: -(agg[k][0] + agg[k][1]))[:12]
+    coins = [k for k in B.MOEDAS if k in agg]
     return {"ts": c["ts"], "rk": rk[:100], "nq": len(rk), "nc": len(c["c"]), "coins": coins, "agg": {k: agg[k] for k in coins}, "ntop": len(top), "mark": b.get("mark", {})}
 
 
