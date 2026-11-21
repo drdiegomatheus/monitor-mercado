@@ -29,32 +29,10 @@ CSS = """
 .mo-note{font-size:12px;color:var(--mu);margin:6px 0}
 """
 
-JS = r"""
+LIB = r"""
 function f1(v,d){return(v==null||v!==v)?'–':v.toLocaleString('pt-BR',{minimumFractionDigits:d==null?1:d,maximumFractionDigits:d==null?1:d})}
 function sg(v,d){return v==null?'–':(v>=0?'+':'−')+f1(Math.abs(v),d)}
 function sf(t){if(!t||t.sc==null)return'<span class="sf"><i></i>–</span>';var c=t.sc>=6.5?'g':(t.sc<=3.5?'r':'n');return'<span class="sf '+c+'"><i></i>'+f1(t.sc,1)+'<small>'+(c=='g'?'compra':c=='r'?'venda':'neutro')+'</small></span>'}
-var R=D.rows,SORT={k:'ger',d:-1},FG='',FS='',FQ='',FSIG='';
-function ger(r){var v=[];['t1','t2'].forEach(function(k){if(r[k]&&r[k].sc!=null)v.push(r[k].sc)});var t=v.length?v.reduce(function(a,b){return a+b},0)/v.length:null;var P=[[t,.4],[r.fu&&r.fu.sc,.4],[r.an&&r.an.sc,.2]],a=0,w=0;P.forEach(function(p){if(p[0]!=null){a+=p[0]*p[1];w+=p[1]}});return w?a/w:null}
-R.forEach(function(r){r.ger=ger(r)});
-var SET=Array.from(new Set(R.map(function(r){return r.s}).filter(Boolean))).sort();
-function val(r,k){if(k=='n')return r.n;if(k=='ger')return r.ger;if(k=='t1')return r.t1&&r.t1.sc;if(k=='t2')return r.t2&&r.t2.sc;if(k=='fu')return r.fu&&r.fu.sc;if(k=='an')return r.an&&r.an.sc;return null}
-function build(){
- var bar='<div class=mo-bar><input id=q placeholder="buscar ativo…" value="'+FQ+'"><button data-g="" class="'+(FG==''?'on':'')+'">Todos</button><button data-g=B3 class="'+(FG=='B3'?'on':'')+'">B3</button><button data-g=EUA class="'+(FG=='EUA'?'on':'')+'">EUA + BDR</button><select id=st><option value="">Todos os setores</option>'+SET.map(function(s){return'<option'+(FS==s?' selected':'')+'>'+s+'</option>'}).join('')+'</select><button data-sg=g class="'+(FSIG=='g'?'on':'')+'">● Compra</button><button data-sg=r class="'+(FSIG=='r'?'on':'')+'">● Venda</button></div>';
- var L=R.filter(function(r){if(FG&&r.g!=FG)return false;if(FS&&r.s!=FS)return false;if(FQ&&(r.n+' '+(r.b||'')).toUpperCase().indexOf(FQ.toUpperCase())<0)return false;if(FSIG){var x=r.ger;if(x==null)return false;if(FSIG=='g'&&x<6.5)return false;if(FSIG=='r'&&x>3.5)return false}return true});
- L.sort(function(a,b){var x=val(a,SORT.k),y=val(b,SORT.k);if(x==null)return 1;if(y==null)return-1;return x<y?-SORT.d:x>y?SORT.d:0});
- var h=bar+'<table class=mo-t><thead><tr><th data-k=n>Empresa</th><th data-k=t1>Técnica (B3 / EUA)</th><th data-k=t2>Técnica BDR</th><th data-k=fu>Fundamental</th><th data-k=an>Analistas</th><th data-k=ger>Geral ▾</th></tr></thead><tbody>';
- L.forEach(function(r){h+='<tr class=mr data-i="'+r.i+'"><td class=mo-n><b>'+r.n+(r.b?' <span class=mu style="font-weight:500">· '+r.b+'</span>':'')+'</b><small>'+(r.s||'')+'</small></td><td>'+sf(r.t1)+'</td><td>'+(r.t2?sf(r.t2):'<span class=mu>–</span>')+'</td><td>'+(r.fu?sf(r.fu):'<span class=mu>–</span>')+'</td><td>'+(r.an?sf(r.an):'<span class=mu>–</span>')+'</td><td>'+sf({sc:r.ger})+'</td></tr>'});
- h+='</tbody></table>';document.getElementById('mo').innerHTML=h}
-document.addEventListener('click',function(e){var t=e.target;
- if(t.dataset&&t.dataset.g!==undefined&&t.closest('.mo-bar')){FG=t.dataset.g;build();return}
- if(t.dataset&&t.dataset.sg){FSIG=FSIG==t.dataset.sg?'':t.dataset.sg;build();return}
- var th=t.closest('th[data-k]');if(th){var k=th.dataset.k;SORT=SORT.k==k?{k:k,d:-SORT.d}:{k:k,d:k=='n'?1:-1};build();return}
- var tr=t.closest('tr.mr');if(tr){openD(+tr.dataset.i);return}
- if(t.closest('.x')||t.id=='mo-o'){document.getElementById('mo-o').style.display='none'}});
-document.addEventListener('input',function(e){if(e.target.id=='q'){FQ=e.target.value;var p=e.target.selectionStart;build();var q=document.getElementById('q');q.focus();q.setSelectionRange(p,p)}});
-document.addEventListener('change',function(e){if(e.target.id=='st'){FS=e.target.value;build()}});
-var CUR=null,TAB='tec',LST=0;
-function openD(i){CUR=R.filter(function(r){return r.i==i})[0];LST=0;TAB='tec';document.getElementById('mo-o').style.display='block';drawD()}
 function line(cv,series,opt){var dpr=window.devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;cv.width=W*dpr;cv.height=H*dpr;var g=cv.getContext('2d');g.scale(dpr,dpr);
  var all=[];series.forEach(function(s){s.v.forEach(function(x){if(x!=null)all.push(x)})});if(opt.lines)opt.lines.forEach(function(l){all.push(l.y)});
  var mn=Math.min.apply(null,all),mx=Math.max.apply(null,all);if(opt.min!=null)mn=opt.min;if(opt.max!=null)mx=opt.max;var pd=(mx-mn)*.06||1;if(opt.min==null)mn-=pd;if(opt.max==null)mx+=pd;
@@ -78,6 +56,31 @@ function bars(cv,labels,series,opt){var dpr=window.devicePixelRatio||1,W=cv.clie
  var lg=0;series.forEach(function(s){g.fillStyle=s.c;g.fillText('● '+s.l,pl+lg,10);lg+=s.l.length*6+22})}
 function M(v){if(v==null)return'–';var a=Math.abs(v);return a>=1e9?f1(v/1e9,1)+' bi':a>=1e6?f1(v/1e6,0)+' mi':f1(v/1e3,0)+' mil'}
 function B(v){return v==null?null:v/1e9}
+"""
+
+JS = LIB + r"""
+var R=D.rows,SORT={k:'ger',d:-1},FG='',FS='',FQ='',FSIG='';
+function ger(r){var v=[];['t1','t2'].forEach(function(k){if(r[k]&&r[k].sc!=null)v.push(r[k].sc)});var t=v.length?v.reduce(function(a,b){return a+b},0)/v.length:null;var P=[[t,.4],[r.fu&&r.fu.sc,.4],[r.an&&r.an.sc,.2]],a=0,w=0;P.forEach(function(p){if(p[0]!=null){a+=p[0]*p[1];w+=p[1]}});return w?a/w:null}
+R.forEach(function(r){r.ger=ger(r)});
+var SET=Array.from(new Set(R.map(function(r){return r.s}).filter(Boolean))).sort();
+function val(r,k){if(k=='n')return r.n;if(k=='ger')return r.ger;if(k=='t1')return r.t1&&r.t1.sc;if(k=='t2')return r.t2&&r.t2.sc;if(k=='fu')return r.fu&&r.fu.sc;if(k=='an')return r.an&&r.an.sc;return null}
+function build(){
+ var bar='<div class=mo-bar><input id=q placeholder="buscar ativo…" value="'+FQ+'"><button data-g="" class="'+(FG==''?'on':'')+'">Todos</button><button data-g=B3 class="'+(FG=='B3'?'on':'')+'">B3</button><button data-g=EUA class="'+(FG=='EUA'?'on':'')+'">EUA + BDR</button><select id=st><option value="">Todos os setores</option>'+SET.map(function(s){return'<option'+(FS==s?' selected':'')+'>'+s+'</option>'}).join('')+'</select><button data-sg=g class="'+(FSIG=='g'?'on':'')+'">● Compra</button><button data-sg=r class="'+(FSIG=='r'?'on':'')+'">● Venda</button></div>';
+ var L=R.filter(function(r){if(FG&&r.g!=FG)return false;if(FS&&r.s!=FS)return false;if(FQ&&(r.n+' '+(r.b||'')).toUpperCase().indexOf(FQ.toUpperCase())<0)return false;if(FSIG){var x=r.ger;if(x==null)return false;if(FSIG=='g'&&x<6.5)return false;if(FSIG=='r'&&x>3.5)return false}return true});
+ L.sort(function(a,b){var x=val(a,SORT.k),y=val(b,SORT.k);if(x==null)return 1;if(y==null)return-1;return x<y?-SORT.d:x>y?SORT.d:0});
+ var h=bar+'<table class=mo-t><thead><tr><th data-k=n>Empresa</th><th data-k=t1>Técnica (B3 / EUA)</th><th data-k=t2>Técnica BDR</th><th data-k=fu>Fundamental</th><th data-k=an>Analistas</th><th data-k=ger>Geral ▾</th></tr></thead><tbody>';
+ L.forEach(function(r){h+='<tr class=mr data-i="'+r.i+'"><td class=mo-n><b>'+r.n+(r.b?' <span class=mu style="font-weight:500">· '+r.b+'</span>':'')+'</b><small>'+(r.s||'')+'</small></td><td>'+sf(r.t1)+'</td><td>'+(r.t2?sf(r.t2):'<span class=mu>–</span>')+'</td><td>'+(r.fu?sf(r.fu):'<span class=mu>–</span>')+'</td><td>'+(r.an?sf(r.an):'<span class=mu>–</span>')+'</td><td>'+sf({sc:r.ger})+'</td></tr>'});
+ h+='</tbody></table>';document.getElementById('mo').innerHTML=h}
+document.addEventListener('click',function(e){var t=e.target;
+ if(t.dataset&&t.dataset.g!==undefined&&t.closest('.mo-bar')){FG=t.dataset.g;build();return}
+ if(t.dataset&&t.dataset.sg){FSIG=FSIG==t.dataset.sg?'':t.dataset.sg;build();return}
+ var th=t.closest('th[data-k]');if(th){var k=th.dataset.k;SORT=SORT.k==k?{k:k,d:-SORT.d}:{k:k,d:k=='n'?1:-1};build();return}
+ var tr=t.closest('tr.mr');if(tr){openD(+tr.dataset.i);return}
+ if(t.closest('.x')||t.id=='mo-o'){document.getElementById('mo-o').style.display='none'}});
+document.addEventListener('input',function(e){if(e.target.id=='q'){FQ=e.target.value;var p=e.target.selectionStart;build();var q=document.getElementById('q');q.focus();q.setSelectionRange(p,p)}});
+document.addEventListener('change',function(e){if(e.target.id=='st'){FS=e.target.value;build()}});
+var CUR=null,TAB='tec',LST=0;
+function openD(i){CUR=R.filter(function(r){return r.i==i})[0];LST=0;TAB='tec';document.getElementById('mo-o').style.display='block';drawD()}
 function qlab(a){return a.map(function(x){var d=x[0].split('-');return d[1]+'/'+d[0].slice(2)})}
 function tr(a,s){return a?a.map(function(x){return x[1]}):[]}
 function dt(d){if(!d)return'–';var p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0]}
@@ -163,23 +166,24 @@ def _n(x, nd=1):
 def _clip(x, a=-1, b=1): return max(a, min(b, x))
 
 
-def tecnica(c, idx, rotulo, moeda, idx_nome):
+def tecnica(c, idx, rotulo, moeda, idx_nome, ano=252, fw="W-FRI", esc=(25, 15, 35), cap_rsi=30):
     """indicadores técnicos de uma série diária de fechamentos"""
-    w = c.resample("W-FRI").last().dropna()
+    w = c.resample(fw).last().dropna()
     s200, s50 = c.rolling(200).mean(), c.rolling(50).mean()
     w200 = w.rolling(200).mean()
     rd, rw = _rsi(c), _rsi(w)
     p = c.iloc[-1]
     d2 = (p / s200.iloc[-1] - 1) * 100 if np.isfinite(s200.iloc[-1]) else None
     w2 = (p / w200.iloc[-1] - 1) * 100 if len(w200) and np.isfinite(w200.iloc[-1]) else None
-    h52 = (p / c.tail(252).max() - 1) * 100
+    h52 = (p / c.tail(ano).max() - 1) * 100
     h5 = (p / c.max() - 1) * 100
-    l52 = (p / c.tail(252).min() - 1) * 100
+    l52 = (p / c.tail(ano).min() - 1) * 100
     def ret(n): return (p / c.iloc[-1 - n] - 1) * 100 if len(c) > n else None
     rs = None
-    if idx is not None and len(idx) > 126 and len(c) > 126:
-        ri = (idx.iloc[-1] / idx.iloc[-127] - 1) * 100
-        rs = ret(126) - ri if ret(126) is not None else None
+    mt = ano // 2
+    if idx is not None and len(idx) > mt and len(c) > mt:
+        ri = (idx.iloc[-1] / idx.iloc[-1 - mt] - 1) * 100
+        rs = ret(mt) - ri if ret(mt) is not None else None
     ab_d = d2 is not None and d2 > 0
     ab_w = w2 is not None and w2 > 0
     rg = "Alta" if ab_d and ab_w else "Correção" if ab_w and not ab_d else "Repique" if ab_d and not ab_w else "Baixa"
@@ -188,21 +192,23 @@ def tecnica(c, idx, rotulo, moeda, idx_nome):
     xs = []
     if np.isfinite(rw.iloc[-1]): xs.append((_clip((50 - rw.iloc[-1]) / 20), 2))
     if np.isfinite(rd.iloc[-1]): xs.append((_clip((50 - rd.iloc[-1]) / 20), 1.5))
-    if d2 is not None: xs.append((_clip(-d2 / 25), 1.5))
-    xs.append((_clip((-h52 - 15) / 35), 1))
+    if d2 is not None: xs.append((_clip(-d2 / esc[0]), 1.5))
+    xs.append((_clip((-h52 - esc[1]) / esc[2]), 1))
     if len(xs) >= 3:
         sc = 5 + 5 * sum(x * k for x, k in xs) / sum(k for _, k in xs)
-        if rg == "Baixa" and sc > 6.4 and not (np.isfinite(rw.iloc[-1]) and rw.iloc[-1] < 30): sc = 6.4   # baixa confirmada: no máximo neutro, salvo capitulação (RSI semanal < 30)
+        if rg == "Baixa" and sc > 6.4 and not (np.isfinite(rw.iloc[-1]) and rw.iloc[-1] < cap_rsi): sc = 6.4   # baixa confirmada: no máximo neutro, salvo capitulação (RSI semanal < 30)
         sc = max(0, min(10, sc))
-    dc = c.tail(250)
+    nd = 2 if p >= 10 else 4
+    nt = max(250, ano)
+    dc = c.tail(nt)
     wc = w.tail(260)
-    ch = {"d": [round(x, 2) for x in dc], "m50": [_n(x, 2) for x in s50.tail(250)], "m200": [_n(x, 2) for x in s200.tail(250)],
+    ch = {"d": [round(x, nd) for x in dc], "m50": [_n(x, nd) for x in s50.tail(nt)], "m200": [_n(x, nd) for x in s200.tail(nt)],
           "dd": [int(t.timestamp() // 86400) for t in dc.index],
-          "w": [round(x, 2) for x in wc], "w200": [_n(x, 2) for x in w200.tail(260)], "wd": [int(t.timestamp() // 86400) for t in wc.index],
-          "rwd": [_n(x, 1) for x in rd.tail(250)], "rww": [_n(x, 1) for x in rw.reindex(dc.index, method="ffill")]}
-    return {"lb": rotulo, "cu": moeda, "p": _n(p, 2), "sc": _n(sc), "rg": rg, "rd": _n(rd.iloc[-1], 0), "rw": _n(rw.iloc[-1], 0),
-            "d2": _n(d2), "w2": _n(w2), "h52": _n(h52), "h5": _n(h5), "l52": _n(l52), "r1": _n(ret(21)), "r3": _n(ret(63)), "r6": _n(ret(126)),
-            "r12": _n(ret(252)), "rs": _n(rs), "ix": idx_nome, "ch": ch}
+          "w": [round(x, nd) for x in wc], "w200": [_n(x, nd) for x in w200.tail(260)], "wd": [int(t.timestamp() // 86400) for t in wc.index],
+          "rwd": [_n(x, 1) for x in rd.tail(nt)], "rww": [_n(x, 1) for x in rw.reindex(dc.index, method="ffill")]}
+    return {"lb": rotulo, "cu": moeda, "p": _n(p, nd), "sc": _n(sc), "rg": rg, "rd": _n(rd.iloc[-1], 0), "rw": _n(rw.iloc[-1], 0),
+            "d2": _n(d2), "w2": _n(w2), "h52": _n(h52), "h5": _n(h5), "l52": _n(l52), "r1": _n(ret(ano // 12)), "r3": _n(ret(ano // 4)), "r6": _n(ret(ano // 2)),
+            "r12": _n(ret(ano)), "rs": _n(rs), "ix": idx_nome, "ch": ch}
 
 
 def _banda(x, cortes, notas):

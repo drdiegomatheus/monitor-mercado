@@ -48,6 +48,11 @@ jobs:
       - name: fundamentos
         # atualiza alguns ativos por rodada (os mais antigos primeiro); cada um no máximo 1 vez por dia
         run: timeout 200 python fundamentos.py || true
+      - name: onchain
+        # dados on-chain, DeFi, derivativos e desenvolvimento de cripto; no máximo 1 vez por hora
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: timeout 280 python onchain.py || true
       - name: painel
         run: python monitor.py --painel
       - name: guardar
@@ -56,7 +61,7 @@ jobs:
         run: |
           git config user.name "coleta"; git config user.email "coleta@users.noreply.github.com"
           ARQ=""
-          for f in painel.html painel_*.html ext.json index.html manifest.webmanifest sw.js icon.svg icon-192.png icon-512.png apple-touch-icon.png categorias/*/dados categorias/*/relatorio.html categorias/*/eventos.json categorias/*/fundamentos.json categorias/*/mercado.json categorias/*/_meta.json; do
+          for f in painel.html painel_*.html ext.json index.html manifest.webmanifest sw.js icon.svg icon-192.png icon-512.png apple-touch-icon.png categorias/*/dados categorias/*/relatorio.html categorias/*/eventos.json categorias/*/fundamentos.json categorias/*/onchain.json categorias/*/mercado.json categorias/*/_meta.json; do
             if [ -e "$f" ]; then ARQ="$ARQ $f"; fi
           done
           git checkout -q --orphan dados_novo

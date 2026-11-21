@@ -290,10 +290,13 @@ def _ln():
     o = {}
     ln = J("https://mempool.space/api/v1/lightning/statistics/latest")
     if ln and ln.get("latest"): o["ln"] = {k: ln["latest"].get(k) for k in ("channel_count", "node_count", "total_capacity", "med_capacity", "avg_fee_rate")}
-    lh = J("https://mempool.space/api/v1/lightning/statistics/1y", tempo=60)
-    if isinstance(lh, dict): lh = lh.get("history") or lh.get("data") or []
-    if lh and isinstance(lh, list) and isinstance(lh[0], dict):
-        o["ln_s"] = serie([(dia(dt.datetime.fromisoformat(x["added"][:10]).replace(tzinfo=dt.timezone.utc).timestamp()), x["total_capacity"] / 1e8) for x in lh], 370, 0)   # BTC
+    try:
+        lh = J("https://mempool.space/api/v1/lightning/statistics/1y", tempo=60)
+        if isinstance(lh, dict): lh = lh.get("history") or lh.get("data") or []
+        if lh and isinstance(lh, list) and isinstance(lh[0], dict):
+            o["ln_s"] = serie([(dia(dt.datetime.fromisoformat(x["added"][:10]).replace(tzinfo=dt.timezone.utc).timestamp()), x["total_capacity"] / 1e8) for x in lh], 370, 0)   # BTC
+    except Exception as e:
+        print("  ln hist", str(e)[:80], file=sys.stderr)
     return o
 
 
