@@ -28,6 +28,7 @@ jobs:
         run: |
           git fetch -q origin dados || { echo "ainda não existe o ramo dados"; exit 0; }
           git checkout -q origin/dados -- . || true
+          git fetch -q origin baleias && git show origin/baleias:baleias.json > categorias/cripto/baleias.json || true
       - name: coleta
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.modo }}" != "agenda" ]; then python monitor.py --salvar; exit 0; fi

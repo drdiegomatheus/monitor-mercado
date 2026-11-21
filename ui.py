@@ -392,6 +392,9 @@ def inicio(paginas, secoes, eventos):
         if chaves == "momento_cripto":
             h.append(f"<a class=tile href='{arq}'><div class=tt>{titulo}<span>→</span></div><div class=ln>Semáforo de compra e venda por criptoativo</div><div class=ln>Técnica, on-chain, derivativos e sentimento</div></a>")
             continue
+        if chaves == "baleias":
+            h.append(f"<a class=tile href='{arq}'><div class=tt>{titulo}<span>→</span></div><div class=ln>Grandes carteiras da Hyperliquid em tempo real</div><div class=ln>Mapa de liquidação, heatmap, posições e movimentações</div></a>")
+            continue
         if chaves == "trades":
             h.append(f"<a class=tile href='{arq}'><div class=tt>{titulo}<span>→</span></div><div class=ln>Day trade e swing curto: trocar um ativo por outro</div><div class=ln>Confluência de indicadores, nota de 0 a 10 em estrelas</div></a>")
             continue
