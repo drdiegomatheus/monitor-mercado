@@ -37,6 +37,7 @@ jobs:
             for c in brasil eua setores commodities macro pares; do python monitor.py --salvar --cat $c; done
           fi
           for c in $(python monitor.py --faltando); do python monitor.py --salvar --cat $c; done
+          if [ -f recoletar.txt ]; then for c in $(cat recoletar.txt); do python monitor.py --salvar --cat $c; done; fi
           if [ "$m" -lt 5 ] && { [ "$h" = "13" ] || [ "$h" = "02" ]; }; then python monitor.py --salvar --cat juros; fi
       - name: pre e pos mercado EUA
         run: python monitor.py --ext || true
