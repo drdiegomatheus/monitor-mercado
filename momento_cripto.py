@@ -11,7 +11,7 @@ CSS = M0.CSS + """
 .mo-h{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin:0 0 12px}
 .mo-sec{margin:14px 0 2px;font-size:12px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;font-weight:800}
 .tip{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;margin-left:5px;border-radius:50%;background:var(--line);color:var(--mu);font-size:10px;font-weight:800;cursor:help;vertical-align:middle;text-transform:none;font-style:normal}.tip:hover{background:var(--ac);color:#fff}
-#tipbox{position:fixed;z-index:99;max-width:300px;background:#111827;color:#f9fafb;border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.45;box-shadow:0 8px 24px rgba(0,0,0,.35);display:none;pointer-events:none}
+#tipbox{position:fixed;z-index:99;max-width:300px;background:#111827;color:#f9fafb;border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.45;box-shadow:0 8px 24px rgba(0,0,0,.35);display:none;pointer-events:none;white-space:pre-line}
 .mo-k em{display:block;font-style:normal;color:var(--mu);font-size:10.5px;margin-top:1px}
 """
 
@@ -186,7 +186,14 @@ def fundamental(k, a, cg, m):
     peso = {"val": 2, "uso": 2, "cap": 1.5, "oferta": 1.5, "seg": 1}
     tot_p = sum(peso[i] for i in sub)
     sc = sum(sub[i] * peso[i] for i in sub) / tot_p if tot_p else None
-    return {"sc": _n(sc), "sub": {i: _n(j) for i, j in sub.items()}, "mvrv": mvrv, "ps": ps, "emis": emis, "cap": cap, "dil": dil,
+    why = {"val": [t for t in (f"MVRV {br(mvrv, 2)}" if mvrv is not None else None, f"preço/receita {br(ps, 1)}×" if ps is not None else None, f"diluição {br(dil, 2)}×" if dil is not None else None) if t],
+           "uso": [t for t in (f"taxas {pc(g_fees, 0, True)}" if g_fees is not None else None, f"TVL {pc(g_tvl, 0, True)} em 30d" if g_tvl is not None else None, f"endereços {pc(g_act, 0, True)}" if g_act is not None else None,
+                               f"transações {pc(g_tx, 0, True)}" if g_tx is not None else None, f"volume DEX {pc(g_dex, 0, True)}" if g_dex is not None else None) if t],
+           "cap": [f"{pc(cap, 1)} ao ano do valor de mercado chega ao token"] if cap is not None else [],
+           "oferta": [t for t in (f"emissão {pc(emis, 2)} ao ano" if emis is not None else None, f"diluição {br(dil, 2)}×" if dil is not None else None, f"oferta em exchanges {pc(exm, 1, True)} em 30d" if exm is not None else None) if t],
+           "seg": [t for t in (f"{c4} commits em 4 semanas" if k in ("BTC", "ETH", "SOL") else None, f"maior pool com {x['pools'][0][1]}% dos blocos" if k == "BTC" and x.get("pools") else None,
+                               f"Nakamoto {x['val']['nakamoto']}" if k == "SOL" and x.get("val") else None, f"{pr.get('hacks', 0)} hack(s) registrado(s)" if pr else None) if t]}
+    return {"sc": _n(sc), "sub": {i: _n(j) for i, j in sub.items()}, "why": why, "mvrv": mvrv, "ps": ps, "emis": emis, "cap": cap, "dil": dil,
             "g": {"fees": g_fees, "tvl": g_tvl, "act": g_act, "tx": g_tx, "dex": g_dex}}
 
 
@@ -205,7 +212,8 @@ def sentimento(k, a, m, cg):
     peso = {"fund": 2, "fng": 1.5, "ls": 1}
     t = sum(peso[i] for i in sub)
     sc = sum(sub[i] * peso[i] for i in sub) / t if t else None
-    return {"sc": _n(sc), "sub": {i: _n(j) for i, j in sub.items()}, "f7": f7}
+    why = {"fund": [f"funding médio de {pc(f7, 1, True)} ao ano (Hyperliquid + OKX, 7d)"] if f7 is not None else [], "fng": [f"índice {br(fng, 0)}"] if fng is not None else [], "ls": [f"razão {br(ls, 2)}"] if ls is not None else []}
+    return {"sc": _n(sc), "sub": {i: _n(j) for i, j in sub.items()}, "f7": f7, "why": why}
 
 
 # ----------------------------------------------------------------------------- detalhe: KPIs e gráficos
@@ -381,6 +389,257 @@ def detalhe_sent(k, a, m, cg, se):
     return [["Derivativos e sentimento", L]], GR
 
 
+# ----------------------------------------------------------------------------- caixinhas: o que o dado significa + o que está dizendo agora
+def leit(sc):
+    return "positiva (sinal de compra)" if sc >= 6.5 else "negativa (sinal de venda)" if sc <= 3.5 else "neutra"
+
+
+def tem(*a):
+    return all(x is not None for x in a)
+
+
+FIXO = {
+    "Valor de mercado": "Preço × oferta circulante: o tamanho do ativo. O ranking compara com todas as criptomoedas.",
+    "FDV": "Fully Diluted Valuation: valor de mercado se TODOS os tokens (inclusive os ainda não liberados) já estivessem em circulação. Quanto maior que o valor de mercado, mais tokens ainda vão entrar no mercado (pressão vendedora futura).",
+    "Volume 24h": "Valor negociado à vista em 24h. Dividido pelo valor de mercado, mede liquidez e interesse pelo ativo.",
+    "Variação 7d": "Variação do preço em 7 dias, 30 dias e 1 ano.",
+    "Máxima histórica": "Maior preço já negociado e quanto o preço atual está abaixo dele.",
+    "Dominância do BTC": "Parcela do Bitcoin no valor total do mercado cripto. Subindo = capital fugindo para o ativo mais seguro (altcoins sofrem); caindo = rotação para altcoins.",
+    "MVRV": "Razão entre o valor de mercado e o valor realizado (preço médio pelo qual cada moeda foi movida pela última vez, ou seja, o custo médio dos detentores). Abaixo de 1 a maioria está no prejuízo — historicamente zona de fundo. De 1 a 2,5 é normal. Acima de 3,5 é euforia.",
+    "Preço / receita": "Quantos anos de receita o mercado está pagando: valor de mercado ÷ (receita dos últimos 30 dias × 12). Parecido com o P/L das ações: menor = mais barato.",
+    "Valor de mercado / TVL": "Compara o valor do token com o dinheiro depositado (TVL). Abaixo de 1 o token vale menos que o capital depositado.",
+    "Oferta circulante": "Moedas já em circulação e quanto isso representa do máximo (ou do total) que vai existir.",
+    "Emissão": "Quantas moedas novas entram por ano, em % da oferta (inflação). Negativa = a queima supera a emissão e a oferta encolhe.",
+    "Diluição futura": "Quanto o valor de mercado cresceria se todos os tokens ainda bloqueados entrassem em circulação.",
+    "Oferta em exchanges": "Moedas guardadas em corretoras, prontas para venda. Caindo = investidores retirando para custódia própria (menos pressão de venda); subindo = movendo para vender.",
+    "Fluxo líquido": "Entradas menos saídas de corretoras nos últimos 30 dias, em dólares.",
+    "ETH em staking": "Moedas travadas para validar a rede. Mais staking = menos oferta disponível para venda e rede mais segura.",
+    "SOL em staking": "Moedas travadas com validadores. Mais staking = menos oferta disponível para venda e rede mais segura.",
+    "Próximo halving": "A cada ≈ 4 anos a emissão de novos BTC é cortada pela metade, reduzindo a oferta nova. Historicamente as altas fortes vieram nos meses seguintes.",
+    "Endereços ativos": "Endereços que enviaram ou receberam algo no dia: aproximação do número de usuários ativos e do uso real da rede.",
+    "Transações /": "Transações confirmadas por dia: demanda por espaço na rede.",
+    "Transferências": "Transferências de valor por dia (exclui chamadas de contrato): uso como meio de pagamento e transferência.",
+    "Endereços com saldo": "Endereços que guardam algum saldo: mede adoção e a base de detentores. Crescendo = mais gente entrando.",
+    "Taxas pagas / dia": "Taxas pagas pelos usuários à rede, em moeda nativa: demanda por espaço de bloco.",
+    "Hash rate": "Poder computacional dedicado à mineração. Quanto maior, mais caro atacar a rede e mais confiança dos mineradores.",
+    "Próximo ajuste": "A cada 2.016 blocos a dificuldade se ajusta ao hash rate. Positivo = mineradores aumentaram a potência (rede mais segura); negativo = mineradores desligaram máquinas (estresse de rentabilidade).",
+    "Mempool": "Fila de transações aguardando confirmação. Fila grande = demanda alta ou rede congestionada; vazia = demanda baixa.",
+    "Taxa média": "Custo médio para fazer uma transação. Baixo = pouca demanda por espaço ou rede eficiente.",
+    "Nós na rede": "Nós completos visíveis, que validam a rede por conta própria: quanto mais, mais descentralizada.",
+    "UTXOs": "Saídas de transação ainda não gastas: cresce com a fragmentação de saldos e é usado para medir atividade.",
+    "Receita dos mineradores": "Subsídio de bloco + taxas pagas aos mineradores por dia. Se cair abaixo do custo de operar, máquinas são desligadas (capitulação de mineradores).",
+    "Lightning": "Rede de pagamentos em segunda camada do Bitcoin. Capacidade e canais medem a adoção para pagamentos rápidos.",
+    "Gás mediano": "Preço por unidade de computação no Ethereum, em gwei. Baixo = rede barata ou pouca demanda.",
+    "Transações por segundo": "Vazão atual da rede Solana, contando votos dos validadores ou não.",
+    "TVL": "Total Value Locked: valor depositado nos contratos do protocolo ou da rede. Mede confiança e uso do capital. Atenção: em dólares, cai junto com o preço dos ativos depositados.",
+    "Taxas pagas pelos usuários": "Total que os usuários pagam para usar o protocolo ou a rede (inclui a parte que vai para os provedores de liquidez).",
+    "Receita do protocolo": "Parte das taxas que fica com o protocolo, e não com os provedores de liquidez. É o que pode sustentar o valor do token.",
+    "Receita destinada": "Parte da receita que chega a quem segura o token (recompra, queima ou distribuição). É a captura de valor real pelo token.",
+    "Volume em DEX": "Valor negociado em exchanges descentralizadas da rede ou protocolo.",
+    "Volume de perpétuos": "Valor negociado em contratos perpétuos no protocolo.",
+    "Stablecoins na rede": "Dólares digitais disponíveis na rede: combustível para compras e para o DeFi. Crescendo = entrada de capital.",
+    "Total emprestado": "Valor emprestado pelo protocolo: demanda por crédito. Dividido pelo TVL, mostra a utilização.",
+    "Token em staking": "Valor do token travado no próprio protocolo (reduz a oferta circulante).",
+    "Tesouro": "Fundos pertencentes ao protocolo/DAO, usados para financiar desenvolvimento e incentivos.",
+    "Hacks": "Histórico de ataques ao protocolo que causaram perdas.",
+    "Coeficiente de Nakamoto": "Menor número de validadores que, juntos, controlam mais de 33% do stake e poderiam travar a rede. Maior = mais descentralizada.",
+    "Top 10": "Parcela do stake total nas 10 maiores operadoras. Menor = stake mais distribuído.",
+    "Validadores ativos": "Validadores participando do consenso; inadimplentes são os que estão offline.",
+    "Comissão média": "Percentual que os validadores retêm das recompensas de quem delega.",
+    "Maiores pools": "Pools de mineração que produziram mais blocos na última semana. Concentração alta = risco de censura ou de ataque de 51%.",
+    "/": "Atividade de desenvolvimento: commits (alterações de código) nas últimas 4 e 52 semanas, estrelas e último push. Muitos commits = projeto mantido ativamente; poucos em contratos maduros é normal.",
+}
+FIXO_SUB = {
+    "val": "Mede se o ativo está barato ou caro: MVRV (preço contra o custo médio dos detentores), preço/receita e diluição futura.",
+    "uso": "Mede se o uso da rede ou protocolo está crescendo: taxas, TVL, endereços ativos, transações e volume (média de 30d contra os 30d anteriores).",
+    "cap": "Mede quanto da receita chega a quem segura o token (recompra, queima, distribuição).",
+    "oferta": "Mede a pressão de oferta: emissão de novas moedas, diluição futura e movimento de moedas para as corretoras.",
+    "seg": "Mede descentralização, segurança e manutenção do código.",
+}
+
+
+def cresc_txt(g, o):
+    if g is None: return None
+    return (f"{o} em queda forte ({pc(g, 0, True)}): perda de uso" if g < -15 else f"{o} em queda ({pc(g, 0, True)})" if g < 0 else
+            f"{o} estável ({pc(g, 0, True)})" if g < 10 else f"{o} crescendo ({pc(g, 0, True)}): uso aumentando")
+
+
+def agora_oc(rot, k, a, cg, m, fu):
+    cm, ch, pr, x = a.get("cm") or {}, a.get("chain") or {}, a.get("prot") or {}, a.get("x") or {}
+    mc = num(cg.get("market_cap"))
+    g = fu["g"]
+    ult_ = lambda s: ultimo(s)
+    if rot.startswith("FDV") or rot.startswith("Diluição"):
+        d = fu["dil"]
+        if d is None: return None
+        return "praticamente tudo já circula: pouca diluição futura" if d <= 1.05 else f"diluição moderada: ainda faltam {pc((d - 1) * 100, 0)} em tokens a liberar" if d <= 1.5 else f"muitos tokens a liberar ({br(d, 2)}× o valor de mercado): pressão vendedora futura"
+    if rot.startswith("Volume 24h"):
+        v = num(cg.get("total_volume"))
+        if not tem(v, mc): return None
+        r = v / mc * 100
+        return f"{pc(r, 1)} do valor de mercado girou no dia: " + ("pouco interesse" if r < 2 else "liquidez normal" if r < 6 else "interesse alto" if r < 15 else "giro muito alto, típico de pânico ou euforia")
+    if rot.startswith("Variação"):
+        v = num(cg.get("price_change_percentage_30d_in_currency"))
+        if v is None: return None
+        return (f"queda de {pc(abs(v), 0)} em 30 dias: ativo sob forte estresse e possivelmente sobrevendido" if v < -25 else f"queda de {pc(abs(v), 0)} em 30 dias: correção" if v < -8 else
+                "preço lateral no mês" if v < 8 else f"alta de {pc(v, 0)} em 30 dias: tendência positiva" if v < 25 else f"alta forte de {pc(v, 0)} em 30 dias: pode estar esticado")
+    if rot.startswith("Máxima"):
+        v = num(cg.get("ath_change_percentage"))
+        if v is None: return None
+        return ("perto da máxima: sem desconto" if v > -10 else f"correção moderada ({pc(v, 0)} da máxima)" if v > -40 else f"queda profunda ({pc(v, 0)}): grande desconto, mas pode refletir deterioração" if v > -70 else f"queda extrema ({pc(v, 0)} da máxima)")
+    if rot.startswith("Dominância"):
+        d = m.get("dom_btc")
+        return None if d is None else ("capital concentrado no BTC: altcoins costumam sofrer" if d > 60 else "dominância moderada a alta: BTC lidera" if d > 50 else "dominância baixa: apetite por altcoins")
+    if rot.startswith("MVRV"):
+        v = fu["mvrv"]
+        if v is None: return None
+        return (f"{br(v, 2)}: muito abaixo do custo médio, capitulação; historicamente zona de fundo" if v < 0.8 else f"{br(v, 2)}: abaixo do custo médio, a maioria dos detentores está no prejuízo" if v < 1 else
+                f"{br(v, 2)}: pouco acima do custo médio, lucro pequeno, região de acumulação" if v < 1.5 else f"{br(v, 2)}: lucro moderado, mercado saudável" if v < 2.5 else f"{br(v, 2)}: lucros altos, atenção" if v < 3.5 else f"{br(v, 2)}: euforia, risco de topo")
+    if rot.startswith("Preço / receita"):
+        v = fu["ps"]
+        return None if v is None else f"{br(v, 1)} anos de receita: " + ("barato" if v < 10 else "razoável" if v < 20 else "esticado" if v < 40 else "caro" if v < 80 else "muito caro")
+    if rot.startswith("Valor de mercado / TVL"):
+        t = pr.get("tvl_atual") or ultimo(ch.get("tvl"))
+        if not tem(mc, t): return None
+        r = mc / t
+        return f"{br(r, 2)}×: " + ("token barato frente ao capital depositado" if r < 0.5 else "token abaixo do capital depositado" if r < 1 else "valor próximo ao capital depositado" if r < 3 else "token caro frente ao TVL, sustentado por expectativa e não pelo capital")
+    if rot.startswith("Oferta circulante"):
+        circ, mx, tot = num(cg.get("circulating_supply")), num(cg.get("max_supply")), num(cg.get("total_supply"))
+        r = circ / (mx or tot) * 100 if circ and (mx or tot) else None
+        return None if r is None else (f"{pc(r, 0)} já emitido: oferta quase toda em circulação, pouca diluição" if r > 95 else f"{pc(r, 0)} já emitido: ainda há tokens a entrar" if r > 70 else f"só {pc(r, 0)} emitido: muita oferta ainda por vir")
+    if rot.startswith("Emissão"):
+        e = fu["emis"]
+        return None if e is None else (f"{pc(e, 2)}: oferta encolhendo (deflacionário)" if e < 0 else f"{pc(e, 2)}: emissão baixa" if e < 1.5 else f"{pc(e, 2)}: emissão moderada" if e < 4 else f"{pc(e, 2)}: emissão alta, diluição relevante para quem segura")
+    if rot.startswith("Oferta em exchanges"):
+        v = mud(cm.get("SplyExNtv"))
+        return None if v is None else (f"{pc(v, 1, True)} em 30d: saindo das corretoras, sinal de acumulação" if v < -3 else f"{pc(v, 1, True)} em 30d: leve saída das corretoras" if v < 0 else f"{pc(v, 1, True)} em 30d: estável" if v < 3 else f"{pc(v, 1, True)} em 30d: mais oferta pronta para venda")
+    if rot.startswith("Fluxo líquido"):
+        fi, fo = (cm.get("FlowInExUSD") or {}).get("v"), (cm.get("FlowOutExUSD") or {}).get("v")
+        if not (fi and fo): return None
+        net = sum(fi[-30:]) - sum(fo[-30:])
+        return "mais moedas entraram nas corretoras do que saíram: possível pressão de venda" if net > 0 else "saída líquida das corretoras: movimento de custódia/acumulação"
+    if rot.endswith("em staking") and k in ("ETH", "SOL"):
+        st = x.get("beacon_stake") if k == "ETH" else (x.get("val") or {}).get("stake")
+        tot = num(cg.get("total_supply"))
+        if not tem(st, tot): return None
+        r = st / tot * 100
+        return f"{pc(r, 0)} da oferta travada: " + ("alto, pouca oferta líquida" if r > 30 else "relevante" if r > 15 else "baixo")
+    if rot.startswith("Próximo halving"):
+        d = x.get("halving_dias")
+        return None if d is None else f"faltam ≈ {br(d / 30, 0)} meses; o mercado costuma antecipar o evento, e o efeito histórico veio mais tarde"
+    if rot.startswith("Endereços ativos"): return cresc_txt(g["act"], "uso")
+    if rot.startswith("Transações /"): return cresc_txt(g["tx"], "transações")
+    if rot.startswith("Transferências"): return cresc_txt(cresc(cm.get("TxTfrCnt")), "transferências")
+    if rot.startswith("Endereços com saldo"):
+        v = mud(cm.get("AdrBalCnt"))
+        return None if v is None else f"{pc(v, 1, True)} em 30d: " + ("base de detentores crescendo" if v > 0.5 else "base estável" if v > -0.5 else "base de detentores encolhendo")
+    if rot.startswith("Hash rate"):
+        v = mud(x.get("hash_s"))
+        return None if v is None else (f"{pc(v, 0, True)} em 30d: mineradores desligando máquinas (estresse)" if v < -5 else "estável" if v < 5 else f"{pc(v, 0, True)} em 30d: potência crescendo, rede mais segura")
+    if rot.startswith("Próximo ajuste"):
+        d = (x.get("dif") or {}).get("difficultyChange")
+        return None if d is None else ("previsto subir: mineradores aumentaram a potência" if d > 2 else "previsto cair: mineradores saindo" if d < -2 else "ajuste pequeno: rede estável")
+    if rot.startswith("Mempool"):
+        n = num((x.get("chair") or {}).get("mempool_transactions"))
+        return None if n is None else ("fila pequena: pouca demanda por espaço" if n < 20000 else "fila normal" if n < 80000 else "fila grande: demanda alta ou congestionamento")
+    if rot.startswith("Receita dos mineradores"):
+        s = x.get("c_miners-revenue")
+        v = mud(s)
+        return None if v is None else f"{pc(v, 0, True)} em 30d: " + ("receita caindo, pressiona mineradores menos eficientes" if v < -10 else "estável" if v < 10 else "receita subindo")
+    if rot.startswith("TVL"):
+        v = mud(ch.get("tvl") or pr.get("tvl"))
+        return None if v is None else (f"{pc(v, 0, True)} em 30d: forte saída de capital (inclui queda de preço dos ativos)" if v < -20 else f"{pc(v, 0, True)} em 30d: capital saindo" if v < 0 else f"{pc(v, 0, True)} em 30d: estável" if v < 10 else f"{pc(v, 0, True)} em 30d: capital entrando")
+    if rot.startswith("Taxas pagas pelos"): return cresc_txt(g["fees"], "taxas")
+    if rot.startswith("Receita do protocolo"): return cresc_txt(cresc((a.get("rev") or {}).get("s")), "receita")
+    if rot.startswith("Receita destinada"):
+        c_ = fu["cap"]
+        return None if c_ is None else ("quase nada chega ao token hoje" if c_ < 0.1 else f"equivale a {pc(c_, 1)} ao ano do valor de mercado: " + ("baixo" if c_ < 2 else "razoável" if c_ < 5 else "alto"))
+    if rot.startswith("Volume em DEX"): return cresc_txt(g["dex"], "volume")
+    if rot.startswith("Stablecoins"):
+        v = mud(ch.get("stable"))
+        return None if v is None else (f"{pc(v, 1, True)} em 30d: dólares saindo da rede" if v < -3 else f"{pc(v, 1, True)} em 30d: estável" if v < 3 else f"{pc(v, 1, True)} em 30d: entrada de capital")
+    if rot.startswith("Total emprestado"):
+        b, t = pr.get("borrowed"), pr.get("tvl_atual")
+        return None if not tem(b, t) or not t else f"{pc(b / t * 100, 0)} do TVL está emprestado: " + ("utilização baixa" if b / t < .3 else "utilização saudável" if b / t < .6 else "utilização alta")
+    if rot.startswith("Tesouro"):
+        t = (a.get("tesouro") or {}).get("total")
+        return None if not tem(t, mc) else f"equivale a {pc(t / mc * 100, 0)} do valor de mercado"
+    if rot.startswith("Hacks"):
+        return None if not pr else ("sem hacks registrados" if not pr.get("hacks") else f"{pr['hacks']} incidente(s), {usd(pr['hacks_usd'])} perdidos: " + ("pequeno frente ao TVL" if pr["hacks_usd"] < (pr.get("tvl_atual") or 1) * 0.002 else "relevante"))
+    if rot.startswith("Coeficiente"):
+        n = (x.get("val") or {}).get("nakamoto")
+        return None if n is None else f"{n}: " + ("baixo, poucos validadores controlam a rede" if n < 10 else "mediano" if n < 20 else "bom nível de descentralização")
+    if rot.startswith("Top 10"):
+        v = (x.get("val") or {}).get("top10_pct")
+        return None if v is None else ("stake bem distribuído" if v < 30 else "stake moderadamente concentrado" if v < 45 else "stake concentrado")
+    if rot.startswith("Maiores pools"):
+        p = (x.get("pools") or [[0, None]])[0][1]
+        return None if p is None else ("mineração diversificada" if p < 30 else "concentração moderada" if p < 40 else "concentração alta")
+    if "/" in rot:
+        d_ = next((d for d in a.get("dev") or [] if d["repo"] == rot), None)
+        if not d_ or d_.get("c4") is None: return None
+        c4 = d_["c4"]
+        return f"{c4} commits em 4 semanas: " + ("muito ativo" if c4 >= 150 else "ativo" if c4 >= 60 else "atividade moderada" if c4 >= 20 else "pouca atividade (comum em contratos maduros e já auditados)")
+    return None
+
+
+def agora_sent(rot, k, a, cg, m, se):
+    hl, ok = a.get("hl") or {}, a.get("okx") or {}
+    mc = num(cg.get("market_cap"))
+    p30 = num(cg.get("price_change_percentage_30d_in_currency"))
+    def fund_txt(f):
+        return (f"{pc(f, 1, True)} ao ano: vendidos pagando muito, mercado pessimista e posicionado para baixo; favorece repique (short squeeze)" if f < -10 else f"{pc(f, 1, True)} ao ano: levemente negativo, leve pessimismo" if f < 0 else
+                f"{pc(f, 1, True)} ao ano: nível normal, sem excesso" if f < 8 else f"{pc(f, 1, True)} ao ano: um pouco acima do normal, otimismo moderado" if f < 15 else
+                f"{pc(f, 1, True)} ao ano: alto, compradores alavancados e risco de correção" if f < 30 else f"{pc(f, 1, True)} ao ano: muito alto, compra esticada e risco de liquidações")
+    if rot.startswith("Medo e Ganância"):
+        v = (m.get("fng") or {}).get("v")
+        return None if v is None else (f"{br(v, 0)}: medo extremo, vendedores exaustos; historicamente favorece compra gradual" if v <= 25 else f"{br(v, 0)}: medo, mercado cauteloso" if v <= 45 else f"{br(v, 0)}: neutro" if v <= 55 else
+                                       f"{br(v, 0)}: ganância, otimismo crescente" if v <= 75 else f"{br(v, 0)}: ganância extrema, mercado eufórico e risco de topo")
+    if rot.startswith("Funding anualizado (Hyperliquid"):
+        f = media(((hl.get("fund_s") or {}).get("v") or [])[-7:])
+        return None if f is None else fund_txt(f)
+    if rot.startswith("Funding anualizado (OKX"):
+        f = ok.get("fund_7d")
+        return None if f is None else "últimos 7 dias: " + fund_txt(f)
+    if rot.startswith("Funding agora"):
+        h = hl.get("fund_h")
+        return None if h is None else fund_txt(h * 24 * 365 * 100)
+    if rot.startswith("Prêmio"):
+        p = (hl.get("premio") or 0) * 100 if hl.get("premio") is not None else None
+        return None if p is None else (f"{pc(p, 3, True)}: perpétuo acima do à vista, demanda alavancada de compra" if p > 0.05 else f"{pc(p, 3, True)}: perpétuo com desconto, pressão vendedora ou busca por proteção" if p < -0.05 else f"{pc(p, 3, True)}: colado ao preço à vista, sem desequilíbrio relevante")
+    if rot.startswith("Open interest (") or rot.startswith("Open interest OKX"):
+        v = mud(ok.get("oi_s"))
+        if v is None or p30 is None: return None
+        cenario = ("alavancagem sendo zerada com o preço em queda: limpeza típica de capitulação, que costuma anteceder fundos" if p30 < 0 and v < 0 else
+                   "preço caindo com posições abertas aumentando: vendidos acumulando, combustível para queda ou para um squeeze" if p30 < 0 else
+                   "preço subindo com posições aumentando: dinheiro novo e alavancagem crescendo na alta" if v > 0 else "preço subindo com posições sendo fechadas: realização de lucros")
+        return f"preço {pc(p30, 0, True)} e OI {pc(v, 0, True)} em 30d: {cenario}"
+    if rot.startswith("Razão compra/venda"):
+        v = ok.get("ls")
+        return None if v is None else (f"{br(v, 2)}: multidão comprada, risco de aperto de compradores" if v > 2.5 else f"{br(v, 2)}: bem mais contas compradas que vendidas" if v > 1.8 else f"{br(v, 2)}: levemente comprado" if v > 1.2 else
+                                       f"{br(v, 2)}: equilibrado" if v > 0.8 else f"{br(v, 2)}: maioria vendida, cenário contrário favorável a alta (short squeeze)")
+    if rot.startswith("Volume de derivativos"):
+        d, s = hl.get("vol24"), num(cg.get("total_volume"))
+        return None if not tem(d, s) or not s else f"na Hyperliquid equivale a {pc(d / s * 100, 0)} do volume à vista global do ativo"
+    return None
+
+
+def decorar(G, f):
+    for _, L in G:
+        for it in L:
+            fixo = it[3] or next((v for kx, v in FIXO.items() if it[0].startswith(kx) and kx != "/"), "") or (FIXO["/"] if "/" in it[0] and " " not in it[0] else "")
+            ag = f(it[0])
+            it[3] = fixo + (("\n\nAgora: " + ag) if ag and fixo else "")
+
+
+def tips_sub(sub, why, fixo):
+    out = {}
+    for k_, v in sub.items():
+        if k_ in why and v is not None:
+            out[k_] = fixo[k_] + f"\n\nAgora: nota {br(v, 1)} de 10, leitura {leit(v)}. Pesaram: " + "; ".join(why[k_]) + "."
+    return out
+
+
 # ----------------------------------------------------------------------------- dados
 def dados(raiz):
     cats = os.path.join(raiz, "categorias", "cripto")
@@ -401,11 +660,17 @@ def dados(raiz):
             fu = fundamental(n, a, cg, m)
             G, GR = detalhe_onchain(n, a, cg, m, fu)
             fu["G"], fu["GR"] = G, GR
+            decorar(G, lambda rot: agora_oc(rot, n, a, cg, m, fu))
+            fu["tips"] = tips_sub(fu["sub"], fu["why"], FIXO_SUB)
+            fu.pop("why", None)
             fu.pop("g", None)
             r["fu"] = fu
             se = sentimento(n, a, m, cg)
             G2, GR2 = detalhe_sent(n, a, m, cg, se)
             se["G"], se["GR"] = G2, GR2
+            decorar(G2, lambda rot: agora_sent(rot, n, a, cg, m, se))
+            se["tips"] = tips_sub(se["sub"], se["why"], {"fund": TIPS["fund"], "fng": TIPS["fng"], "ls": TIPS["ls"]})
+            se.pop("why", None)
             r["se"] = se
         rows.append(r)
     mk = {}
@@ -432,7 +697,7 @@ document.addEventListener('click',function(e){var t=e.target;
  var tr=t.closest&&t.closest('tr.mr');if(tr&&!t.closest('.mo-o')){CUR=R.filter(function(r){return r.i==tr.dataset.i})[0];TAB='tec';document.getElementById('mo-o').style.display='block';drawD()}});
 var SUBN={val:'Valuation',uso:'Uso e crescimento',cap:'Captura de valor',oferta:'Oferta e emissão',seg:'Segurança e desenvolvimento',fund:'Funding',fng:'Medo e Ganância',ls:'Compra/venda'};
 var SUBT={fund:"Funding é a taxa que compradores e vendedores de contratos perpétuos (futuros sem vencimento) pagam uns aos outros para manter o preço do perpétuo colado ao preço à vista. Positivo = quem está comprado paga quem está vendido (otimismo e alavancagem na compra). Negativo = vendidos pagam comprados (pessimismo). Aparece anualizado para comparar: ≈ 10% ao ano é o normal. Muito acima disso indica compra esticada e risco de liquidações em cascata; negativo por muito tempo pode preceder um repique (short squeeze).",fng:"Índice de 0 a 100 que resume o humor do mercado cripto (volatilidade, volume, redes sociais e dominância do BTC). Abaixo de 25 = medo extremo: vendedores exaustos, historicamente uma boa zona de acumulação. Acima de 75 = ganância extrema: mercado eufórico, risco maior de topo. Aqui é lido de forma contrária.",ls:"Número de contas compradas dividido pelo de contas vendidas na OKX. Acima de 1 = mais contas compradas que vendidas. É um termômetro contrário: extremos de compra (acima de ≈ 2,5) mostram a multidão toda do mesmo lado, e o mercado costuma andar contra a maioria. Conta pessoas, não dinheiro: o varejo tende a ficar comprado."};
-function subs(o){return'<div class=mo-g>'+Object.keys(o.sub).map(function(k){return'<div class=mo-k><small>'+SUBN[k]+(SUBT[k]?'<span class=tip data-tip="'+SUBT[k].replace(/"/g,'&quot;')+'">i</span>':'')+'</small><b>'+sf({sc:o.sub[k]})+'</b></div>'}).join('')+'</div>'}
+function subs(o){return'<div class=mo-g>'+Object.keys(o.sub).map(function(k){return'<div class=mo-k><small>'+SUBN[k]+(((o.tips&&o.tips[k])||SUBT[k])?'<span class=tip data-tip="'+((o.tips&&o.tips[k])||SUBT[k]).replace(/"/g,'&quot;')+'">i</span>':'')+'</small><b>'+sf({sc:o.sub[k]})+'</b></div>'}).join('')+'</div>'}
 function groups(G){return G.map(function(g){return'<div class=mo-sec>'+g[0]+'</div><div class=mo-g style="grid-template-columns:repeat(auto-fill,minmax(210px,1fr))">'+g[1].map(function(k){return'<div class=mo-k><small>'+k[0]+(k[3]?'<span class=tip data-tip="'+k[3].replace(/"/g,'&quot;')+'">i</span>':'')+'</small><b style="font-size:14px">'+k[1]+'</b>'+(k[2]?'<em>'+k[2]+'</em>':'')+'</div>'}).join('')+'</div>'}).join('')}
 function chartsH(GR){return GR.map(function(g,i){return'<div class=mo-c><h4>'+g.t+'</h4><canvas data-gi="'+i+'"></canvas></div>'}).join('')}
 function drawCharts(GR){document.querySelectorAll('canvas[data-gi]').forEach(function(cv){var g=GR[+cv.dataset.gi];line(cv,g.s,{dates:g.dd,d:g.d})})}
