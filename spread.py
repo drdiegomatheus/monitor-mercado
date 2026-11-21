@@ -77,7 +77,7 @@ function renderBase(){var gs=[],gf=[];CUR.forEach(function(x){if(gs.indexOf(x.g)
 function renderBusca(){var i=document.getElementById('sps'),r=document.getElementById('spr'),cur=document.getElementById('spcur');if(!i)return;
  cur.innerHTML=BY[base]&&!BY[base].c?'Selecionado: <b>'+base+'</b> <small>'+(BY[base].s||'')+'</small>':'';
  function lista(){var q=i.value.trim().toUpperCase();if(!q){r.innerHTML='';return}
-  var L=A.filter(function(x){return x.n.indexOf(q)==0}).concat(A.filter(function(x){return x.n.indexOf(q)>0||(x.s||'').toUpperCase().indexOf(q)>=0})).slice(0,14);
+  var L=A.filter(function(x){return x.n.indexOf(q)==0}).concat(A.filter(function(x){return x.n.indexOf(q)!=0&&(x.n.indexOf(q)>0||(x.s||'').toUpperCase().indexOf(q)>=0)})).slice(0,14);
   r.innerHTML=L.map(function(x){return'<button data-n="'+x.n+'">'+x.n+'<small>'+(x.s||x.g)+' · R$ '+f2(x.dc[x.dc.length-1])+'</small></button>'}).join('')||'<span class=mu>Nenhum ativo encontrado</span>';
   r.querySelectorAll('button').forEach(function(b){b.onclick=function(){base=b.dataset.n;st('spbase',base);sel=null;i.value='';r.innerHTML='';render()}})}
  i.oninput=lista;i.onkeydown=function(e){if(e.key=='Enter'){var b=r.querySelector('button');if(b)b.click()}}}
