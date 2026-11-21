@@ -1,0 +1,197 @@
+{
+"cm_assets": {
+"s": 200,
+"n": 38701,
+"t": "{\"data\":[{\"asset\":\"aave\",\"full_name\":\"Aave\",\"metrics\":[{\"metric\":\"AdrActCnt\",\"frequencies\":[{\"frequency\":\"1d\",\"min_time\":\"2020-09-24T00:00:00.000000000Z\",\"max_time\":\"2026-11-20T00:00:00.000000000Z\",\"community\":true}]},{\"metric\":\"AdrBalCnt\",\"frequencies\":[{\"frequency\":\"1d\",\"min_time\":\"2020-10-02T00:00:00.000000000Z\",\"max_time\":\"2026-11-20T00:00:00.000000000Z\",\"community\":true}]},{\"metric\":\"AssetCompletionTime\",\"frequencies\":[{\"frequency\":\"1d\",\"min_time\":\"2020-10-02T00:00:00.000000000Z\",\"max_time\":\"2026-11-20T00:00:00.000000000Z\",\"community\":true}]},{\"metric\":\"AssetEODCompletionTime\",\"frequencies\":[{\"frequency\":\"1d\",\"min_time\":\"2020-10-02T00:00:00.000000000Z\",\"max_time\":\"2026-11-20T00:00:00.00"
+},
+"cm_metrics_btc": {
+"s": 400,
+"n": 86,
+"t": "{\"error\":{\"type\":\"unsupported_parameter\",\"message\":\"Unsupported parameter 'assets'.\"}}"
+},
+"cm_metrics_sol": {
+"s": 400,
+"n": 86,
+"t": "{\"error\":{\"type\":\"unsupported_parameter\",\"message\":\"Unsupported parameter 'assets'.\"}}"
+},
+"cm_metrics_uni": {
+"s": 400,
+"n": 86,
+"t": "{\"error\":{\"type\":\"unsupported_parameter\",\"message\":\"Unsupported parameter 'assets'.\"}}"
+},
+"cm_btc_ts": {
+"s": 403,
+"n": 148,
+"t": "{\"error\":{\"type\":\"forbidden\",\"message\":\"Requested metric 'NVTAdj' with frequency '1d' for asset 'btc' is not available with supplied credentials.\"}}"
+},
+"llama_protocols": {
+"s": 200,
+"n": 9664498,
+"t": "[{\"id\":\"2269\",\"name\":\"Binance CEX\",\"address\":null,\"symbol\":\"BNB\",\"url\":\"https://www.binance.com\",\"description\":\"Binance is a cryptocurrency exchange which is the largest exchange in the world in terms of daily trading volume of cryptocurrencies\",\"chain\":\"Multi-Chain\",\"logo\":\"https://icons.llamao.fi/icons/protocols/binance-cex\",\"audits\":\"0\",\"gecko_id\":null,\"cmcId\":null,\"category\":\"CEX\",\"chains\":[\"Ethereum\",\"Bitcoin\",\"Solana\",\"Binance\",\"Tron\",\"Ripple\",\"Arbitrum\",\"Doge\",\"Zcash\",\"Base\",\"Sui\",\"Aptos\",\"Near\",\"Plasma\",\"Avalanche\",\"Arc\",\"Litecoin\",\"Stellar\",\"TON\",\"Bitcoincash\",\"Algorand\",\"Hedera\",\"Polygon\",\"Polkadot\",\"Optimism\",\"Celo\",\"Sonic\",\"World Chain\",\"Cardano\",\"Sei\",\"Starknet\",\"Kava\",\"Ronin\",\""
+},
+"llama_chains": {
+"s": 200,
+"n": 58523,
+"t": "[{\"gecko_id\":\"moonbeam\",\"gasTokenGeckoId\":\"moonbeam\",\"tvl\":0,\"tokenSymbol\":\"GLMR\",\"cmcId\":\"6836\",\"name\":\"Moonbeam\",\"chainId\":1284},{\"gecko_id\":\"mantle\",\"gasTokenGeckoId\":\"mantle\",\"tvl\":79154913.13879016,\"tokenSymbol\":\"MNT\",\"cmcId\":\"27075\",\"name\":\"Mantle\",\"chainId\":5000},{\"gecko_id\":\"corn-3\",\"gasTokenGeckoId\":\"bitcorn-3\",\"tvl\":0,\"tokenSymbol\":\"CORN\",\"cmcId\":\"36164\",\"name\":\"Corn\",\"chainId\":21000000},{\"gecko_id\":null,\"gasTokenGeckoId\":null,\"tvl\":596788227.2173718,\"tokenSymbol\":null,\"cmcId\":null,\"name\":\"Arc\",\"chainId\":5042},{\"gecko_id\":\"harmony\",\"gasTokenGeckoId\":\"harmony\",\"tvl\":0,\"tokenSymbol\":\"ONE\",\"cmcId\":\"3945\",\"name\":\"Harmony\",\"chainId\":1666600000},{\"gecko_id\":null,\"gasTokenGeckoId\":\"ethere"
+},
+"llama_fees": {
+"s": 200,
+"n": 6009265,
+"t": "{\"totalDataChart\":[],\"totalDataChartBreakdown\":[],\"breakdown24h\":null,\"breakdown30d\":null,\"chain\":null,\"allChains\":[\"Ethereum\",\"Hyperliquid L1\",\"Solana\",\"Base\",\"BSC\",\"Robinhood Chain\",\"Polygon\",\"TON\",\"Tron\",\"Arbitrum\",\"Near\",\"zkLighter\",\"TxFlow\",\"Avalanche\",\"Stellar\",\"Ink\",\"OP Mainnet\",\"Chainflip\",\"Bitcoin\",\"Morph Tachyon\",\"Monad\",\"Sui\",\"Arc\",\"ZKsync Era\",\"Unichain\",\"edgeX L1\",\"Derive V3\",\"X Layer\",\"Plasma\",\"Mantle\",\"Flare\",\"Cronos\",\"Elysium\",\"Aster\",\"Cardano\",\"XRPL\",\"THORChain\",\"ValueChain\",\"BULK\",\"Sei\",\"Starknet\",\"Plume Mainnet\",\"Pharos\",\"Manta\",\"RISE\",\"Provenance\",\"Katana\",\"PulseChain\",\"Stable\",\"Stacks\",\"SX Rollup\",\"Celo\",\"Gnosis\",\"BOT Chain\",\"Sis\",\"Vaulta\",\"Sonic\",\"Mayachain\",\"Orderly Ne"
+},
+"llama_dex": {
+"s": 200,
+"n": 2573169,
+"t": "{\"totalDataChart\":[],\"totalDataChartBreakdown\":[],\"breakdown24h\":null,\"breakdown30d\":null,\"chain\":null,\"allChains\":[\"Ethereum\",\"Solana\",\"Base\",\"BSC\",\"Hyperliquid L1\",\"Robinhood Chain\",\"Arbitrum\",\"Polygon\",\"Near\",\"THORChain\",\"Tron\",\"Avalanche\",\"Spark\",\"X Layer\",\"Chainflip\",\"Dexalot\",\"Monad\",\"edgeX L1\",\"Provenance\",\"Arc\",\"Sui\",\"Unichain\",\"OP Mainnet\",\"Starknet\",\"Anubis\",\"Flare\",\"XO\",\"Canton\",\"Elysium\",\"Ink\",\"XRPL\",\"Sei\",\"zkLighter\",\"Plasma\",\"Cronos\",\"Mantle\",\"SX Rollup\",\"Mayachain\",\"TON\",\"Injective\",\"PulseChain\",\"Stellar\",\"BOT Chain\",\"Celo\",\"XPR Network\",\"Doma\",\"Berachain\",\"Cardano\",\"Sonic\",\"Gnosis\",\"ZKsync Era\",\"Hedera\",\"Morph\",\"Hydration\",\"ValueChain\",\"Aptos\",\"Kaia\",\"Katana\",\"Tempo\",\"Linea\","
+},
+"llama_stable": {
+"s": 200,
+"n": 20242,
+"t": "[{\"totalCirculatingUSD\":{\"peggedUSD\":5684542.365310687},\"name\":\"Manta\"},{\"totalCirculatingUSD\":{\"peggedUSD\":0},\"name\":\"ThunderCore\"},{\"totalCirculatingUSD\":{\"peggedUSD\":37070973.56688176},\"name\":\"Movement\"},{\"totalCirculatingUSD\":{\"peggedUSD\":0},\"name\":\"Shiden\"},{\"totalCirculatingUSD\":{\"peggedUSD\":0},\"name\":\"Corn\"},{\"totalCirculatingUSD\":{\"peggedUSD\":35993995.989699475},\"name\":\"Starknet\"},{\"totalCirculatingUSD\":{\"peggedUSD\":92673738464.32011,\"peggedRUB\":570246236.6703849,\"peggedCNY\":2247379.8000000003,\"peggedEUR\":6583639.655456192},\"name\":\"Tron\"},{\"totalCirculatingUSD\":{\"peggedUSD\":706058.0104945428},\"name\":\"CORE\"},{\"totalCirculatingUSD\":{\"peggedUSD\":288737.15809272596},\"name\":\"ApeChain\"},{\""
+},
+"llama_aave": {
+"s": 200,
+"n": 11089491,
+"t": "{\"id\":\"parent#aave\",\"name\":\"Aave\",\"url\":\"https://aave.com\",\"description\":\"Aave is an Open Source and Non-Custodial protocol to earn interest on deposits and borrow assets\",\"logo\":\"https://icons.llamao.fi/icons/protocols/aave\",\"chains\":[],\"gecko_id\":\"aave\",\"cmcId\":\"7278\",\"treasury\":\"aave.js\",\"twitter\":\"aave\",\"governanceID\":[\"snapshot:aave.eth\",\"eip155:1:0xEC568fffba86c094cf06b22134B23074DFE2252c\"],\"wrongLiquidity\":true,\"github\":[\"aave\",\"aave-dao\"],\"stablecoins\":[\"gho\"],\"symbol\":\"AAVE\",\"address\":\"0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9\",\"currentChainTvls\":{\"Ethereum-staking\":248536620,\"Ethereum-pool2\":391842,\"Avalanche-borrowed\":223979086,\"Ethereum\":13866019926,\"Polygon-borrowed\":52677462,\""
+},
+"llama_hl": {
+"s": 200,
+"n": 111568,
+"t": "{\"id\":\"parent#hyperliquid\",\"name\":\"Hyperliquid\",\"url\":\"https://app.hyperliquid.xyz\",\"referralUrl\":\"https://app.hyperliquid.xyz/join/DEFILLAMAS\",\"description\":\"Hyperliquid is a Layer 1 blockchain best known for perpetual futures and spot trading. Beyond its flagship decentralized exchange (DEX), the ecosystem supports borrowing, lending, RWAs, and a full-fledged EVM.\",\"logo\":\"https://icons.llamao.fi/icons/protocols/hyperliquid\",\"gecko_id\":\"hyperliquid\",\"cmcId\":\"32196\",\"chains\":[\"Hyperliquid L1\"],\"twitter\":\"HyperliquidX\",\"github\":[\"hyperliquid-dex\"],\"symbol\":\"HYPE\",\"address\":\"hyperliquid:0x0d01dc56dcaaca66ad901c959b4011ec\",\"linkedProtocols\":[\"Hyperliquid\",\"Hyperliquid HLP\",\"Hyperliquid Perps\","
+},
+"cg_markets": {
+"s": 200,
+"n": 5451,
+"t": "[{\"id\":\"bitcoin\",\"symbol\":\"btc\",\"name\":\"Bitcoin\",\"image\":\"https://coin-images.coingecko.com/coins/images/1/large/bitcoin.png?1696501400\",\"current_price\":59789,\"market_cap\":1202546025279,\"market_cap_rank\":1,\"fully_diluted_valuation\":1202546025279,\"total_volume\":69552040284,\"high_24h\":60799,\"low_24h\":55298,\"price_change_24h\":377.76,\"price_change_percentage_24h\":0.63584,\"market_cap_change_24h\":7523985495,\"market_cap_change_percentage_24h\":0.62961,\"circulating_supply\":20115334.0,\"total_supply\":20115334.0,\"max_supply\":21000000.0,\"ath\":126080,\"ath_change_percentage\":-52.57854,\"ath_date\":\"2025-10-06T10:57:42.000Z\",\"atl\":67.81,\"atl_change_percentage\":88072.55394,\"atl_date\":\"2013-07-05T16:00:00.000Z\""
+},
+"cg_coin": {
+"s": 200,
+"n": 30486,
+"t": "{\"id\":\"solana\",\"symbol\":\"sol\",\"name\":\"Solana\",\"web_slug\":\"solana\",\"asset_platform_id\":null,\"platforms\":{\"\":\"\"},\"detail_platforms\":{\"\":{\"decimal_place\":null,\"contract_address\":\"\"}},\"block_time_in_minutes\":0,\"hashing_algorithm\":null,\"categories\":[\"Smart Contract Platform\",\"Solana Ecosystem\",\"Layer 1 (L1)\",\"FTX Holdings\",\"Multicoin Capital Portfolio\",\"Proof of Stake (PoS)\",\"Alameda Research Portfolio\",\"Andreessen Horowitz (a16z) Portfolio\",\"GMCI Layer 1 Index\",\"GMCI 30 Index\",\"Delphi Ventures Portfolio\",\"GMCI Index\",\"Polychain Capital Portfolio\",\"Made in USA\",\"Coinbase 50 Index\",\"CoinList Launchpad\"],\"preview_listing\":false,\"public_notice\":null,\"additional_notices\":[],\"description\":{\"en\":\"Solan"
+},
+"bc_hash": {
+"s": 200,
+"n": 1452,
+"t": "{\"status\":\"ok\",\"name\":\"Hash Rate\",\"unit\":\"Hash Rate TH/s\",\"period\":\"day\",\"description\":\"The estimated number of tera hashes per second (trillions of hashes per second) the Bitcoin network is performing.\",\"values\":[{\"x\":1792627200,\"y\":8.944837605489599E8},{\"x\":1792713600,\"y\":1.2159388619962423E9},{\"x\":1792800000,\"y\":1.0202705393761574E9},{\"x\":1792886400,\"y\":1.090152083169045E9},{\"x\":1792972800,\"y\":1.1320810094447773E9},{\"x\":1793059200,\"y\":1.1041283919276223E9},{\"x\":1793145600,\"y\":1.0062942306175799E9},{\"x\":1793232000,\"y\":9.666672608032416E8},{\"x\":1793318400,\"y\":1.0620348956616763E9},{\"x\":1793404800,\"y\":1.076785380323644E9},{\"x\":1793491200,\"y\":1.0989111073165958E9},{\"x\":1793577600,\"y\":9.366557"
+},
+"bc_stats": {
+"s": 200,
+"n": 577,
+"t": "{\"timestamp\":1.795276906E12,\"market_price_usd\":60092.93,\"hash_rate\":1.1460641112988408E12,\"total_fees_btc\":-53437500000,\"n_btc_mined\":53437500000,\"n_tx\":634737,\"n_blocks_mined\":171,\"minutes_between_blocks\":7.9882,\"totalbc\":2011538437500000,\"n_blocks_total\":976923,\"estimated_transaction_volume_usd\":1.8425223410565113E10,\"blocks_size\":298125703,\"miners_revenue_usd\":0.0,\"nextretarget\":977759,\"difficulty\":134823837323272,\"estimated_btc_sent\":30661216570011,\"miners_revenue_btc\":0,\"total_btc_sent\":164802125306628,\"trade_volume_btc\":14560.24,\"trade_volume_usd\":8.749674831032E8}"
+},
+"mempool_diff": {
+"s": 200,
+"n": 6402,
+"t": "{\"hashrates\":[{\"timestamp\":1787356800,\"avgHashrate\":863592363663592800000},{\"timestamp\":1787443200,\"avgHashrate\":945923920892237000000},{\"timestamp\":1787529600,\"avgHashrate\":846580304320033500000},{\"timestamp\":1787616000,\"avgHashrate\":880324282514252800000},{\"timestamp\":1787702400,\"avgHashrate\":890396923247641600000},{\"timestamp\":1787788800,\"avgHashrate\":964392880970843300000},{\"timestamp\":1787875200,\"avgHashrate\":894733549896998000000},{\"timestamp\":1787961600,\"avgHashrate\":829936924401655600000},{\"timestamp\":1788048000,\"avgHashrate\":909274181802149700000},{\"timestamp\":1788134400,\"avgHashrate\":1.05306583701446e+21},{\"timestamp\":1788220800,\"avgHashrate\":921439610791292700000},{\"timestamp\":178"
+},
+"mempool_fees": {
+"s": 200,
+"n": 74,
+"t": "{\"fastestFee\":2,\"halfHourFee\":1,\"hourFee\":1,\"economyFee\":1,\"minimumFee\":1}"
+},
+"mempool_ln": {
+"s": 200,
+"n": 359,
+"t": "{\"latest\":{\"id\":115515,\"added\":\"2026-05-21T00:00:00.000Z\",\"channel_count\":41087,\"node_count\":17437,\"total_capacity\":489660335543,\"tor_nodes\":8974,\"clearnet_nodes\":4695,\"unannounced_nodes\":2001,\"avg_capacity\":11917646,\"avg_fee_rate\":817,\"avg_base_fee_mtokens\":881,\"med_capacity\":2100000,\"med_fee_rate\":100,\"med_base_fee_mtokens\":100,\"clearnet_tor_nodes\":1767}}"
+},
+"beacon": {
+"s": 401,
+"n": 96,
+"t": "{\"error\":\"Unauthorized: a valid API key is required. Create one at https://beaconcha.in/login\"}\n"
+},
+"hl_meta": {
+"s": 200,
+"n": 72793,
+"t": "[{\"universe\":[{\"szDecimals\":5,\"name\":\"BTC\",\"maxLeverage\":40,\"marginTableId\":56},{\"szDecimals\":4,\"name\":\"ETH\",\"maxLeverage\":25,\"marginTableId\":55},{\"szDecimals\":2,\"name\":\"ATOM\",\"maxLeverage\":5,\"marginTableId\":5},{\"szDecimals\":1,\"name\":\"MATIC\",\"maxLeverage\":20,\"marginTableId\":20,\"isDelisted\":true},{\"szDecimals\":1,\"name\":\"DYDX\",\"maxLeverage\":5,\"marginTableId\":5},{\"szDecimals\":2,\"name\":\"SOL\",\"maxLeverage\":20,\"marginTableId\":54},{\"szDecimals\":2,\"name\":\"AVAX\",\"maxLeverage\":10,\"marginTableId\":52},{\"szDecimals\":3,\"name\":\"BNB\",\"maxLeverage\":10,\"marginTableId\":51},{\"szDecimals\":1,\"name\":\"APE\",\"maxLeverage\":5,\"marginTableId\":5},{\"szDecimals\":1,\"name\":\"OP\",\"maxLeverage\":5,\"marginTableId\":5},{\"szDecimals"
+},
+"okx_fund": {
+"s": 200,
+"n": 524,
+"t": "{\"code\":\"0\",\"data\":[{\"formulaType\":\"withRate\",\"fundingRate\":\"0.0000014541903432\",\"fundingTime\":\"1795305600000\",\"impactValue\":\"20000.0000000000000000\",\"instId\":\"BTC-USDT-SWAP\",\"instType\":\"SWAP\",\"interestRate\":\"0.0001000000000000\",\"maxFundingRate\":\"0.00375\",\"method\":\"current_period\",\"minFundingRate\":\"-0.00375\",\"nextFundingRate\":\"\",\"nextFundingTime\":\"1795334400000\",\"premium\":\"-0.0005344771143582\",\"prevFundingTime\":\"1795276800000\",\"settFundingRate\":\"0.0000009641044106\",\"settState\":\"settled\",\"ts\":\"1795277282827\"}],\"msg\":\"\"}"
+},
+"okx_oi": {
+"s": 200,
+"n": 189,
+"t": "{\"code\":\"0\",\"data\":[{\"instId\":\"BTC-USDT-SWAP\",\"instType\":\"SWAP\",\"oi\":\"3215557.73000001054\",\"oiCcy\":\"32155.5773000001054\",\"oiUsd\":\"1922639846.80614630205572\",\"ts\":\"1795277300694\"}],\"msg\":\"\"}"
+},
+"bybit_tick": {
+"s": 403,
+"n": 96,
+"t": "{\n    error:The Amazon CloudFront distribution is configured to block access from your country\n}"
+},
+"binance_fund": {
+"s": 451,
+"n": 224,
+"t": "{\n  \"code\": 0,\n  \"msg\": \"Service unavailable from a restricted location according to 'b. Eligibility' in https://www.binance.com/en/terms. Please contact customer service if you believe you received this message in error.\"\n}"
+},
+"fng": {
+"s": 200,
+"n": 414,
+"t": "{\n\t\"name\": \"Fear and Greed Index\",\n\t\"data\": [\n\t\t{\n\t\t\t\"value\": \"12\",\n\t\t\t\"value_classification\": \"Extreme Fear\",\n\t\t\t\"timestamp\": \"1795219200\",\n\t\t\t\"time_until_update\": \"28298\"\n\t\t},\n\t\t{\n\t\t\t\"value\": \"12\",\n\t\t\t\"value_classification\": \"Extreme Fear\",\n\t\t\t\"timestamp\": \"1795132800\"\n\t\t},\n\t\t{\n\t\t\t\"value\": \"10\",\n\t\t\t\"value_classification\": \"Extreme Fear\",\n\t\t\t\"timestamp\": \"1795046400\"\n\t\t}\n\t],\n\t\"metadata\": {\n\t\t\"error\": null\n\t}\n}"
+},
+"sol_rpc": {
+"s": 200,
+"n": 170,
+"t": "{\"jsonrpc\":\"2.0\",\"result\":{\"absoluteSlot\":472200432,\"blockHeight\":450214378,\"epoch\":1093,\"slotIndex\":24432,\"slotsInEpoch\":432000,\"transactionCount\":567752594451},\"id\":1}\n"
+},
+"sol_supply": {
+"s": 200,
+"n": 150311,
+"t": "{\"jsonrpc\":\"2.0\",\"result\":{\"context\":{\"apiVersion\":\"4.4.0\",\"slot\":472200435},\"value\":{\"circulating\":591961784664395244,\"nonCirculating\":46019806597829025,\"nonCirculatingAccounts\":[\"2izHryuGraAG9nFcd33hnRKfejD4KqvDEriKZdX9LCyU\",\"32PyKWBPdnYGEKyrurxzNo93KEcVJvW8HHoLzBhT6mik\",\"H4UQERNBvsumippNgeiJcnS3zz5X3jk6k2sPHZz8X5Ft\",\"8s6i6HFQ1TMiosWLiWHuQnmGksYSz8dJMx4w6FwzaV8c\",\"9jMh48y7XNFBhLsM9NJaQppEZAU88d11KQy8XgVCpwW9\",\"FTMkLVY63cMNxEJNvsbgdQwTLRn2JiVTYSq1wpgKkjhj\",\"BsKsunvENxAraBrL77UfAn1Gi7unVEmQAdCbhsjUN6tU\",\"pX8G9BFw8Az6wCFu3GfytcYF8399W2s2X9WX6rVfHD7\",\"9dc7KrS8oQQnsSHyPxvjh4TTfDM6nxkxTVrhaCWoQe9J\",\"AzLqtov8pLp7Xw2Y933KLB1BJweuohaoD7nsMsqFUTEw\",\"5sHv8o1QYQ3cmvq8Vr164mSZwFHKpn9LJiwjPLaypFBN\",\"D3V"
+},
+"sol_vote": {
+"s": 200,
+"n": 311690,
+"t": "{\"jsonrpc\":\"2.0\",\"result\":{\"current\":[{\"activatedStake\":205272728582303,\"commission\":0,\"epochCredits\":[[1089,797854257492,769228628478],[1090,827325343222,797854257492],[1091,860013769869,827325343222],[1092,889204929020,860013769869],[1093,890905957794,889204929020]],\"epochVoteAccount\":true,\"inflationRewardsCommissionBps\":0,\"lastVote\":472200470,\"nodePubkey\":\"2T9NfUEDBcFUGGX3GgguMboJaGTe9eZMGemptqXMnvzR\",\"rootSlot\":472200470,\"votePubkey\":\"242yMU95HFBsubQPoHc4yv4gcbmYSyUUHSFzbGDt6RYt\"},{\"activatedStake\":242254478609258,\"commission\":5,\"epochCredits\":[[1089,895661718989,857594732896],[1090,931981651718,895661718989],[1091,966390480484,931981651718],[1092,1002452558492,966390480484],[1093,100430"
+},
+"eth_stake": {
+"s": 200,
+"n": 417570,
+"t": "{\"block_number\":26464570,\"d1\":[{\"supply\":122235849.15773804,\"timestamp\":\"2026-11-20T16:06:24Z\"},{\"supply\":122235850.30964305,\"timestamp\":\"2026-11-20T16:12:48Z\"},{\"supply\":122235853.33263992,\"timestamp\":\"2026-11-20T16:19:12Z\"},{\"supply\":122235858.54544511,\"timestamp\":\"2026-11-20T16:25:36Z\"},{\"supply\":122235864.8956076,\"timestamp\":\"2026-11-20T16:32:00Z\"},{\"supply\":122235872.16037036,\"timestamp\":\"2026-11-20T16:38:24Z\"},{\"supply\":122235880.7634759,\"timestamp\":\"2026-11-20T16:44:48Z\"},{\"supply\":122235889.93058796,\"timestamp\":\"2026-11-20T16:51:12Z\"},{\"supply\":122235899.86497615,\"timestamp\":\"2026-11-20T16:57:36Z\"},{\"supply\":122235909.47086257,\"timestamp\":\"2026-11-20T17:04:00Z\"},{\"supply\":122235918.8"
+},
+"etherscan_supply": {
+"s": 200,
+"n": 155,
+"t": "{\"status\":\"0\",\"message\":\"NOTOK\",\"result\":\"You are using a deprecated V1 endpoint, switch to Etherscan API V2 using https://docs.etherscan.io/v2-migration\"}"
+},
+"gh_sol": {
+"s": 200,
+"n": 6474,
+"t": "{\"id\":121470383,\"node_id\":\"MDEwOlJlcG9zaXRvcnkxMjE0NzAzODM=\",\"name\":\"solana\",\"full_name\":\"solana-labs/solana\",\"private\":false,\"owner\":{\"login\":\"solana-labs\",\"id\":35608259,\"node_id\":\"MDEyOk9yZ2FuaXphdGlvbjM1NjA4MjU5\",\"avatar_url\":\"https://avatars.githubusercontent.com/u/35608259?v=4\",\"gravatar_id\":\"\",\"url\":\"https://api.github.com/users/solana-labs\",\"html_url\":\"https://github.com/solana-labs\",\"followers_url\":\"https://api.github.com/users/solana-labs/followers\",\"following_url\":\"https://api.github.com/users/solana-labs/following{/other_user}\",\"gists_url\":\"https://api.github.com/users/solana-labs/gists{/gist_id}\",\"starred_url\":\"https://api.github.com/users/solana-labs/starred{/owner}{/repo}\",\"sub"
+},
+"llama_treasury": {
+"s": 200,
+"n": 911117,
+"t": "{\"id\":\"parent#uniswap-treasury\",\"name\":\"Uniswap (treasury)\",\"url\":\"https://app.uniswap.org/\",\"description\":\"Swap, earn, and build on the leading decentralized crypto trading protocol.\",\"logo\":\"https://icons.llamao.fi/icons/protocols/uniswap\",\"gecko_id\":\"uniswap\",\"cmcId\":\"7083\",\"chains\":[\"Ethereum\"],\"twitter\":\"Uniswap\",\"treasury\":\"uniswap.js\",\"governanceID\":[\"snapshot:uniswap\",\"eip155:1:0x408ED6354d4973f66138C91495F2f2FCbd8724C3\",\"compound:ethereum:0x5e4be8bc9637f0eaa1a755019e06a68ce081d58f\"],\"github\":[\"Uniswap\"],\"symbol\":\"UNI\",\"address\":\"0x1f9840a85d5af5bf1d1762f925bdaddc4201f984\",\"module\":\"treasury/uniswap.js\",\"category\":\"Treasury\",\"tvlCodePath\":\"https://github.com/DefiLlama/DefiLlama-Adapt"
+},
+"llama_emis": {
+"s": 402,
+"n": 66,
+"t": "Upgrade to the paid API plan at https://defillama.com/subscription"
+},
+"llama_raises": {
+"s": 402,
+"n": 66,
+"t": "Upgrade to the paid API plan at https://defillama.com/subscription"
+},
+"llama_etf": {
+"s": 200,
+"n": 9179259,
+"t": "{\"id\":\"parent#pendle\",\"name\":\"Pendle\",\"url\":\"https://pendle.finance/\",\"description\":\"Pendle Finance is a protocol that enables the trading of tokenized future yield on an AMM system.\",\"logo\":\"https://icons.llamao.fi/icons/protocols/pendle\",\"gecko_id\":\"pendle\",\"cmcId\":\"9481\",\"chains\":[],\"twitter\":\"pendle_fi\",\"github\":[\"pendle-finance\"],\"symbol\":\"PENDLE\",\"address\":\"0x808507121b80c02388fad14726482e061b8da827\",\"currentChainTvls\":{\"OP Mainnet\":0,\"Ethereum-staking\":118930607,\"Arbitrum\":40485175,\"Avalanche\":44766,\"Avalanche-pool2\":469883,\"Hyperliquid L1\":7127583,\"Ethereum\":712641954,\"Berachain\":696,\"Ethereum-pool2\":79612,\"Sonic\":409578,\"Base\":2056479,\"Plasma\":1802250,\"Mantle\":91583,\"BSC\":5206846,\"X"
+},
+"cg_btc_hist": {
+"s": 200,
+"n": 74253,
+"t": "{\"prices\":[[1792688400000,81170.8057324379],[1792692000000,81136.01056762585],[1792695600000,81292.2326894585],[1792699200000,81387.14751020947],[1792702800000,81178.33923388347],[1792706400000,81395.62043356516],[1792710000000,81255.39801185396],[1792713600000,81328.20561459455],[1792717200000,81373.68817406888],[1792720800000,81258.10264850924],[1792724400000,81868.73796499605],[1792728000000,81796.37097495349],[1792731600000,81492.29276604367],[1792735200000,81751.26059995872],[1792738800000,81794.14936223833],[1792742400000,81485.65375141255],[1792746000000,81670.18530082236],[1792749600000,81577.5249863132],[1792753200000,81592.8922639217],[1792756800000,81633.9711765576],[1792760400000"
+},
+"blockchair_btc": {
+"s": 200,
+"n": 1868,
+"t": "{\"data\":{\"blocks\":976924,\"transactions\":1484173633,\"outputs\":4027084860,\"circulation\":2011535854155096,\"blocks_24h\":171,\"transactions_24h\":635167,\"difficulty\":134823837323272.7,\"volume_24h\":163213634019314,\"mempool_transactions\":69091,\"mempool_size\":101370615,\"mempool_tps\":4.35,\"mempool_total_fee_usd\":3982.9106,\"best_block_height\":976923,\"best_block_hash\":\"000000000000000000007232c15a5cfc6a3dc98e5650c793c7dce98b0081e4e3\",\"best_block_time\":\"2026-11-21 15:56:20\",\"blockchain_size\":784761909210,\"average_transaction_fee_24h\":663,\"inflation_24h\":53437500000,\"median_transaction_fee_24h\":25,\"cdd_24h\":23767549.065410353,\"mempool_outputs\":221218,\"largest_transaction_24h\":{\"hash\":\"04414cc694456cc9c8a7b"
+},
+"blockchair_eth": {
+"s": 200,
+"n": 2471,
+"t": "{\"data\":{\"blocks\":26465559,\"transactions\":3863273027,\"blocks_24h\":7171,\"circulation_approximate\":\"122374665718230000000000000\",\"transactions_24h\":1944638,\"difficulty\":0,\"volume_24h_approximate\":\"4983445496019301000000000\",\"mempool_transactions\":286,\"mempool_median_gas_price\":253177857,\"mempool_tps\":4.65,\"mempool_total_value_approximate\":\"44590930579279520000\",\"best_block_height\":26464571,\"best_block_hash\":\"f350dd254c5810db3851bbc0d8680d9c0303dee79fb92f99c3d96e8d2a0b9346\",\"best_block_time\":\"2026-11-21 16:08:11\",\"uncles\":1306721,\"uncles_24h\":0,\"blockchain_size\":1811261457032,\"calls\":20477581110,\"average_transaction_fee_24h\":\"159524252685442\",\"median_transaction_fee_24h\":\"42002100000000\",\"infla"
+}
+}
