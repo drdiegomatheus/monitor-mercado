@@ -215,6 +215,12 @@
   "BOVX11": {
    "setor": "ETFs Ibovespa"
   },
+  "QQQI11": {
+   "setor": "ETFs internacionais"
+  },
+  "SPYI11": {
+   "setor": "ETFs internacionais"
+  },
   "IVVB11": {
    "setor": "ETFs internacionais"
   },
