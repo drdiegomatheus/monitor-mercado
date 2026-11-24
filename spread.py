@@ -214,9 +214,9 @@ function ccRun(){var box=document.getElementById('ccres');if(!CC){box.innerHTML=
  var ups=bs.filter(function(b){return b.up}).sort(function(a,b){return a.lo-b.lo}),dns=bs.filter(function(b){return!b.up}).sort(function(a,b){return b.hi-a.hi});
  ups.forEach(function(b,i){b.k=i+1});dns.forEach(function(b,i){b.k=i+1});
  var ordem=ups.slice().reverse().concat(dns),lu=S.totA>0&&ups.length?Math.max(1,Math.floor(S.totA/S.na/ups.length)):1,ld=S.totB>0&&dns.length?Math.max(1,Math.floor(S.totB/S.nb/dns.length)):lu;
- var tot=0,usoA=0,usoB=0,rows='',txt=[],lev=[],dtt=0,cic=0;
+ var tot=0,usoA=0,usoB=0,rows='',txt=[],lev=[],dtt=0,cic=0,lotU=0,lotD=0;
  ordem.forEach(function(b){var key=b.lo+'|'+b.hi,lots=S.lots&&S.lots[key]>0?S.lots[key]:(b.up?lu:ld),r=ccSim(w.d,w.t,b,w.h),g=(b.hi-b.lo)*lots,f=fee*lots,net=ccNet(g,f,S.ir),total=ccTot(r,g,f,S.ir);tot+=total;dtt+=r.dtc;cic+=r.ciclos;
-  if(b.up)usoA+=lots*S.na;else usoB+=lots*S.nb;
+  if(b.up){usoA+=lots*S.na;lotU+=lots}else{usoB+=lots*S.nb;lotD+=lots}
   var ent=b.up?b.hi:b.lo,sai=b.up?b.lo:b.hi,qa=lots*S.na,qb=lots*S.nb,acao=b.up?'Vender '+qa+' '+S.a+' · comprar '+qb+' '+S.b:'Comprar '+qa+' '+S.a+' · vender '+qb+' '+S.b;
   lev.push({v:ent,c:b.up?'#ef4444':'#22c55e',t:(b.up?'▲':'▼')+b.k+' '+f2(ent)});
   txt.push((b.up?'▲':'▼')+b.k+': troca quando a diferença '+(b.up?'≥':'≤')+' R$ '+f2(ent)+' → '+acao+' | desfaz quando '+(b.up?'≤':'≥')+' R$ '+f2(sai));
@@ -227,6 +227,7 @@ function ccRun(){var box=document.getElementById('ccres');if(!CC){box.innerHTML=
  var warn=(S.totA>0&&usoA>S.totA?'<span style="color:var(--rd)">▲ usam '+f2(usoA,0)+' '+S.a+' e você tem '+f2(S.totA,0)+'. </span>':'')+(S.totB>0&&usoB>S.totB?'<span style="color:var(--rd)">▼ usam '+f2(usoB,0)+' '+S.b+' e você tem '+f2(S.totB,0)+'.</span>':'');
  box.innerHTML=(bs.length?'<div class=sc><table class=cc-t><thead><tr><th>Camada</th><th>Troca quando a diferença</th><th>Ação</th><th>Desfaz quando</th><th>Lotes</th><th>Ciclos</th><th>Tempo/ciclo</th><th>Líquido/ciclo</th><th>Total no período</th><th>Pior excursão</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
   +'<div class=sp-line style="margin-top:8px"><span>Ganho líquido no período ('+n+(w.h?' velas de 1h':' pregões')+', taxas B3'+(S.ir?' e IR 15%':', antes do IR')+')</span><b>R$ '+f2(tot)+'</b></div>'
+  +'<div class=sp-line><span>Total de lotes nas camadas (soma automática)</span><b>'+f2(lotU+lotD,0)+' lotes · ▲ '+f2(lotU,0)+' + ▼ '+f2(lotD,0)+'</b></div><div class=sp-line><span>Ações necessárias (▲ vende '+S.a+' · ▼ vende '+S.b+')</span><b>'+f2(usoA,0)+' '+S.a+' · '+f2(usoB,0)+' '+S.b+'</b></div>'
   +'<div class=sp-line><span>Taxas por ciclo de 1 lote (4 pernas × 0,03%, corretagem zero)</span><b>R$ '+f2(fee)+'</b></div>'
   +(w.h?'<div class=sp-line><span>Ciclos no mesmo dia (day trade: taxa 0,023%, IR 20%)</span><b>'+dtt+' de '+cic+'</b></div>':'')+'<div class=sp-line><span>Fora de todas as camadas no período</span><b>'+f2(fora/n*100,0)+'% dos dias · maior sequência '+f2(mseq,0)+' dias</b></div>'+(warn?'<div class=sp-line><span>Atenção</span><b>'+warn+'</b></div>':'')
   +'<h3 style="margin:14px 0 6px;font-size:13px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em">Ordens para o robô (só valores de spread)</h3><textarea id=ccout readonly rows='+Math.min(10,txt.length+1)+' style="width:100%;background:var(--card);border:1px solid var(--line);color:var(--tx);border-radius:10px;padding:8px;font-size:13px">'+H_(txt.join(String.fromCharCode(10)))+'</textarea><div class=sp-in><button id=cccp class=sp-btn>Copiar ordens</button><span id=ccok class=mu></span></div>':'<div class=mu>Defina o passo e as camadas, ou escreva as faixas.</div>')
