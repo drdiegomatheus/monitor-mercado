@@ -248,7 +248,7 @@ function ccRecHtml(S){var key=[S.a,S.b,S.base,CCW,S.ir].join('|');if(CCR.k!=key)
  +'<div class=sp-in style="margin-top:8px"><button id=ccapl class=sp-btn>Aplicar essa configuração</button></div></div></div>';return o}
 function ccApply(){var B=CCR.v;if(!B||!CC)return;var S=CC;S.na=B.a;S.nb=B.b;S.centro=B.centro;S.modo='deg';S.passo=B.passo;S.nUp=B.nUp;S.nDn=B.nDn;S.lots={};
  var U=B.L.filter(function(b){return b.up}),D=B.L.filter(function(b){return!b.up}),au=ccAlloc(U,S.totA>0?Math.floor(S.totA/B.a):0),ad=ccAlloc(D,S.totB>0?Math.floor(S.totB/B.b):0);
- U.forEach(function(b,i){if(au[i]>0)S.lots[b.lo+'|'+b.hi]=au[i]});D.forEach(function(b,i){if(ad[i]>0)S.lots[b.lo+'|'+b.hi]=ad[i]});ccFill();ccSave();ccRun()}
+ if(S.totA>0)U.forEach(function(b,i){S.lots[b.lo+'|'+b.hi]=au[i]});if(S.totB>0)D.forEach(function(b,i){S.lots[b.lo+'|'+b.hi]=ad[i]});ccFill();ccSave();ccRun()}
 function ccRun(){var box=document.getElementById('ccres');if(!CC){box.innerHTML='<div class=mu>Escolha dois ativos com histórico.</div>';document.getElementById('cch').innerHTML='';return}
  var S=CC;if(S.base=='1h'&&!(H1[S.a]&&H1[S.b])){if(H1E[S.a]||H1E[S.b]){S.base='d';ccSave();ccFill();ccRun();return}box.innerHTML='<div class=mu>Carregando as velas de 1 hora…</div>';var pend=2,fim=function(){if(--pend==0)ccRun()};h1load(S.a,fim);h1load(S.b,fim);return}
  var se=ccSeries(S.a,S.b,S.na,S.nb);if(!se){box.innerHTML='<div class=mu>Sem histórico suficiente para este par.</div>';document.getElementById('cch').innerHTML='';return}
