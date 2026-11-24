@@ -11,18 +11,27 @@
   ]
  },
  "ativos": {
-  "ITUB4": {
+   "ITUB3": {
+   "setor": "Bancos"
+  },
+ "ITUB4": {
    "setor": "Bancos",
    "destaque": true
   },
-  "BBDC4": {
+   "BBDC3": {
+   "setor": "Bancos"
+  },
+ "BBDC4": {
    "setor": "Bancos",
    "destaque": true
   },
   "BPAC11": {
    "setor": "Bancos"
   },
-  "ITSA4": {
+   "ITSA3": {
+   "setor": "Bancos"
+  },
+ "ITSA4": {
    "setor": "Bancos"
   },
   "SANB11": {
@@ -45,7 +54,10 @@
   "CXSE3": {
    "setor": "Seguros e serviços financeiros"
   },
-  "PETR4": {
+   "PETR3": {
+   "setor": "Petróleo e gás"
+  },
+ "PETR4": {
    "setor": "Petróleo e gás",
    "destaque": true
   },
