@@ -56,6 +56,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: timeout 280 python onchain.py || true
+      - name: candles de 1h do spread
+        # 2 anos de velas de 1 hora dos ativos do Spread (um lote por rodada; atualiza a cada 12 h)
+        run: HORARIO_ORC=120 timeout 170 python horario.py || true
       - name: painel
         run: python monitor.py --painel
       - name: guardar

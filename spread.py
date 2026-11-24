@@ -164,27 +164,33 @@ var NICE=[.01,.02,.05,.1,.2,.25,.5,1,2,5,10,20,50,100],CC=null,CCW=+(st('spccw')
 function pnum(s){var v=parseFloat(String(s).replace(',','.'));return isNaN(v)?0:v}
 function rr(v){return Math.round(v*10000)/10000}
 function H_(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
-function ccSeries(a,b,na,nb){var X=BY[a],Y=BY[b];if(!X||!Y)return null;var al=align(X.dt,X.dc,Y.dt,Y.dc);if(al.t.length<30)return null;var d=[];for(var i=0;i<al.t.length;i++)d.push(na*al.x[i]-nb*al.y[i]);return{t:al.t,d:d,pA:al.x[al.x.length-1],pB:al.y[al.y.length-1]}}
-function ccWin(se){var n=se.t.length,w=(!CCW||CCW>=n)?n:CCW,i=n-w;return{t:se.t.slice(i),d:se.d.slice(i),pA:se.pA,pB:se.pB}}
+var H1={},H1E={};
+function h1load(n,cb){if(H1[n]){cb();return}if(H1E[n]){cb();return}var x=BY[n];if(!x||!x.k){H1E[n]=1;cb();return}
+ fetch('categorias/'+x.k+'/dados/h1/'+n+'.json',{cache:'no-cache'}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){H1[n]={t:j.t,c:j.c};cb()}).catch(function(){H1E[n]=1;cb()})}
+function ccSeries(a,b,na,nb){var X=BY[a],Y=BY[b];if(!X||!Y)return null;
+ if(CC&&CC.base=='1h'&&H1[a]&&H1[b]){var A1=H1[a],B1=H1[b],al1=align(A1.t,A1.c,B1.t,B1.c);if(al1.t.length>=60){var d1=[],t1=[];for(var j=0;j<al1.t.length;j++){d1.push(na*al1.x[j]-nb*al1.y[j]);t1.push(al1.t[j]/1440)}return{t:t1,d:d1,pA:al1.x[al1.x.length-1],pB:al1.y[al1.y.length-1],h:1}}}
+ var al=align(X.dt,X.dc,Y.dt,Y.dc);if(al.t.length<30)return null;var d=[];for(var i=0;i<al.t.length;i++)d.push(na*al.x[i]-nb*al.y[i]);return{t:al.t,d:d,pA:al.x[al.x.length-1],pB:al.y[al.y.length-1]}}
+function ccWin(se){var n=se.t.length,w,i;if(se.h){var dias=!CCW?99999:(CCW<=120?182:CCW<=250?365:730),lim=se.t[n-1]-dias;i=0;while(i<n-1&&se.t[i]<lim)i++}else{w=(!CCW||CCW>=n)?n:CCW;i=n-w}return{t:se.t.slice(i),d:se.d.slice(i),pA:se.pA,pB:se.pB,h:se.h}}
 function ccCenter(se){var tl=se.t[se.t.length-1],s=0,c=0;for(var i=0;i<se.t.length;i++){if(se.t[i]>=tl-365){s+=se.d[i];c++}}return rr(Math.round(s/c*100)/100)}
 function ccRatio(pA,pB,nA,nB){if(nA&&nB&&nA.slice(0,4)==nB.slice(0,4))return{a:1,b:1,e:0};var best=null;for(var a=1;a<=10;a++)for(var b=1;b<=10;b++){var e=Math.abs(a*pA/(b*pB)-1)+0.004*(a+b);if(!best||e<best.e)best={a:a,b:b,e:e}}return best}
 function ccFee(S,pA,pB){return 0.0003*2*(S.na*pA+S.nb*pB)}
-function ccNet(g,f,ir){var n=g-f;return(ir&&n>0)?n*0.85:n}
+function ccNet(g,f,ir,al){var n=g-f;return(ir&&n>0)?n*(1-(al||.15)):n}
+function ccTot(r,g,f,ir){var fdt=f*0.23/0.30;return(r.ciclos-r.dtc)*ccNet(g,f,ir,.15)+r.dtc*ccNet(g,fdt,ir,.2)}
 function ccBands(S){var o=[],k;
  if(S.modo=='mao'){String(S.faixas||'').split(String.fromCharCode(10)).forEach(function(l){var s=l.replace(/([0-9]) *- *(?=-?[0-9])/g,'$1 ').replace(/ a /g,' ');var m=s.match(/-?[0-9]+(?:[.,][0-9]+)?/g);if(m&&m.length>=2){var p=pnum(m[0]),q=pnum(m[1]);if(p!=q)o.push({lo:Math.min(p,q),hi:Math.max(p,q)})}});o.forEach(function(b){b.up=(b.lo+b.hi)/2>=S.centro});return o}
  var st1=S.passo;if(!(st1>0))return o;
  for(k=S.nUp;k>=1;k--)o.push({lo:rr(S.centro+(k-1)*st1),hi:rr(S.centro+k*st1),up:true});
  for(k=1;k<=S.nDn;k++)o.push({hi:rr(S.centro-(k-1)*st1),lo:rr(S.centro-k*st1),up:false});return o}
-function ccSim(d,t,b){var up=b.up,inn=false,ent=0,tr=0,du=0,ex=0,cur=0,dias=0,n=d.length,i,x,adv;
+function ccSim(d,t,b,h){var up=b.up,inn=false,ent=0,tr=0,du=0,ex=0,cur=0,dias=0,n=d.length,i,x,adv,dtc=0;
  for(i=0;i<n;i++){x=d[i];if(up?x>=b.hi:x<=b.lo)dias++;
   if(!inn&&(up?x>=b.hi:x<=b.lo)){inn=true;ent=i;cur=0}
-  if(inn){adv=up?x-b.hi:b.lo-x;if(adv>cur)cur=adv;if(cur>ex)ex=cur;if(up?x<=b.lo:x>=b.hi){inn=false;tr++;du+=t[i]-t[ent]}}}
- return{ciclos:tr,dur:tr?du/tr:null,pior:ex,aberta:inn,dias:dias/n}}
+  if(inn){adv=up?x-b.hi:b.lo-x;if(adv>cur)cur=adv;if(cur>ex)ex=cur;if(up?x<=b.lo:x>=b.hi){inn=false;tr++;du+=t[i]-t[ent];if(h&&Math.floor(t[i]-.125)==Math.floor(t[ent]-.125))dtc++}}}
+ return{ciclos:tr,dtc:dtc,dur:tr?du/tr:null,pior:ex,aberta:inn,dias:dias/n}}
 function ccScan(S,w){var d=w.d,s=d.slice().sort(function(a,b){return a-b}),n=s.length,q5=s[Math.round(.05*(n-1))],q95=s[Math.round(.95*(n-1))],c=S.centro,far=Math.max(q95-c,c-q5,.01),fee=ccFee(S,w.pA,w.pB),rows=[];
  NICE.forEach(function(stp){if(stp>far*1.2||stp<far/12)return;
   var nU=q95>c?Math.max(1,Math.min(5,Math.round((q95-c)/stp))):0,nD=q5<c?Math.max(1,Math.min(5,Math.round((c-q5)/stp))):0;
   var T={centro:c,passo:stp,nUp:nU,nDn:nD,modo:'deg'},bs=ccBands(T),cic=0,liq=0;
-  bs.forEach(function(b){var r=ccSim(d,w.t,b);cic+=r.ciclos;liq+=r.ciclos*ccNet(stp,fee,S.ir)});
+  bs.forEach(function(b){var r=ccSim(d,w.t,b,w.h);cic+=r.ciclos;liq+=ccTot(r,stp,fee,S.ir)});
   rows.push({passo:stp,nUp:nU,nDn:nD,ciclos:cic,liq:liq})});
  var best=null;rows.forEach(function(r){if(!best||r.liq>=best.liq)best=r});return{rows:rows,best:best}}
 function ccInit(a,b){var raw=st('spcalc_'+a+'|'+b),S=null;if(raw){try{S=JSON.parse(raw)}catch(e){}}
@@ -198,30 +204,31 @@ function ccHtml(){var opts=A.map(function(x){return'<option value="'+x.n+'">'}).
  +'<div class=sp-in><input id=cna type=number min=1 style="width:64px"> × <input id=cA list=ccdl placeholder=ATIVO style="width:110px;text-transform:uppercase"> − <input id=cnb type=number min=1 style="width:64px"> × <input id=cB list=ccdl placeholder=ATIVO style="width:110px;text-transform:uppercase"><datalist id=ccdl>'+opts+'</datalist><button id=ccsug class=sp-btn>Sugerir tudo</button><span id=ccnow class=mu></span></div>'
  +'<div class=sp-in>Centro R$ <input id=ccen type=text inputmode=decimal style="width:84px"> <span class=mu>(sugerido: média de 365 dias)</span> · Modo <select id=ccm><option value=deg>Degraus iguais</option><option value=mao>Faixas à mão</option></select> <span id=ccdeg>Passo R$ <input id=cpas type=text inputmode=decimal style="width:70px"> ▲ <input id=cnu type=number min=0 max=12 style="width:56px"> ▼ <input id=cnd type=number min=0 max=12 style="width:56px"></span></div>'
  +'<div class=sp-in id=ccmao style="display:none"><textarea id=cfx rows=4 placeholder="Uma faixa por linha: de 2,00 a 2,50" style="width:260px;background:var(--card);border:1px solid var(--line);color:var(--tx);border-radius:10px;padding:8px;font-size:14px"></textarea><span class=mu>Cada linha é uma camada: abre no valor maior e desfaz no menor (▲), ou o inverso (▼).</span></div>'
- +'<div class=sp-in>Tenho <input id=cta type=number min=0 style="width:100px"> <b id=cla></b> e <input id=ctb type=number min=0 style="width:100px"> <b id=clb></b> · Janela <span class=sp-wb id=ccw></span> · <label><input type=checkbox id=cir style="width:auto"> descontar IR 15% (swing)</label></div>'
+ +'<div class=sp-in>Tenho <input id=cta type=number min=0 style="width:100px"> <b id=cla></b> e <input id=ctb type=number min=0 style="width:100px"> <b id=clb></b> · Velas <select id=ccb><option value=d>Diário</option><option value=1h>1 hora</option></select> · Janela <span class=sp-wb id=ccw></span> · <label><input type=checkbox id=cir style="width:auto"> descontar IR 15% (swing)</label></div>'
  +'<div id=ccres></div><div id=cch class=sp-ch></div></div>'}
 function ccRun(){var box=document.getElementById('ccres');if(!CC){box.innerHTML='<div class=mu>Escolha dois ativos com histórico.</div>';document.getElementById('cch').innerHTML='';return}
- var S=CC,se=ccSeries(S.a,S.b,S.na,S.nb);if(!se){box.innerHTML='<div class=mu>Sem histórico suficiente para este par.</div>';document.getElementById('cch').innerHTML='';return}
+ var S=CC;if(S.base=='1h'&&!(H1[S.a]&&H1[S.b])){if(H1E[S.a]||H1E[S.b]){S.base='d';ccSave();ccFill();ccRun();return}box.innerHTML='<div class=mu>Carregando as velas de 1 hora…</div>';var pend=2,fim=function(){if(--pend==0)ccRun()};h1load(S.a,fim);h1load(S.b,fim);return}
+ var se=ccSeries(S.a,S.b,S.na,S.nb);if(!se){box.innerHTML='<div class=mu>Sem histórico suficiente para este par.</div>';document.getElementById('cch').innerHTML='';return}
  var w=ccWin(se),bs=ccBands(S),fee=ccFee(S,w.pA,w.pB),cur=w.d[w.d.length-1],n=w.d.length;
  document.getElementById('ccnow').textContent='hoje R$ '+f2(cur)+' ('+S.na+'×'+S.a+' R$ '+f2(S.na*w.pA)+' − '+S.nb+'×'+S.b+' R$ '+f2(S.nb*w.pB)+')';
  var ups=bs.filter(function(b){return b.up}).sort(function(a,b){return a.lo-b.lo}),dns=bs.filter(function(b){return!b.up}).sort(function(a,b){return b.hi-a.hi});
  ups.forEach(function(b,i){b.k=i+1});dns.forEach(function(b,i){b.k=i+1});
  var ordem=ups.slice().reverse().concat(dns),lu=S.totA>0&&ups.length?Math.max(1,Math.floor(S.totA/S.na/ups.length)):1,ld=S.totB>0&&dns.length?Math.max(1,Math.floor(S.totB/S.nb/dns.length)):lu;
- var tot=0,usoA=0,usoB=0,rows='',txt=[],lev=[];
- ordem.forEach(function(b){var key=b.lo+'|'+b.hi,lots=S.lots&&S.lots[key]>0?S.lots[key]:(b.up?lu:ld),r=ccSim(w.d,w.t,b),g=(b.hi-b.lo)*lots,f=fee*lots,net=ccNet(g,f,S.ir),total=net*r.ciclos;tot+=total;
+ var tot=0,usoA=0,usoB=0,rows='',txt=[],lev=[],dtt=0,cic=0;
+ ordem.forEach(function(b){var key=b.lo+'|'+b.hi,lots=S.lots&&S.lots[key]>0?S.lots[key]:(b.up?lu:ld),r=ccSim(w.d,w.t,b,w.h),g=(b.hi-b.lo)*lots,f=fee*lots,net=ccNet(g,f,S.ir),total=ccTot(r,g,f,S.ir);tot+=total;dtt+=r.dtc;cic+=r.ciclos;
   if(b.up)usoA+=lots*S.na;else usoB+=lots*S.nb;
   var ent=b.up?b.hi:b.lo,sai=b.up?b.lo:b.hi,qa=lots*S.na,qb=lots*S.nb,acao=b.up?'Vender '+qa+' '+S.a+' · comprar '+qb+' '+S.b:'Comprar '+qa+' '+S.a+' · vender '+qb+' '+S.b;
   lev.push({v:ent,c:b.up?'#ef4444':'#22c55e',t:(b.up?'▲':'▼')+b.k+' '+f2(ent)});
   txt.push((b.up?'▲':'▼')+b.k+': troca quando a diferença '+(b.up?'≥':'≤')+' R$ '+f2(ent)+' → '+acao+' | desfaz quando '+(b.up?'≤':'≥')+' R$ '+f2(sai));
-  rows+='<tr><td><b>'+(b.up?'▲ ':'▼ ')+b.k+'</b>'+(r.aberta?' <span class=mu>aberta</span>':'')+'</td><td><b>'+(b.up?'≥ ':'≤ ')+'R$ '+f2(ent)+'</b></td><td>'+acao+'</td><td>'+(b.up?'≤ ':'≥ ')+'R$ '+f2(sai)+'</td><td><input class=cclot type=number min=1 data-k="'+key+'" value='+lots+' style="width:130px"></td><td>'+r.ciclos+'</td><td>'+(r.dur===null?'–':f2(r.dur,0)+'d')+'</td><td>R$ '+f2(net)+'</td><td><b>R$ '+f2(total)+'</b></td><td>R$ '+f2(r.pior)+'</td></tr>'});
+  rows+='<tr><td><b>'+(b.up?'▲ ':'▼ ')+b.k+'</b>'+(r.aberta?' <span class=mu>aberta</span>':'')+'</td><td><b>'+(b.up?'≥ ':'≤ ')+'R$ '+f2(ent)+'</b></td><td>'+acao+'</td><td>'+(b.up?'≤ ':'≥ ')+'R$ '+f2(sai)+'</td><td><input class=cclot type=number min=1 data-k="'+key+'" value='+lots+' style="width:130px"></td><td>'+r.ciclos+'</td><td>'+(r.dur===null?'–':(w.h&&r.dur<1?f2(r.dur*24,0)+'h':f2(r.dur,0)+'d'))+'</td><td>R$ '+f2(net)+'</td><td><b>R$ '+f2(total)+'</b></td><td>R$ '+f2(r.pior)+'</td></tr>'});
  var oS=ups.length?ups[ups.length-1].hi:S.centro,oI=dns.length?dns[dns.length-1].lo:S.centro,fora=0,seq=0,mseq=0,i0=0;
  for(var i=0;i<n;i++){if(w.d[i]>oS||w.d[i]<oI){fora++;if(!seq)i0=i;seq=1;var dd=w.t[i]-w.t[i0];if(dd>mseq)mseq=dd}else seq=0}
  var sc=ccScan(S,w),cmp=sc.rows.map(function(r){return'<tr class=ccrow data-p="'+r.passo+'" data-u="'+r.nUp+'" data-d="'+r.nDn+'"'+(S.modo=='deg'&&Math.abs(r.passo-S.passo)<1e-9?' style="background:var(--card)"':'')+'><td>R$ '+f2(r.passo)+'</td><td>'+r.nUp+' ▲ · '+r.nDn+' ▼</td><td>'+r.ciclos+'</td><td>R$ '+f2(r.liq)+'</td></tr>'}).join('');
  var warn=(S.totA>0&&usoA>S.totA?'<span style="color:var(--rd)">▲ usam '+f2(usoA,0)+' '+S.a+' e você tem '+f2(S.totA,0)+'. </span>':'')+(S.totB>0&&usoB>S.totB?'<span style="color:var(--rd)">▼ usam '+f2(usoB,0)+' '+S.b+' e você tem '+f2(S.totB,0)+'.</span>':'');
  box.innerHTML=(bs.length?'<div class=sc><table class=cc-t><thead><tr><th>Camada</th><th>Troca quando a diferença</th><th>Ação</th><th>Desfaz quando</th><th>Lotes</th><th>Ciclos</th><th>Tempo/ciclo</th><th>Líquido/ciclo</th><th>Total no período</th><th>Pior excursão</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
-  +'<div class=sp-line style="margin-top:8px"><span>Ganho líquido no período ('+n+' pregões, taxas B3'+(S.ir?' e IR 15%':', antes do IR')+')</span><b>R$ '+f2(tot)+'</b></div>'
+  +'<div class=sp-line style="margin-top:8px"><span>Ganho líquido no período ('+n+(w.h?' velas de 1h':' pregões')+', taxas B3'+(S.ir?' e IR 15%':', antes do IR')+')</span><b>R$ '+f2(tot)+'</b></div>'
   +'<div class=sp-line><span>Taxas por ciclo de 1 lote (4 pernas × 0,03%, corretagem zero)</span><b>R$ '+f2(fee)+'</b></div>'
-  +'<div class=sp-line><span>Fora de todas as camadas no período</span><b>'+f2(fora/n*100,0)+'% dos dias · maior sequência '+f2(mseq,0)+' dias</b></div>'+(warn?'<div class=sp-line><span>Atenção</span><b>'+warn+'</b></div>':'')
+  +(w.h?'<div class=sp-line><span>Ciclos no mesmo dia (day trade: taxa 0,023%, IR 20%)</span><b>'+dtt+' de '+cic+'</b></div>':'')+'<div class=sp-line><span>Fora de todas as camadas no período</span><b>'+f2(fora/n*100,0)+'% dos dias · maior sequência '+f2(mseq,0)+' dias</b></div>'+(warn?'<div class=sp-line><span>Atenção</span><b>'+warn+'</b></div>':'')
   +'<h3 style="margin:14px 0 6px;font-size:13px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em">Ordens para o robô (só valores de spread)</h3><textarea id=ccout readonly rows='+Math.min(10,txt.length+1)+' style="width:100%;background:var(--card);border:1px solid var(--line);color:var(--tx);border-radius:10px;padding:8px;font-size:13px">'+H_(txt.join(String.fromCharCode(10)))+'</textarea><div class=sp-in><button id=cccp class=sp-btn>Copiar ordens</button><span id=ccok class=mu></span></div>':'<div class=mu>Defina o passo e as camadas, ou escreva as faixas.</div>')
   +'<h3 style="margin:14px 0 6px;font-size:13px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em">Comparar passos (1 lote por camada, centro R$ '+f2(S.centro)+')</h3><div class=sc><table class=cc-t><thead><tr><th>Passo</th><th>Camadas</th><th>Ciclos</th><th>Líquido no período</th></tr></thead><tbody>'+cmp+'</tbody></table></div><div class=mu style="font-size:12px;margin:4px 0 8px">Clique numa linha para aplicar. Passos menores fecham mais ciclos, mas as taxas comem parte do ganho.</div>';
  document.querySelectorAll('.cclot').forEach(function(el){el.onchange=function(){S.lots=S.lots||{};S.lots[el.dataset.k]=Math.max(1,Math.floor(+el.value)||1);ccSave();ccRun()}});
@@ -231,13 +238,13 @@ function ccRun(){var box=document.getElementById('ccres');if(!CC){box.innerHTML=
  document.querySelectorAll('#ccw button').forEach(function(b){b.onclick=function(){CCW=+b.dataset.w;st('spccw',String(CCW));ccRun()}});
  CC.cm={d:w.d,t:w.t,lev:lev};ccDraw()}
 function ccDraw(){if(!CC||!CC.cm)return;var el=document.getElementById('cch');if(!el)return;chart('cch',CC.cm.d,CC.cm.t,function(v){return'R$ '+f2(v)},'#7c3aed',false,false,true,CC.cm.lev)}
-function ccFill(){var S=CC;if(!S)return;var g=function(i){return document.getElementById(i)};g('cna').value=S.na;g('cnb').value=S.nb;g('cA').value=S.a;g('cB').value=S.b;g('ccen').value=String(S.centro).replace('.',',');g('ccm').value=S.modo;g('cpas').value=String(S.passo).replace('.',',');g('cnu').value=S.nUp;g('cnd').value=S.nDn;g('cfx').value=S.faixas||'';g('cta').value=S.totA||'';g('ctb').value=S.totB||'';g('cir').checked=!!S.ir;g('cla').textContent=S.a;g('clb').textContent=S.b;g('ccdeg').style.display=S.modo=='deg'?'':'none';g('ccmao').style.display=S.modo=='mao'?'':'none'}
-function ccRead(){var S=CC;if(!S)return;var g=function(i){return document.getElementById(i)};S.na=Math.max(1,Math.floor(+g('cna').value)||1);S.nb=Math.max(1,Math.floor(+g('cnb').value)||1);S.centro=pnum(g('ccen').value);S.modo=g('ccm').value;S.passo=pnum(g('cpas').value);S.nUp=Math.max(0,Math.min(12,Math.floor(+g('cnu').value)||0));S.nDn=Math.max(0,Math.min(12,Math.floor(+g('cnd').value)||0));S.faixas=g('cfx').value;S.totA=+g('cta').value||0;S.totB=+g('ctb').value||0;S.ir=g('cir').checked?1:0;g('ccdeg').style.display=S.modo=='deg'?'':'none';g('ccmao').style.display=S.modo=='mao'?'':'none'}
+function ccFill(){var S=CC;if(!S)return;var g=function(i){return document.getElementById(i)};g('cna').value=S.na;g('cnb').value=S.nb;g('cA').value=S.a;g('cB').value=S.b;g('ccen').value=String(S.centro).replace('.',',');g('ccm').value=S.modo;g('cpas').value=String(S.passo).replace('.',',');g('cnu').value=S.nUp;g('cnd').value=S.nDn;g('cfx').value=S.faixas||'';g('cta').value=S.totA||'';g('ctb').value=S.totB||'';g('cir').checked=!!S.ir;g('ccb').value=S.base||'d';g('cla').textContent=S.a;g('clb').textContent=S.b;g('ccdeg').style.display=S.modo=='deg'?'':'none';g('ccmao').style.display=S.modo=='mao'?'':'none'}
+function ccRead(){var S=CC;if(!S)return;var g=function(i){return document.getElementById(i)};S.na=Math.max(1,Math.floor(+g('cna').value)||1);S.nb=Math.max(1,Math.floor(+g('cnb').value)||1);S.centro=pnum(g('ccen').value);S.modo=g('ccm').value;S.passo=pnum(g('cpas').value);S.nUp=Math.max(0,Math.min(12,Math.floor(+g('cnu').value)||0));S.nDn=Math.max(0,Math.min(12,Math.floor(+g('cnd').value)||0));S.faixas=g('cfx').value;S.totA=+g('cta').value||0;S.totB=+g('ctb').value||0;S.ir=g('cir').checked?1:0;S.base=g('ccb').value;g('ccdeg').style.display=S.modo=='deg'?'':'none';g('ccmao').style.display=S.modo=='mao'?'':'none'}
 function ccPair(a,b){a=String(a).trim().toUpperCase();b=String(b).trim().toUpperCase();if(!BY[a]||!BY[b]||a==b)return false;var n=ccInit(a,b);if(!n)return false;CC=n;ccFill();ccSave();ccRun();return true}
 function renderCalc(){var root=document.getElementById('spcalc');if(!root)return;root.innerHTML=ccHtml();
  var last=(st('spcalc_last')||'ITSA3|ITSA4').split('|');if(!ccPair(last[0],last[1])&&!ccPair('ITSA3','ITSA4'))ccRun();
  ['cna','cnb','ccen','cpas','cnu','cnd','cfx','cta','ctb'].forEach(function(id){document.getElementById(id).oninput=function(){ccRead();ccSave();ccRun()}});
- ['ccm','cir'].forEach(function(id){document.getElementById(id).onchange=function(){ccRead();ccSave();ccRun()}});
+ ['ccm','cir','ccb'].forEach(function(id){document.getElementById(id).onchange=function(){ccRead();ccSave();ccRun()}});
  ['cA','cB'].forEach(function(id){document.getElementById(id).onchange=function(){ccPair(document.getElementById('cA').value,document.getElementById('cB').value)||ccFill()}});
  document.getElementById('ccsug').onclick=function(){if(!CC)return;var a=CC.a,b=CC.b,X=BY[a],Y=BY[b],al=align(X.dt,X.dc,Y.dt,Y.dc),rt=ccRatio(al.x[al.x.length-1],al.y[al.y.length-1],a,b);CC.na=rt.a;CC.nb=rt.b;CC.modo='deg';CC.lots={};var se=ccSeries(a,b,CC.na,CC.nb);CC.centro=ccCenter(se);var sc=ccScan(CC,ccWin(se));if(sc.best){CC.passo=sc.best.passo;CC.nUp=sc.best.nUp;CC.nDn=sc.best.nDn}ccFill();ccSave();ccRun()}}
 function render(){renderBase();renderTable();renderDetail()}
@@ -285,7 +292,7 @@ def dados(raiz):
             except Exception as e:
                 print("reconstrução falhou", n, e)
         dts, cls = dts[-520:], cls[-520:]
-        item = {"n": n, "g": g, "s": setor, "dt": dts, "dc": [round(x, 4) for x in cls]}
+        item = {"n": n, "g": g, "s": setor, "k": cat, "dt": dts, "dc": [round(x, 4) for x in cls]}
         if n not in extras: item["c"] = 1
         if rec: item["rec"] = rec
         f3 = os.path.join(cats, cat, "dados", f"{n}_30m.csv")
