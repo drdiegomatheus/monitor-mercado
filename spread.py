@@ -232,6 +232,23 @@ function ccBest(S){var cands=[],seen={},se1=ccSeries(S.a,S.b,1,1);if(!se1)return
  return best||best2}
 function ccAlloc(L,lotsTot){var n=L.length,out=[],i;for(i=0;i<n;i++)out.push(0);if(!(lotsTot>0)||!n)return out;var sw=0;L.forEach(function(b){sw+=b.r.ciclos});var eq=sw==0;if(eq)sw=n;
  var fr=[],used=0;L.forEach(function(b,i){var x=lotsTot*(eq?1:b.r.ciclos)/sw;out[i]=Math.floor(x);used+=out[i];fr.push([i,x-out[i]])});fr.sort(function(x,y){return y[1]-x[1]});for(i=0;used<lotsTot&&i<fr.length;i++,used++)out[fr[i][0]]++;return out}
+
+function ccPlano(S,B,U,D,au,ad,cur,se){if(cur===null||!se)return'';var w=ccWin(se),d=w.d,tt=w.t,n=d.length,pA=B.pA,pB=B.pB,tem=(S.totA>0)||(S.totB>0);
+ var ativ=[],fut=[];U.forEach(function(b,i){var o={b:b,lots:au[i],up:true,ent:b.hi,sai:b.lo};(cur>=b.hi?ativ:fut).push(o)});D.forEach(function(b,i){var o={b:b,lots:ad[i],up:false,ent:b.lo,sai:b.hi};(cur<=b.lo?ativ:fut).push(o)});
+ function nm(o){return(o.up?'▲':'▼')+o.b.k}
+ function hist(o){var c=0,ult=-1;for(var i=0;i<n;i++){if(o.up?d[i]>=o.ent:d[i]<=o.ent){c++;ult=i}}return{pct:c/n*100,ult:ult}}
+ var h='<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--line)"><b>Como começar agora</b> (diferença hoje: R$ '+f2(cur)+')<div style="font-size:13.5px;line-height:1.55;margin-top:4px">';
+ if(ativ.length){var vA=0,vB=0,sa=0,sb=0,lst=[];ativ.forEach(function(o){var l=o.lots||0;lst.push(nm(o));if(o.up){sa+=l*B.a;vB+=l*B.b}else{sb+=l*B.b;vA+=l*B.a}});
+  var vend=[],comp=[],cash=sa*pA-vB*pB+sb*pB-vA*pA;if(sa>0)vend.push(f2(sa,0)+' '+S.a);if(sb>0)vend.push(f2(sb,0)+' '+S.b);if(vA>0)comp.push(f2(vA,0)+' '+S.a);if(vB>0)comp.push(f2(vB,0)+' '+S.b);
+  h+='Com a diferença em R$ '+f2(cur)+', as camadas <b>'+lst.join(', ')+'</b> já estariam abertas. '+(tem&&vend.length?'<b>Venda '+vend.join(' e ')+' e compre '+comp.join(' e ')+'</b> para entrar em sintonia com o robô'+(Math.abs(cash)>=1?' (caixa '+(cash>=0?'que sobra':'que falta')+': R$ '+f2(Math.abs(cash))+')':'')+'. ':'Informe quanto você tem para eu calcular as quantidades. ')+'Desfaça cada camada quando a diferença voltar ao nível de saída da tabela.'}
+ else{h+='<b>Hoje não compensa vender para abrir camada nenhuma.</b> '}
+ if(fut.length){fut.sort(function(x,y){return Math.abs(cur-x.ent)-Math.abs(cur-y.ent)});var o=fut[0],hh=hist(o),dist=Math.abs(cur-o.ent);
+  h+=(ativ.length?' Próxima camada: ':' ')+'Espere a diferença '+(o.up?'subir':'cair')+' até <b>'+(o.up?'≥':'≤')+' R$ '+f2(o.ent)+'</b> (faltam R$ '+f2(dist)+'), camada '+nm(o)+'. '
+   +(tem&&o.lots>0?'Nesse nível: <b>'+(o.up?'venda '+f2(o.lots*B.a,0)+' '+S.a+' e compre '+f2(o.lots*B.b,0)+' '+S.b:'venda '+f2(o.lots*B.b,0)+' '+S.b+' e compre '+f2(o.lots*B.a,0)+' '+S.a)+'</b>, e desfaça em '+(o.up?'≤':'≥')+' R$ '+f2(o.sai)+'. ':'')
+   +'Na janela, essa camada foi atingida em '+f2(hh.pct,0)+'% dos dias e fechou '+o.b.r.ciclos+' ciclo'+(o.b.r.ciclos==1?'':'s')+(hh.ult>=0?'; última vez que a diferença esteve nesse nível: '+dstr(tt[hh.ult])+'.':'; não chegou a esse nível na janela.')}
+ var gc=0;ativ.concat(fut).forEach(function(o){gc+=ccNet((o.b.hi-o.b.lo)*(o.lots||0),ccFee({na:B.a,nb:B.b},pA,pB)*(o.lots||0),S.ir)});
+ if(tem&&gc>0)h+='<br>Se todas as camadas fecharem um ciclo com esses lotes, o ganho líquido de taxas'+(S.ir?' e IR':'')+' é de cerca de <b>R$ '+f2(gc)+'</b>.';
+ return h+'</div></div>'}
 function ccRecHtml(S){var key=[S.a,S.b,S.base,CCW,S.ir,S.totA>0?1:0,S.totB>0?1:0].join('|');if(CCR.k!=key){CCR.k=key;CCR.v=ccBest(S)}var B=CCR.v,per=S.base=='1h'?'velas de 1 hora':'fechamentos diários';
  if(!B)return'<div class=mu>Sem histórico suficiente para sugerir.</div>';
  var U=B.L.filter(function(b){return b.up}),D=B.L.filter(function(b){return!b.up}),lu=S.totA>0?Math.floor(S.totA/B.a):0,ld=S.totB>0?Math.floor(S.totB/B.b):0,au=ccAlloc(U,lu),ad=ccAlloc(D,ld),sw=0;B.L.forEach(function(b){sw+=b.r.ciclos});
@@ -246,6 +263,7 @@ function ccRecHtml(S){var key=[S.a,S.b,S.base,CCW,S.ir,S.totA>0?1:0,S.totB>0?1:0
  +(B.ciclos<8?'<div style="color:var(--rd);margin-top:6px">Atenção: só '+B.ciclos+' ciclos na janela. É pouca evidência; trate como ponto de partida, não como regra.</div>':'')
  +'<ul style="margin:8px 0 0 18px;padding:0">'+U.map(function(b,i){return linha(b,au[i],S.totA>0)}).join('')+D.map(function(b,i){return linha(b,ad[i],S.totB>0)}).join('')+'</ul>'
  +((S.totA>0||S.totB>0)?'':'<div class=mu style="margin-top:6px">Informe quanto você tem de cada ativo em "Tenho" para eu converter o peso de cada camada em lotes.</div>')
+ +ccPlano(S,B,U,D,au,ad,cur,se)
  +'<div class=sp-in style="margin-top:8px"><button id=ccapl class=sp-btn>Aplicar essa configuração</button></div></div></div>';return o}
 function ccApply(){var B=CCR.v;if(!B||!CC)return;var S=CC;S.na=B.a;S.nb=B.b;S.centro=B.centro;S.modo='deg';S.passo=B.passo;S.nUp=B.nUp;S.nDn=B.nDn;S.lots={};
  var U=B.L.filter(function(b){return b.up}),D=B.L.filter(function(b){return!b.up}),au=ccAlloc(U,S.totA>0?Math.floor(S.totA/B.a):0),ad=ccAlloc(D,S.totB>0?Math.floor(S.totB/B.b):0);
