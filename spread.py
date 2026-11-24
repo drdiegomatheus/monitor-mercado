@@ -38,6 +38,7 @@ CSS = """
 .sp-flt{display:flex;gap:6px;padding:0 18px 10px;flex-wrap:wrap}.sp-flt button{border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:999px;padding:4px 12px;font-weight:600;font-size:12px;cursor:pointer}.sp-flt button.on{background:var(--tx);color:var(--bg)}
 .sp-hm td:first-child{text-align:left;font-weight:800}
 .sp-search{margin:0 0 12px}.sp-search input{width:100%;max-width:420px;background:var(--card);border:1px solid var(--line);color:var(--tx);border-radius:12px;padding:10px 14px;font-size:14px;font-weight:600;outline:none}.sp-search input:focus{border-color:var(--ac)}#spr{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}#spr button{border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:10px;padding:6px 11px;font-weight:800;font-size:13px;cursor:pointer}#spr button small{display:block;color:var(--mu);font-weight:500;font-size:10.5px}#spcur{margin-top:6px;font-size:13px}.sp-al{display:inline-block;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:3px 9px;margin:4px 4px 0 0;font-size:12.5px;cursor:pointer;font-weight:600}
+.cc-t{width:100%;border-collapse:collapse;font-size:12.5px}.cc-t th,.cc-t td{text-align:left!important}.cc-t th{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;padding:6px 8px;white-space:nowrap}.cc-t td{padding:6px 8px;border-top:1px solid var(--line);white-space:nowrap}.cc-t input{background:var(--card);border:1px solid var(--line);color:var(--tx);border-radius:8px;padding:4px 6px;font-weight:700}.ccrow{cursor:pointer}.ccrow:hover td{background:var(--card)}.sp-btn{border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:10px;padding:8px 14px;font-weight:800;font-size:13px;cursor:pointer}#ccm{background:var(--card);border:1px solid var(--line);color:var(--tx);border-radius:10px;padding:7px 8px;font-weight:700}
 """
 
 JS = r"""
@@ -93,7 +94,7 @@ function renderTable(){var L=others();var key={abs:function(p){return Math.abs(p
 var WIN=+(st('spwin')||120),CTX=null;
 function dstr(d){var t=new Date(d*86400000);return('0'+t.getUTCDate()).slice(-2)+'/'+('0'+(t.getUTCMonth()+1)).slice(-2)+'/'+String(t.getUTCFullYear()).slice(-2)}
 function winBar(n){var o=[120,180,250,500,0].filter(function(w){return w==0||w<n});return'<span class=sp-wb>'+o.map(function(w){return'<button data-w='+w+' class="'+((WIN==w||(WIN>=n&&w==0))?'on':'')+'">'+(w==250?'1 ano':w==500?'2 anos':w?w+'d':'Tudo')+'</button>'}).join('')+'</span>'}
-function chart(id,vals,dts,fmt,color,sig,rel,zero){var el=document.getElementById(id);if(!el||!vals.length)return;
+function chart(id,vals,dts,fmt,color,sig,rel,zero,lev){var el=document.getElementById(id);if(!el||!vals.length)return;
  var N=vals.length,W=Math.max(el.clientWidth,280),Hh=240,pl=8,pr=88,pt=14,pb=22,col=color||'var(--ac)';
  var m=mean(vals),sg=sd(vals),mn=Infinity,mx=-Infinity,imn=0,imx=0,cur=vals[N-1],i;
  for(i=0;i<N;i++){if(vals[i]<mn){mn=vals[i];imn=i}if(vals[i]>mx){mx=vals[i];imx=i}}
@@ -101,6 +102,7 @@ function chart(id,vals,dts,fmt,color,sig,rel,zero){var el=document.getElementByI
  function X(i){return pl+(W-pl-pr)*i/Math.max(N-1,1)}function Y(v){return pt+(Hh-pt-pb)*(1-(v-lo)/(hi-lo))}
  var lines=[{v:m,c:'#64748b',t:'méd',d:'',w:1.4}];
  if(sig){[[1,'#f59e0b'],[-1,'#f59e0b'],[2,'#ef4444'],[-2,'#22c55e']].forEach(function(q){var v=m+q[0]*sg;if(v>lo&&v<hi)lines.push({v:v,c:q[1],t:(q[0]>0?'+':'−')+Math.abs(q[0])+'σ',d:'4 3',w:1})})}
+ (lev||[]).forEach(function(l){if(l.v>lo&&l.v<hi)lines.push({v:l.v,c:l.c,t:l.t,d:'5 3',w:1.2})});
  var o='<svg class=sp-svg width='+W+' height='+Hh+' viewBox="0 0 '+W+' '+Hh+'">';
  for(i=0;i<=3;i++){var gv=lo+(hi-lo)*i/3;if(Math.abs(Y(gv)-Y(m))<13||Math.abs(Y(gv)-Y(cur))<13)continue;o+='<line x1='+pl+' x2='+(W-pr)+' y1='+Y(gv)+' y2='+Y(gv)+' stroke="var(--line)" stroke-width=1 opacity=.5 /><text x='+(W-pr+5)+' y='+(Y(gv)+3)+' font-size=9.5 fill="var(--mu)">'+fmt(gv)+'</text>'}
  var tk=[0,Math.floor((N-1)/2),N-1];tk.forEach(function(j,k){o+='<text x='+X(j)+' y='+(Hh-6)+' font-size=9.5 fill="var(--mu)" text-anchor="'+(k==0?'start':k==2?'end':'middle')+'">'+dstr(dts[j])+'</text>'});
@@ -128,7 +130,7 @@ function drawCharts(){if(!CTX)return;var p=CTX.p,n=p.n,w=(!WIN||WIN>=n)?n:WIN,i0
  if(CTX.na){var dif=[];for(var i=i0;i<n;i++)dif.push(CTX.na*p.al.x[i]-CTX.nb*p.al.y[i]);chart('spch2',dif,dts,function(v){return'R$ '+f2(v)},'#0891b2',false,false,true)}
  document.querySelectorAll('.sp-wb').forEach(function(b){b.innerHTML=winBar(n).replace(/^<span class=sp-wb>|<\/span>$/g,'')});
  document.querySelectorAll('.sp-wb button').forEach(function(b){b.onclick=function(){WIN=+b.dataset.w;st('spwin',String(WIN));drawCharts()}})}
-window.addEventListener('resize',function(){drawCharts()});
+window.addEventListener('resize',function(){drawCharts();ccDraw()});
 function hist(p,th){var r=p.r,n=p.n,ev=[],last=-9,i;for(i=20;i<n-5;i++){var z=zs(r,20,i);if(z>=th&&i-last>=5){last=i;ev.push(-(r[i+5]/r[i]-1))}}
  if(!ev.length)return null;var w=ev.filter(function(v){return v>0}).length,s=ev.slice().sort(function(a,b){return a-b});return{n:ev.length,win:w/ev.length,med:s[Math.floor(s.length/2)],worst:s[0],best:s[s.length-1]}}
 function renderDetail(){var el=document.getElementById('spd');if(!sel||!BY[sel]){el.innerHTML='';return}var p=pair(base,sel,true);if(!p){el.innerHTML='';return}
@@ -158,8 +160,88 @@ function renderHeat(){var h='<div class=sc><table class=sp-hm><thead><tr><th></t
   var bg=z>0?'rgba(22,163,74,'+(.1+.6*al)+')':'rgba(220,38,38,'+(.1+.6*al)+')';h+='<td data-x="'+r.n+'" data-y="'+c.n+'" style="background:'+bg+'">'+(z>0?'+':'')+f2(z,1)+'</td>'});h+='</tr>'});
  h+='</tbody></table></div>';document.getElementById('sph').innerHTML=h;
  document.querySelectorAll('#sph td[data-x]').forEach(function(t){t.onclick=function(){base=t.dataset.x;sel=t.dataset.y;st('spbase',base);st('sppar',sel);render();window.scrollTo(0,0)}})}
+var NICE=[.01,.02,.05,.1,.2,.25,.5,1,2,5,10,20,50,100],CC=null,CCW=+(st('spccw')||500);
+function pnum(s){var v=parseFloat(String(s).replace(',','.'));return isNaN(v)?0:v}
+function rr(v){return Math.round(v*10000)/10000}
+function H_(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function ccSeries(a,b,na,nb){var X=BY[a],Y=BY[b];if(!X||!Y)return null;var al=align(X.dt,X.dc,Y.dt,Y.dc);if(al.t.length<30)return null;var d=[];for(var i=0;i<al.t.length;i++)d.push(na*al.x[i]-nb*al.y[i]);return{t:al.t,d:d,pA:al.x[al.x.length-1],pB:al.y[al.y.length-1]}}
+function ccWin(se){var n=se.t.length,w=(!CCW||CCW>=n)?n:CCW,i=n-w;return{t:se.t.slice(i),d:se.d.slice(i),pA:se.pA,pB:se.pB}}
+function ccCenter(se){var tl=se.t[se.t.length-1],s=0,c=0;for(var i=0;i<se.t.length;i++){if(se.t[i]>=tl-365){s+=se.d[i];c++}}return rr(Math.round(s/c*100)/100)}
+function ccRatio(pA,pB,nA,nB){if(nA&&nB&&nA.slice(0,4)==nB.slice(0,4))return{a:1,b:1,e:0};var best=null;for(var a=1;a<=10;a++)for(var b=1;b<=10;b++){var e=Math.abs(a*pA/(b*pB)-1)+0.004*(a+b);if(!best||e<best.e)best={a:a,b:b,e:e}}return best}
+function ccFee(S,pA,pB){return 0.0003*2*(S.na*pA+S.nb*pB)}
+function ccNet(g,f,ir){var n=g-f;return(ir&&n>0)?n*0.85:n}
+function ccBands(S){var o=[],k;
+ if(S.modo=='mao'){String(S.faixas||'').split(String.fromCharCode(10)).forEach(function(l){var s=l.replace(/([0-9]) *- *(?=-?[0-9])/g,'$1 ').replace(/ a /g,' ');var m=s.match(/-?[0-9]+(?:[.,][0-9]+)?/g);if(m&&m.length>=2){var p=pnum(m[0]),q=pnum(m[1]);if(p!=q)o.push({lo:Math.min(p,q),hi:Math.max(p,q)})}});o.forEach(function(b){b.up=(b.lo+b.hi)/2>=S.centro});return o}
+ var st1=S.passo;if(!(st1>0))return o;
+ for(k=S.nUp;k>=1;k--)o.push({lo:rr(S.centro+(k-1)*st1),hi:rr(S.centro+k*st1),up:true});
+ for(k=1;k<=S.nDn;k++)o.push({hi:rr(S.centro-(k-1)*st1),lo:rr(S.centro-k*st1),up:false});return o}
+function ccSim(d,t,b){var up=b.up,inn=false,ent=0,tr=0,du=0,ex=0,cur=0,dias=0,n=d.length,i,x,adv;
+ for(i=0;i<n;i++){x=d[i];if(up?x>=b.hi:x<=b.lo)dias++;
+  if(!inn&&(up?x>=b.hi:x<=b.lo)){inn=true;ent=i;cur=0}
+  if(inn){adv=up?x-b.hi:b.lo-x;if(adv>cur)cur=adv;if(cur>ex)ex=cur;if(up?x<=b.lo:x>=b.hi){inn=false;tr++;du+=t[i]-t[ent]}}}
+ return{ciclos:tr,dur:tr?du/tr:null,pior:ex,aberta:inn,dias:dias/n}}
+function ccScan(S,w){var d=w.d,s=d.slice().sort(function(a,b){return a-b}),n=s.length,q5=s[Math.round(.05*(n-1))],q95=s[Math.round(.95*(n-1))],c=S.centro,far=Math.max(q95-c,c-q5,.01),fee=ccFee(S,w.pA,w.pB),rows=[];
+ NICE.forEach(function(stp){if(stp>far*1.2||stp<far/12)return;
+  var nU=q95>c?Math.max(1,Math.min(5,Math.round((q95-c)/stp))):0,nD=q5<c?Math.max(1,Math.min(5,Math.round((c-q5)/stp))):0;
+  var T={centro:c,passo:stp,nUp:nU,nDn:nD,modo:'deg'},bs=ccBands(T),cic=0,liq=0;
+  bs.forEach(function(b){var r=ccSim(d,w.t,b);cic+=r.ciclos;liq+=r.ciclos*ccNet(stp,fee,S.ir)});
+  rows.push({passo:stp,nUp:nU,nDn:nD,ciclos:cic,liq:liq})});
+ var best=null;rows.forEach(function(r){if(!best||r.liq>=best.liq)best=r});return{rows:rows,best:best}}
+function ccInit(a,b){var raw=st('spcalc_'+a+'|'+b),S=null;if(raw){try{S=JSON.parse(raw)}catch(e){}}
+ if(!S){var X=BY[a],Y=BY[b];if(!X||!Y)return null;var al=align(X.dt,X.dc,Y.dt,Y.dc);if(al.t.length<30)return null;var rt=ccRatio(al.x[al.x.length-1],al.y[al.y.length-1],a,b);
+  S={na:rt.a,nb:rt.b,centro:0,modo:'deg',passo:.1,nUp:3,nDn:3,faixas:'',totA:0,totB:0,ir:0,lots:{}};
+  var se=ccSeries(a,b,S.na,S.nb);S.centro=ccCenter(se);var sc=ccScan(S,ccWin(se));if(sc.best){S.passo=sc.best.passo;S.nUp=sc.best.nUp;S.nDn=sc.best.nDn}}
+ S.a=a;S.b=b;return S}
+function ccSave(){if(!CC)return;try{var c=CC.cm;delete CC.cm;st('spcalc_'+CC.a+'|'+CC.b,JSON.stringify(CC));st('spcalc_last',CC.a+'|'+CC.b);if(c)CC.cm=c}catch(e){}}
+function ccHtml(){var opts=A.map(function(x){return'<option value="'+x.n+'">'}).join('');
+ return'<h2>Calculadora de camadas de spread</h2><div class=m>Diferença = ativo da esquerda menos o da direita. Quando ela sobe (▲) ou desce (▼) até uma camada, você troca; quando volta, desfaz e fica com a diferença. Tudo editável; as sugestões vêm do histórico.</div><div class=sp-det>'
+ +'<div class=sp-in><input id=cna type=number min=1 style="width:64px"> × <input id=cA list=ccdl placeholder=ATIVO style="width:110px;text-transform:uppercase"> − <input id=cnb type=number min=1 style="width:64px"> × <input id=cB list=ccdl placeholder=ATIVO style="width:110px;text-transform:uppercase"><datalist id=ccdl>'+opts+'</datalist><button id=ccsug class=sp-btn>Sugerir tudo</button><span id=ccnow class=mu></span></div>'
+ +'<div class=sp-in>Centro R$ <input id=ccen type=text inputmode=decimal style="width:84px"> <span class=mu>(sugerido: média de 365 dias)</span> · Modo <select id=ccm><option value=deg>Degraus iguais</option><option value=mao>Faixas à mão</option></select> <span id=ccdeg>Passo R$ <input id=cpas type=text inputmode=decimal style="width:70px"> ▲ <input id=cnu type=number min=0 max=12 style="width:56px"> ▼ <input id=cnd type=number min=0 max=12 style="width:56px"></span></div>'
+ +'<div class=sp-in id=ccmao style="display:none"><textarea id=cfx rows=4 placeholder="Uma faixa por linha: de 2,00 a 2,50" style="width:260px;background:var(--card);border:1px solid var(--line);color:var(--tx);border-radius:10px;padding:8px;font-size:14px"></textarea><span class=mu>Cada linha é uma camada: abre no valor maior e desfaz no menor (▲), ou o inverso (▼).</span></div>'
+ +'<div class=sp-in>Tenho <input id=cta type=number min=0 style="width:100px"> <b id=cla></b> e <input id=ctb type=number min=0 style="width:100px"> <b id=clb></b> · Janela <span class=sp-wb id=ccw></span> · <label><input type=checkbox id=cir style="width:auto"> descontar IR 15% (swing)</label></div>'
+ +'<div id=ccres></div><div id=cch class=sp-ch></div></div>'}
+function ccRun(){var box=document.getElementById('ccres');if(!CC){box.innerHTML='<div class=mu>Escolha dois ativos com histórico.</div>';document.getElementById('cch').innerHTML='';return}
+ var S=CC,se=ccSeries(S.a,S.b,S.na,S.nb);if(!se){box.innerHTML='<div class=mu>Sem histórico suficiente para este par.</div>';document.getElementById('cch').innerHTML='';return}
+ var w=ccWin(se),bs=ccBands(S),fee=ccFee(S,w.pA,w.pB),cur=w.d[w.d.length-1],n=w.d.length;
+ document.getElementById('ccnow').textContent='hoje R$ '+f2(cur)+' ('+S.na+'×'+S.a+' R$ '+f2(S.na*w.pA)+' − '+S.nb+'×'+S.b+' R$ '+f2(S.nb*w.pB)+')';
+ var ups=bs.filter(function(b){return b.up}).sort(function(a,b){return a.lo-b.lo}),dns=bs.filter(function(b){return!b.up}).sort(function(a,b){return b.hi-a.hi});
+ ups.forEach(function(b,i){b.k=i+1});dns.forEach(function(b,i){b.k=i+1});
+ var ordem=ups.slice().reverse().concat(dns),lu=S.totA>0&&ups.length?Math.max(1,Math.floor(S.totA/S.na/ups.length)):1,ld=S.totB>0&&dns.length?Math.max(1,Math.floor(S.totB/S.nb/dns.length)):lu;
+ var tot=0,usoA=0,usoB=0,rows='',txt=[],lev=[];
+ ordem.forEach(function(b){var key=b.lo+'|'+b.hi,lots=S.lots&&S.lots[key]>0?S.lots[key]:(b.up?lu:ld),r=ccSim(w.d,w.t,b),g=(b.hi-b.lo)*lots,f=fee*lots,net=ccNet(g,f,S.ir),total=net*r.ciclos;tot+=total;
+  if(b.up)usoA+=lots*S.na;else usoB+=lots*S.nb;
+  var ent=b.up?b.hi:b.lo,sai=b.up?b.lo:b.hi,qa=lots*S.na,qb=lots*S.nb,acao=b.up?'Vender '+qa+' '+S.a+' · comprar '+qb+' '+S.b:'Comprar '+qa+' '+S.a+' · vender '+qb+' '+S.b;
+  lev.push({v:ent,c:b.up?'#ef4444':'#22c55e',t:(b.up?'▲':'▼')+b.k+' '+f2(ent)});
+  txt.push((b.up?'▲':'▼')+b.k+': troca quando a diferença '+(b.up?'≥':'≤')+' R$ '+f2(ent)+' → '+acao+' | desfaz quando '+(b.up?'≤':'≥')+' R$ '+f2(sai));
+  rows+='<tr><td><b>'+(b.up?'▲ ':'▼ ')+b.k+'</b>'+(r.aberta?' <span class=mu>aberta</span>':'')+'</td><td><b>'+(b.up?'≥ ':'≤ ')+'R$ '+f2(ent)+'</b></td><td>'+acao+'</td><td>'+(b.up?'≤ ':'≥ ')+'R$ '+f2(sai)+'</td><td><input class=cclot type=number min=1 data-k="'+key+'" value='+lots+' style="width:62px"></td><td>'+r.ciclos+'</td><td>'+(r.dur===null?'–':f2(r.dur,0)+'d')+'</td><td>R$ '+f2(net)+'</td><td><b>R$ '+f2(total)+'</b></td><td>R$ '+f2(r.pior)+'</td></tr>'});
+ var oS=ups.length?ups[ups.length-1].hi:S.centro,oI=dns.length?dns[dns.length-1].lo:S.centro,fora=0,seq=0,mseq=0,i0=0;
+ for(var i=0;i<n;i++){if(w.d[i]>oS||w.d[i]<oI){fora++;if(!seq)i0=i;seq=1;var dd=w.t[i]-w.t[i0];if(dd>mseq)mseq=dd}else seq=0}
+ var sc=ccScan(S,w),cmp=sc.rows.map(function(r){return'<tr class=ccrow data-p="'+r.passo+'" data-u="'+r.nUp+'" data-d="'+r.nDn+'"'+(S.modo=='deg'&&Math.abs(r.passo-S.passo)<1e-9?' style="background:var(--card)"':'')+'><td>R$ '+f2(r.passo)+'</td><td>'+r.nUp+' ▲ · '+r.nDn+' ▼</td><td>'+r.ciclos+'</td><td>R$ '+f2(r.liq)+'</td></tr>'}).join('');
+ var warn=(S.totA>0&&usoA>S.totA?'<span style="color:var(--rd)">▲ usam '+f2(usoA,0)+' '+S.a+' e você tem '+f2(S.totA,0)+'. </span>':'')+(S.totB>0&&usoB>S.totB?'<span style="color:var(--rd)">▼ usam '+f2(usoB,0)+' '+S.b+' e você tem '+f2(S.totB,0)+'.</span>':'');
+ box.innerHTML=(bs.length?'<div class=sc><table class=cc-t><thead><tr><th>Camada</th><th>Troca quando a diferença</th><th>Ação</th><th>Desfaz quando</th><th>Lotes</th><th>Ciclos</th><th>Tempo/ciclo</th><th>Líquido/ciclo</th><th>Total no período</th><th>Pior excursão</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+  +'<div class=sp-line style="margin-top:8px"><span>Ganho líquido no período ('+n+' pregões, taxas B3'+(S.ir?' e IR 15%':', antes do IR')+')</span><b>R$ '+f2(tot)+'</b></div>'
+  +'<div class=sp-line><span>Taxas por ciclo de 1 lote (4 pernas × 0,03%, corretagem zero)</span><b>R$ '+f2(fee)+'</b></div>'
+  +'<div class=sp-line><span>Fora de todas as camadas no período</span><b>'+f2(fora/n*100,0)+'% dos dias · maior sequência '+f2(mseq,0)+' dias</b></div>'+(warn?'<div class=sp-line><span>Atenção</span><b>'+warn+'</b></div>':'')
+  +'<h3 style="margin:14px 0 6px;font-size:13px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em">Ordens para o robô (só valores de spread)</h3><textarea id=ccout readonly rows='+Math.min(10,txt.length+1)+' style="width:100%;background:var(--card);border:1px solid var(--line);color:var(--tx);border-radius:10px;padding:8px;font-size:13px">'+H_(txt.join(String.fromCharCode(10)))+'</textarea><div class=sp-in><button id=cccp class=sp-btn>Copiar ordens</button><span id=ccok class=mu></span></div>':'<div class=mu>Defina o passo e as camadas, ou escreva as faixas.</div>')
+  +'<h3 style="margin:14px 0 6px;font-size:13px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em">Comparar passos (1 lote por camada, centro R$ '+f2(S.centro)+')</h3><div class=sc><table class=cc-t><thead><tr><th>Passo</th><th>Camadas</th><th>Ciclos</th><th>Líquido no período</th></tr></thead><tbody>'+cmp+'</tbody></table></div><div class=mu style="font-size:12px;margin:4px 0 8px">Clique numa linha para aplicar. Passos menores fecham mais ciclos, mas as taxas comem parte do ganho.</div>';
+ document.querySelectorAll('.cclot').forEach(function(el){el.onchange=function(){S.lots=S.lots||{};S.lots[el.dataset.k]=Math.max(1,Math.floor(+el.value)||1);ccSave();ccRun()}});
+ document.querySelectorAll('.ccrow').forEach(function(el){el.onclick=function(){S.modo='deg';S.passo=+el.dataset.p;S.nUp=+el.dataset.u;S.nDn=+el.dataset.d;ccFill();ccSave();ccRun()}});
+ var cp=document.getElementById('cccp');if(cp)cp.onclick=function(){var o=document.getElementById('ccout');o.select();try{navigator.clipboard.writeText(o.value)}catch(e){document.execCommand('copy')}document.getElementById('ccok').textContent='copiado'};
+ document.getElementById('ccw').innerHTML=[[120,'6 meses'],[250,'1 ano'],[500,'2 anos'],[0,'Tudo']].map(function(q){return'<button data-w='+q[0]+' class="'+((CCW==q[0])?'on':'')+'">'+q[1]+'</button>'}).join('');
+ document.querySelectorAll('#ccw button').forEach(function(b){b.onclick=function(){CCW=+b.dataset.w;st('spccw',String(CCW));ccRun()}});
+ CC.cm={d:w.d,t:w.t,lev:lev};ccDraw()}
+function ccDraw(){if(!CC||!CC.cm)return;var el=document.getElementById('cch');if(!el)return;chart('cch',CC.cm.d,CC.cm.t,function(v){return'R$ '+f2(v)},'#7c3aed',false,false,true,CC.cm.lev)}
+function ccFill(){var S=CC;if(!S)return;var g=function(i){return document.getElementById(i)};g('cna').value=S.na;g('cnb').value=S.nb;g('cA').value=S.a;g('cB').value=S.b;g('ccen').value=String(S.centro).replace('.',',');g('ccm').value=S.modo;g('cpas').value=String(S.passo).replace('.',',');g('cnu').value=S.nUp;g('cnd').value=S.nDn;g('cfx').value=S.faixas||'';g('cta').value=S.totA||'';g('ctb').value=S.totB||'';g('cir').checked=!!S.ir;g('cla').textContent=S.a;g('clb').textContent=S.b;g('ccdeg').style.display=S.modo=='deg'?'':'none';g('ccmao').style.display=S.modo=='mao'?'':'none'}
+function ccRead(){var S=CC;if(!S)return;var g=function(i){return document.getElementById(i)};S.na=Math.max(1,Math.floor(+g('cna').value)||1);S.nb=Math.max(1,Math.floor(+g('cnb').value)||1);S.centro=pnum(g('ccen').value);S.modo=g('ccm').value;S.passo=pnum(g('cpas').value);S.nUp=Math.max(0,Math.min(12,Math.floor(+g('cnu').value)||0));S.nDn=Math.max(0,Math.min(12,Math.floor(+g('cnd').value)||0));S.faixas=g('cfx').value;S.totA=+g('cta').value||0;S.totB=+g('ctb').value||0;S.ir=g('cir').checked?1:0;g('ccdeg').style.display=S.modo=='deg'?'':'none';g('ccmao').style.display=S.modo=='mao'?'':'none'}
+function ccPair(a,b){a=String(a).trim().toUpperCase();b=String(b).trim().toUpperCase();if(!BY[a]||!BY[b]||a==b)return false;var n=ccInit(a,b);if(!n)return false;CC=n;ccFill();ccSave();ccRun();return true}
+function renderCalc(){var root=document.getElementById('spcalc');if(!root)return;root.innerHTML=ccHtml();
+ var last=(st('spcalc_last')||'ITSA3|ITSA4').split('|');if(!ccPair(last[0],last[1])&&!ccPair('ITSA3','ITSA4'))ccRun();
+ ['cna','cnb','ccen','cpas','cnu','cnd','cfx','cta','ctb'].forEach(function(id){document.getElementById(id).oninput=function(){ccRead();ccSave();ccRun()}});
+ ['ccm','cir'].forEach(function(id){document.getElementById(id).onchange=function(){ccRead();ccSave();ccRun()}});
+ ['cA','cB'].forEach(function(id){document.getElementById(id).onchange=function(){ccPair(document.getElementById('cA').value,document.getElementById('cB').value)||ccFill()}});
+ document.getElementById('ccsug').onclick=function(){if(!CC)return;var a=CC.a,b=CC.b,X=BY[a],Y=BY[b],al=align(X.dt,X.dc,Y.dt,Y.dc),rt=ccRatio(al.x[al.x.length-1],al.y[al.y.length-1],a,b);CC.na=rt.a;CC.nb=rt.b;CC.modo='deg';CC.lots={};var se=ccSeries(a,b,CC.na,CC.nb);CC.centro=ccCenter(se);var sc=ccScan(CC,ccWin(se));if(sc.best){CC.passo=sc.best.passo;CC.nUp=sc.best.nUp;CC.nDn=sc.best.nDn}ccFill();ccSave();ccRun()}}
 function render(){renderBase();renderTable();renderDetail()}
-render();renderHeat();
+render();renderHeat();renderCalc();
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){})}
 })();
 """
@@ -221,6 +303,7 @@ def pagina(arq, titulo, paginas, ativos):
     if len(ativos) < 2:
         h.append("<p class=mu>Preciso de pelo menos 2 ativos com histórico coletado.</p></main></body></html>")
         return "".join(h)
+    h.append("<div id=spcalc class=sp-card></div>")
     h.append("<div class=sp-search><input id=sps type=search placeholder='Digite o ativo que você tem (ex.: TAEE4, WEGE3, BOVX11) e clique…' autocomplete=off><div id=spr></div><div id=spcur></div></div><div class=sp-base id=spb></div><div class=sp-card><h2>Relação com os outros ativos</h2><div class=m>Clique numa linha para abrir os detalhes e a conta da troca. Clique no título de uma coluna para ordenar. Verde (z positivo) = o ativo que você tem está caro em relação ao outro, bom momento para sair dele. Vermelho = está barato, melhor esperar.</div><div class=sp-flt id=spf></div><div id=spt></div></div>")
     h.append("<div id=spd></div><div class=sp-card><h2>Mapa de todos contra todos (z 20d)</h2><div class=m>Linha = ativo que você tem; coluna = para onde iria. Verde: a linha está esticada contra a coluna (bom para sair). Vermelho: está barata. Clique numa célula para abrir.</div><div id=sph></div></div>")
     h.append("<details><summary>Como ler</summary><p><b>Relação</b> = preço do ativo da esquerda ÷ preço do outro. <b>z 20d / 60d</b> = quantos desvios-padrão a relação de hoje está acima (+, bom para sair do ativo da esquerda) ou abaixo (−) da média dos últimos 20 / 60 pregões; acima de +2 ou abaixo de −2 é raro. "
