@@ -201,16 +201,59 @@ function ccInit(a,b){var raw=st('spcalc_'+a+'|'+b),S=null;if(raw){try{S=JSON.par
 function ccSave(){if(!CC)return;try{var c=CC.cm;delete CC.cm;st('spcalc_'+CC.a+'|'+CC.b,JSON.stringify(CC));st('spcalc_last',CC.a+'|'+CC.b);if(c)CC.cm=c}catch(e){}}
 function ccHtml(){var opts=A.map(function(x){return'<option value="'+x.n+'">'}).join('');
  return'<h2>Calculadora de camadas de spread</h2><div class=m>Diferença = ativo da esquerda menos o da direita. Quando ela sobe (▲) ou desce (▼) até uma camada, você troca; quando volta, desfaz e fica com a diferença. Tudo editável; as sugestões vêm do histórico.</div><div class=sp-det>'
- +'<div class=sp-in><input id=cna type=number min=1 style="width:64px"> × <input id=cA list=ccdl placeholder=ATIVO style="width:110px;text-transform:uppercase"> − <input id=cnb type=number min=1 style="width:64px"> × <input id=cB list=ccdl placeholder=ATIVO style="width:110px;text-transform:uppercase"><datalist id=ccdl>'+opts+'</datalist><button id=ccsug class=sp-btn>Sugerir tudo</button><span id=ccnow class=mu></span></div>'
+ +'<div class=sp-in><input id=cna type=number min=1 style="width:64px"> × <input id=cA list=ccdl placeholder=ATIVO style="width:110px;text-transform:uppercase"> − <input id=cnb type=number min=1 style="width:64px"> × <input id=cB list=ccdl placeholder=ATIVO style="width:110px;text-transform:uppercase"><datalist id=ccdl>'+opts+'</datalist><button id=ccsug class=sp-btn>Sugerir tudo</button> Velas <select id=ccb><option value=d>Diário</option><option value=1h>1 hora</option></select> Janela <span class=sp-wb id=ccw></span><span id=ccnow class=mu style="flex-basis:100%"></span></div>'
  +'<div class=sp-in>Centro R$ <input id=ccen type=text inputmode=decimal style="width:84px"> <span class=mu>(sugerido: média de 365 dias)</span> · Modo <select id=ccm><option value=deg>Degraus iguais</option><option value=mao>Faixas à mão</option></select> <span id=ccdeg>Passo R$ <input id=cpas type=text inputmode=decimal style="width:70px"> ▲ <input id=cnu type=number min=0 max=12 style="width:56px"> ▼ <input id=cnd type=number min=0 max=12 style="width:56px"></span></div>'
  +'<div class=sp-in id=ccmao style="display:none"><textarea id=cfx rows=4 placeholder="Uma faixa por linha: de 2,00 a 2,50" style="width:260px;background:var(--card);border:1px solid var(--line);color:var(--tx);border-radius:10px;padding:8px;font-size:14px"></textarea><span class=mu>Cada linha é uma camada: abre no valor maior e desfaz no menor (▲), ou o inverso (▼).</span></div>'
- +'<div class=sp-in>Tenho <input id=cta type=number min=0 style="width:100px"> <b id=cla></b> e <input id=ctb type=number min=0 style="width:100px"> <b id=clb></b> · Velas <select id=ccb><option value=d>Diário</option><option value=1h>1 hora</option></select> · Janela <span class=sp-wb id=ccw></span> · <label><input type=checkbox id=cir style="width:auto"> descontar IR 15% (swing)</label></div>'
- +'<div id=ccres></div><div id=cch class=sp-ch></div></div>'}
+ +'<div class=sp-in>Tenho <input id=cta type=number min=0 style="width:100px"> <b id=cla></b> e <input id=ctb type=number min=0 style="width:100px"> <b id=clb></b> · <label><input type=checkbox id=cir style="width:auto"> descontar IR 15% (swing)</label></div>'
+ +'<div id=ccrec></div><div id=ccres></div><div id=cch class=sp-ch></div></div>'}
 function sf(nm,tem,uso,q){if(!(tem>0))return'<span class=mu>informe quanto você tem de '+nm+'</span>';var d=tem-uso,l=Math.floor(Math.abs(d)/q);if(d>0)return'<span style="color:var(--gr)">sobram '+f2(d,0)+' '+nm+' ('+l+' lote'+(l==1?'':'s')+')</span>';if(d<0)return'<span style="color:var(--rd)">faltam '+f2(-d,0)+' '+nm+' ('+Math.ceil(-d/q)+' lote'+(Math.ceil(-d/q)==1?'':'s')+')</span>';return'<span>exato: '+nm+' todo usado</span>'}
+
+var CCR={k:null,v:null};
+function ccBest(S){var cands=[],seen={},se1=ccSeries(S.a,S.b,1,1);if(!se1)return null;var pA=se1.pA,pB=se1.pB;
+ function gcd(x,y){return y?gcd(y,x%y):x}
+ var mesmo=S.a.slice(0,4)==S.b.slice(0,4);
+ function add(a,b){var k=a+':'+b;if(mesmo&&!(a==1&&b==1))return;if(a>=1&&b>=1&&a<=10&&b<=10&&gcd(a,b)==1&&!seen[k]){seen[k]=1;cands.push([a,b])}}
+ var rt=ccRatio(pA,pB,S.a,S.b);add(rt.a,rt.b);[[1,1],[1,2],[2,1],[1,3],[3,1],[2,3],[3,2]].forEach(function(q){add(q[0],q[1])});
+ var vm=[];for(var a=1;a<=10;a++)for(var b=1;b<=10;b++)vm.push([a,b,Math.abs(a*pA/(b*pB)-1)+0.004*(a+b)]);vm.sort(function(x,y){return x[2]-y[2]});vm.slice(0,3).forEach(function(q){add(q[0],q[1])});
+ var best=null;
+ var best2=null;
+ cands.forEach(function(c){if(Math.abs(c[0]*pA/(c[1]*pB)-1)>0.2&&!(c[0]==rt.a&&c[1]==rt.b))return;var se=ccSeries(S.a,S.b,c[0],c[1]);if(!se)return;var w=ccWin(se),d=w.d,n=d.length;if(n<30)return;var T={na:c[0],nb:c[1],ir:S.ir},fee=ccFee(T,w.pA,w.pB);
+  var ss=d.slice().sort(function(x,y){return x-y}),q5=ss[Math.round(.05*(n-1))],q95=ss[Math.round(.95*(n-1))],med=ss[Math.round(.5*(n-1))],mw=0;for(var i=0;i<n;i++)mw+=d[i];mw=Math.round(mw/n*100)/100;
+  var cens=[];[ccCenter(se),mw,Math.round(med*100)/100].forEach(function(x){if(cens.indexOf(x)<0)cens.push(x)});
+  cens.forEach(function(cn){var far=Math.max(q95-cn,cn-q5,.01);
+   NICE.forEach(function(stp){if(stp>far*1.2||stp<far/12)return;
+    var nU=q95>cn?Math.max(1,Math.min(5,Math.round((q95-cn)/stp))):0,nD=q5<cn?Math.max(1,Math.min(5,Math.round((cn-q5)/stp))):0,k,L=[],tot=0,cic=0;
+    for(k=1;k<=nU;k++){var bu={lo:rr(cn+(k-1)*stp),hi:rr(cn+k*stp),up:true,k:k},ru=ccSim(d,w.t,bu,w.h);if(ru.ciclos<2)break;bu.r=ru;L.push(bu)}
+    for(k=1;k<=nD;k++){var bd={hi:rr(cn-(k-1)*stp),lo:rr(cn-k*stp),up:false,k:k},rd=ccSim(d,w.t,bd,w.h);if(rd.ciclos<2)break;bd.r=rd;L.push(bd)}
+    if(!L.length)return;var cu=0,cd=0;L.forEach(function(b){tot+=ccTot(b.r,stp,fee,S.ir);cic+=b.r.ciclos;if(b.up)cu++;else cd++});
+    var cap=cu*c[0]*w.pA+cd*c[1]*w.pB,sc=tot/cap;
+    var cfg={a:c[0],b:c[1],centro:cn,passo:stp,nUp:cu,nDn:cd,ciclos:cic,total:tot,cap:cap,score:sc,L:L,pA:w.pA,pB:w.pB,n:n,h:w.h,t0:w.t[0],t1:w.t[w.t.length-1]};
+    if(cic>=8&&(!best||sc>best.score))best=cfg;if(!best2||tot>best2.total)best2=cfg})})});
+ return best||best2}
+function ccAlloc(L,lotsTot){var n=L.length,out=[],i;for(i=0;i<n;i++)out.push(0);if(!(lotsTot>0)||!n)return out;var sw=0;L.forEach(function(b){sw+=b.r.ciclos});
+ var fr=[],used=0;L.forEach(function(b,i){var x=lotsTot*b.r.ciclos/sw;out[i]=Math.floor(x);used+=out[i];fr.push([i,x-out[i]])});fr.sort(function(x,y){return y[1]-x[1]});for(i=0;used<lotsTot&&i<fr.length;i++,used++)out[fr[i][0]]++;return out}
+function ccRecHtml(S){var key=[S.a,S.b,S.base,CCW,S.ir].join('|');if(CCR.k!=key){CCR.k=key;CCR.v=ccBest(S)}var B=CCR.v,per=S.base=='1h'?'velas de 1 hora':'fechamentos diários';
+ if(!B)return'<div class=mu>Sem histórico suficiente para sugerir.</div>';
+ var U=B.L.filter(function(b){return b.up}),D=B.L.filter(function(b){return!b.up}),lu=S.totA>0?Math.floor(S.totA/B.a):0,ld=S.totB>0?Math.floor(S.totB/B.b):0,au=ccAlloc(U,lu),ad=ccAlloc(D,ld),sw=0;B.L.forEach(function(b){sw+=b.r.ciclos});
+ var cur=null,se=ccSeries(S.a,S.b,B.a,B.b);if(se)cur=se.d[se.d.length-1];
+ function linha(b,lots,tem){var ent=b.up?b.hi:b.lo,sai=b.up?b.lo:b.hi,pc=f2(b.r.ciclos/sw*100,0);
+  return'<li><b>'+(b.up?'▲':'▼')+b.k+'</b> · troca quando a diferença '+(b.up?'≥':'≤')+' R$ '+f2(ent)+', desfaz em R$ '+f2(sai)+' · fechou '+b.r.ciclos+' ciclos ('+pc+'% da atividade) · '+(tem?'<b>'+f2(lots,0)+' lote'+(lots==1?'':'s')+'</b> ('+f2(lots*(b.up?B.a:B.b),0)+' '+(b.up?S.a:S.b)+')':'peso sugerido <b>'+pc+'%</b>')+'</li>'}
+ var o='<div class=sp-box style="margin:10px 0"><h3>Melhor configuração do histórico ('+f2((B.t1-B.t0)/(B.h?1:1),0)+' dias de dados na janela, '+per+')</h3><div style="font-size:13.5px;line-height:1.55">'
+ +'Proporção <b>'+B.a+' '+S.a+' : '+B.b+' '+S.b+'</b> · centro <b>R$ '+f2(B.centro)+'</b> · passo <b>R$ '+f2(B.passo)+'</b> · <b>'+B.nUp+' camada'+(B.nUp==1?'':'s')+' ▲</b> e <b>'+B.nDn+' ▼</b>. '
+ +'Nesse período teria fechado <b>'+B.ciclos+' ciclos</b> e rendido <b>R$ '+f2(B.total)+'</b> líquido de taxas'+(S.ir?' e IR':'')+' com 1 lote por camada (R$ '+f2(B.score*1000)+' no período para cada R$ 1.000 de ativo nas camadas). Critério: maior retorno sobre o capital das camadas, usando só camadas que fecharam ao menos 2 ciclos.'
+ +(cur===null?'':' Hoje a diferença está em <b>R$ '+f2(cur)+'</b>'+(cur>B.centro?(U.length&&cur>U[U.length-1].hi?', acima de todas as camadas ▲ (a última abre em R$ '+f2(U[U.length-1].hi)+'): hoje elas já estariam todas abertas, e o centro está longe do patamar atual, então vale conferir com o centro editado.':', acima do centro: as camadas ▲ são as que disparam primeiro.'):cur<B.centro?', abaixo do centro: as camadas ▼ são as que disparam primeiro.':', no centro.'))
+ +(B.ciclos<8?'<div style="color:var(--rd);margin-top:6px">Atenção: só '+B.ciclos+' ciclos na janela. É pouca evidência; trate como ponto de partida, não como regra.</div>':'')
+ +'<ul style="margin:8px 0 0 18px;padding:0">'+U.map(function(b,i){return linha(b,au[i],S.totA>0)}).join('')+D.map(function(b,i){return linha(b,ad[i],S.totB>0)}).join('')+'</ul>'
+ +((S.totA>0&&S.totB>0)?'':'<div class=mu style="margin-top:6px">Informe quanto você tem de cada ativo em "Tenho" para eu converter o peso de cada camada em lotes.</div>')
+ +'<div class=sp-in style="margin-top:8px"><button id=ccapl class=sp-btn>Aplicar essa configuração</button></div></div></div>';return o}
+function ccApply(){var B=CCR.v;if(!B||!CC)return;var S=CC;S.na=B.a;S.nb=B.b;S.centro=B.centro;S.modo='deg';S.passo=B.passo;S.nUp=B.nUp;S.nDn=B.nDn;S.lots={};
+ var U=B.L.filter(function(b){return b.up}),D=B.L.filter(function(b){return!b.up}),au=ccAlloc(U,S.totA>0?Math.floor(S.totA/B.a):0),ad=ccAlloc(D,S.totB>0?Math.floor(S.totB/B.b):0);
+ U.forEach(function(b,i){if(au[i]>0)S.lots[b.lo+'|'+b.hi]=au[i]});D.forEach(function(b,i){if(ad[i]>0)S.lots[b.lo+'|'+b.hi]=ad[i]});ccFill();ccSave();ccRun()}
 function ccRun(){var box=document.getElementById('ccres');if(!CC){box.innerHTML='<div class=mu>Escolha dois ativos com histórico.</div>';document.getElementById('cch').innerHTML='';return}
  var S=CC;if(S.base=='1h'&&!(H1[S.a]&&H1[S.b])){if(H1E[S.a]||H1E[S.b]){S.base='d';ccSave();ccFill();ccRun();return}box.innerHTML='<div class=mu>Carregando as velas de 1 hora…</div>';var pend=2,fim=function(){if(--pend==0)ccRun()};h1load(S.a,fim);h1load(S.b,fim);return}
  var se=ccSeries(S.a,S.b,S.na,S.nb);if(!se){box.innerHTML='<div class=mu>Sem histórico suficiente para este par.</div>';document.getElementById('cch').innerHTML='';return}
  var w=ccWin(se),bs=ccBands(S),fee=ccFee(S,w.pA,w.pB),cur=w.d[w.d.length-1],n=w.d.length;
+document.getElementById('ccrec').innerHTML=ccRecHtml(S);var ba=document.getElementById('ccapl');if(ba)ba.onclick=ccApply;
  document.getElementById('ccnow').textContent='hoje R$ '+f2(cur)+' ('+S.na+'×'+S.a+' R$ '+f2(S.na*w.pA)+' − '+S.nb+'×'+S.b+' R$ '+f2(S.nb*w.pB)+')';
  var ups=bs.filter(function(b){return b.up}).sort(function(a,b){return a.lo-b.lo}),dns=bs.filter(function(b){return!b.up}).sort(function(a,b){return b.hi-a.hi});
  ups.forEach(function(b,i){b.k=i+1});dns.forEach(function(b,i){b.k=i+1});
