@@ -93,7 +93,7 @@ function renderTable(){var L=others();var key={abs:function(p){return Math.abs(p
 var WIN=+(st('spwin')||120),CTX=null;
 function dstr(d){var t=new Date(d*86400000);return('0'+t.getUTCDate()).slice(-2)+'/'+('0'+(t.getUTCMonth()+1)).slice(-2)+'/'+String(t.getUTCFullYear()).slice(-2)}
 function winBar(n){var o=[120,180,250,500,0].filter(function(w){return w==0||w<n});return'<span class=sp-wb>'+o.map(function(w){return'<button data-w='+w+' class="'+((WIN==w||(WIN>=n&&w==0))?'on':'')+'">'+(w==250?'1 ano':w==500?'2 anos':w?w+'d':'Tudo')+'</button>'}).join('')+'</span>'}
-function chart(id,vals,dts,fmt,color,sig,rel,zero,lev){var el=document.getElementById(id);if(!el||!vals.length)return;
+function chart(id,vals,dts,fmt,color,sig,rel,zero){var el=document.getElementById(id);if(!el||!vals.length)return;
  var N=vals.length,W=Math.max(el.clientWidth,280),Hh=240,pl=8,pr=88,pt=14,pb=22,col=color||'var(--ac)';
  var m=mean(vals),sg=sd(vals),mn=Infinity,mx=-Infinity,imn=0,imx=0,cur=vals[N-1],i;
  for(i=0;i<N;i++){if(vals[i]<mn){mn=vals[i];imn=i}if(vals[i]>mx){mx=vals[i];imx=i}}
@@ -101,7 +101,6 @@ function chart(id,vals,dts,fmt,color,sig,rel,zero,lev){var el=document.getElemen
  function X(i){return pl+(W-pl-pr)*i/Math.max(N-1,1)}function Y(v){return pt+(Hh-pt-pb)*(1-(v-lo)/(hi-lo))}
  var lines=[{v:m,c:'#64748b',t:'méd',d:'',w:1.4}];
  if(sig){[[1,'#f59e0b'],[-1,'#f59e0b'],[2,'#ef4444'],[-2,'#22c55e']].forEach(function(q){var v=m+q[0]*sg;if(v>lo&&v<hi)lines.push({v:v,c:q[1],t:(q[0]>0?'+':'−')+Math.abs(q[0])+'σ',d:'4 3',w:1})})}
- (lev||[]).forEach(function(l){if(l.v>lo&&l.v<hi)lines.push({v:l.v,c:l.c,t:l.t,d:'5 3',w:1.2})});
  var o='<svg class=sp-svg width='+W+' height='+Hh+' viewBox="0 0 '+W+' '+Hh+'">';
  for(i=0;i<=3;i++){var gv=lo+(hi-lo)*i/3;if(Math.abs(Y(gv)-Y(m))<13||Math.abs(Y(gv)-Y(cur))<13)continue;o+='<line x1='+pl+' x2='+(W-pr)+' y1='+Y(gv)+' y2='+Y(gv)+' stroke="var(--line)" stroke-width=1 opacity=.5 /><text x='+(W-pr+5)+' y='+(Y(gv)+3)+' font-size=9.5 fill="var(--mu)">'+fmt(gv)+'</text>'}
  var tk=[0,Math.floor((N-1)/2),N-1];tk.forEach(function(j,k){o+='<text x='+X(j)+' y='+(Hh-6)+' font-size=9.5 fill="var(--mu)" text-anchor="'+(k==0?'start':k==2?'end':'middle')+'">'+dstr(dts[j])+'</text>'});
@@ -124,39 +123,9 @@ function chart(id,vals,dts,fmt,color,sig,rel,zero,lev){var el=document.getElemen
   tip.style.display='block';var tw=tip.offsetWidth,left=px+12;if(left+tw>W-4)left=px-tw-12;tip.style.left=left+'px';tip.style.top=Math.max(2,Math.min(Y(v)-30,Hh-70))+'px';if(ev.cancelable&&ev.touches)ev.preventDefault()}
  function lv(){vl.style.display='none';dot.style.display='none';tip.style.display='none'}
  hit.addEventListener('mousemove',mv);hit.addEventListener('mouseleave',lv);hit.addEventListener('touchstart',mv,{passive:false});hit.addEventListener('touchmove',mv,{passive:false});hit.addEventListener('touchend',lv)}
-
-var NICE=[.01,.02,.05,.1,.2,.25,.5,1,2,5,10,20,50,100];
-function camCalc(d,st0){var s=d.slice().sort(function(a,b){return a-b}),n=d.length;function q(p){return s[Math.min(n-1,Math.max(0,Math.round(p*(n-1))))]}
- var med=Math.round(mean(d)*100)/100,p5=q(.05),p95=q(.95),mx=s[n-1],mn=s[0],half=Math.max(p95-med,med-p5,.01),step=st0>0?st0:null;
- if(!step){for(var i=0;i<NICE.length;i++){if(NICE[i]>=half/5){step=NICE[i];break}}if(!step)step=NICE[NICE.length-1]}
- var nUp=Math.max(1,Math.min(5,Math.round((p95-med)/step))),nDn=Math.max(1,Math.min(5,Math.round((med-p5)/step))),L=[],k,cur=d[n-1];
- function sim(lv,up){var inn=false,ent=0,tr=0,du=[],dias=0,i,x;for(i=0;i<n;i++){x=d[i];if(up?x>=lv:x<=lv)dias++;
-   if(!inn&&(up?x>=lv:x<=lv)){inn=true;ent=i}else if(inn&&(up?x<=lv-step:x>=lv+step)){inn=false;tr++;du.push(i-ent)}}
-  du.sort(function(a,b){return a-b});return{ciclos:tr,dias:dias/n,dur:du.length?du[Math.floor(du.length/2)]:null,aberta:inn,pior:up?Math.max(0,mx-lv):Math.max(0,lv-mn)}}
- for(k=nUp;k>=1;k--){var lu=Math.round((med+k*step)*100)/100,r1=sim(lu,true);r1.v=lu;r1.up=true;r1.k=k;r1.on=cur>=lu;L.push(r1)}
- for(k=1;k<=nDn;k++){var ld=Math.round((med-k*step)*100)/100,r2=sim(ld,false);r2.v=ld;r2.up=false;r2.k=k;r2.on=cur<=ld;L.push(r2)}
- return{med:med,p5:p5,p95:p95,mx:mx,mn:mn,step:step,nUp:nUp,nDn:nDn,L:L,cur:cur,n:n}}
-function camRender(){var p=CTX&&CTX.p;var box=document.getElementById('spcmo');if(!box||!p)return;CTX.cm=null;
- var S=p.x,B=p.y,pS=p.px,pB=p.py,key='spcm_'+S+'_'+B,sv=(st(key)||'').split(',');
- var ia=document.getElementById('cma'),ib=document.getElementById('cmb'),ip=document.getElementById('cmp'),iq=document.getElementById('cmq');
- var na=+ia.value,nb=+ib.value,stp=parseFloat(String(ip.value).replace(',','.'))||0,qd=+iq.value;if(!(na>0&&nb>0)){box.innerHTML='';return}
- st(key,[ia.value,ib.value,ip.value,iq.value].join(','));
- var n=p.n,w=(!WIN||WIN>=n)?n:WIN,i0=n-w,d=[];for(var i=i0;i<n;i++)d.push(na*p.al.x[i]-nb*p.al.y[i]);
- if(d.length<20){box.innerHTML='<div class=mu>Poucos dados.</div>';return}
- var c=camCalc(d,stp),nCam=c.nUp,lotes=qd>0?Math.max(1,Math.floor(qd/na)):1;
- var custo=lotes*2*(na*pS+nb*pB)*0.0003,bruto=c.step*lotes;
- var rows=c.L.map(function(l){var acao=l.up?'Vender '+lotes*na+' '+S+' · comprar '+lotes*nb+' '+B:'Comprar '+lotes*na+' '+S+' · vender '+lotes*nb+' '+B;
-  var meta=l.up?l.v-c.step:l.v+c.step;
-  return'<tr'+(l.on?' style="background:var(--card)"':'')+'><td><b>'+(l.up?'▲ ':'▼ ')+l.k+'</b>'+(l.on?' <span class=mu>ativa</span>':'')+'</td><td><b>R$ '+f2(l.v)+'</b></td><td>'+acao+'</td><td>R$ '+f2(meta)+'</td><td>'+f2(l.dias*100,0)+'%</td><td>'+l.ciclos+(l.aberta?' <span class=mu>(+1 aberto)</span>':'')+'</td><td>'+(l.dur===null?'–':l.dur+'d')+'</td><td>R$ '+f2(l.pior)+'</td></tr>'}).join('');
- box.innerHTML='<div class=sp-line><span>Média do período · hoje</span><b>R$ '+f2(c.med)+' · R$ '+f2(c.cur)+'</b></div><div class=sp-line><span>Faixa que cobre 90% dos dias</span><b>R$ '+f2(c.p5)+' a R$ '+f2(c.p95)+'</b></div><div class=sp-line><span>Passo sugerido · camadas</span><b>R$ '+f2(c.step)+' · '+c.nUp+' acima e '+c.nDn+' abaixo</b></div>'
-  +'<div class=sc style="margin-top:8px"><table class=sp-hm style="width:100%;text-align:left"><thead><tr><th>Camada</th><th>Spread</th><th>Ao atingir</th><th>Zera em</th><th>Dias além</th><th>Ciclos</th><th>Tempo/ciclo</th><th>Pior excursão</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
-  +'<div class=sp-line style="margin-top:8px"><span>Ganho por ciclo de 1 camada ('+lotes+' lote'+(lotes>1?'s':'')+')</span><b>R$ '+f2(bruto)+' bruto · R$ '+f2(bruto-custo)+' após custos</b></div>';
- var lev=c.L.map(function(l){return{v:l.v,c:l.up?'#ef4444':'#22c55e',t:(l.up?'▲':'▼')+l.k+' '+f2(l.v)}});
- CTX.cm={d:d,lev:lev,i0:i0}}
 function drawCharts(){if(!CTX)return;var p=CTX.p,n=p.n,w=(!WIN||WIN>=n)?n:WIN,i0=n-w,dts=p.al.t.slice(i0);
  chart('spch1',p.r.slice(i0),dts,function(v){return f2(v,3)},null,true,true);
  if(CTX.na){var dif=[];for(var i=i0;i<n;i++)dif.push(CTX.na*p.al.x[i]-CTX.nb*p.al.y[i]);chart('spch2',dif,dts,function(v){return'R$ '+f2(v)},'#0891b2',false,false,true)}
- camRender();if(CTX.cm){chart('spch3',CTX.cm.d,p.al.t.slice(CTX.cm.i0),function(v){return'R$ '+f2(v)},'#7c3aed',false,false,true,CTX.cm.lev)}else{var e3=document.getElementById('spch3');if(e3)e3.innerHTML=''}
  document.querySelectorAll('.sp-wb').forEach(function(b){b.innerHTML=winBar(n).replace(/^<span class=sp-wb>|<\/span>$/g,'')});
  document.querySelectorAll('.sp-wb button').forEach(function(b){b.onclick=function(){WIN=+b.dataset.w;st('spwin',String(WIN));drawCharts()}})}
 window.addEventListener('resize',function(){drawCharts()});
@@ -167,7 +136,6 @@ function renderDetail(){var el=document.getElementById('spd');if(!sel||!BY[sel])
  var key='sp_'+S+'_'+B,saved=st(key),a=w.a,b=w.b;if(saved){var q=saved.split(',');a=+q[0]||a;b=+q[1]||b}
  var qty=+(st('spq_'+S)||10000);
  var s=sig(p.z20,p.z60),n=p.n;
- var sc=(st('spcm_'+S+'_'+B)||'').split(','),rr=pS/pB,ca=+sc[0]||((rr>.8&&rr<1.25)?1:w.a),cb=+sc[1]||((rr>.8&&rr<1.25)?1:w.b),cp=sc[2]||'',cq=sc[3]||'';
  CTX={p:p,na:0,nb:0};var recn=[p.x,p.y].filter(function(q){return BY[q].rec}).map(function(q){return q+' antes de '+dstr(BY[q].rec)});
  var h1=hist(p,1),h2=hist(p,2);
  function ht(h,t){return h?'<div class=sp-line><span>'+t+'</span><b>'+h.n+' casos · compensou em '+f2(h.win*100,0)+'% · mediana '+f2(h.med*100)+'% · pior '+f2(h.worst*100)+'%</b></div>':'<div class=sp-line><span>'+t+'</span><b>sem casos</b></div>'}
@@ -176,10 +144,6 @@ function renderDetail(){var el=document.getElementById('spd');if(!sel||!BY[sel])
  +'<div id=spc></div><div class=sp-in>Tenho <input id=sq type=number min=0 value='+qty+' style="width:110px"> '+S+'</div><div id=spc2></div></div>'
  +'<div class=sp-box style="grid-column:1/-1"><h3>Relação '+p.x+' ÷ '+p.y+' <span class=sp-wb></span></h3><div id=spch1 class=sp-ch></div>'+(recn.length?'<div class=mu style="font-size:12px;margin-top:6px">⚠ '+recn.join(' e ')+': histórico reconstruído (MSTR × dólar × fator fixo), erro típico de ~1%. Vale para ver tendência, não o preço exato.</div>':'')+'</div>'
  +'<div class=sp-box style="grid-column:1/-1"><h3><span id=spdt></span> <span class=sp-wb></span></h3><div id=spch2 class=sp-ch></div></div>'
- +'<div class=sp-box style="grid-column:1/-1"><h3>Camadas de spread: diferença em R$ <span class=sp-wb></span></h3>'
-  +'<div class=mu style="font-size:12.5px;margin-bottom:8px">Quando a diferença sobe até uma camada, você troca um pedaço de '+S+' por '+B+'; quando ela volta um passo, desfaz a troca e embolsa a diferença. Vale também no sentido contrário (camadas ▼). Os números abaixo vêm do histórico da janela escolhida.</div>'
-  +'<div class=sp-in>Proporção <input id=cma type=number min=1 value='+ca+' style="width:70px"> '+S+' : <input id=cmb type=number min=1 value='+cb+' style="width:70px"> '+B+' · Passo R$ <input id=cmp type=text inputmode=decimal placeholder=auto value="'+cp+'" style="width:70px"> · '+S+' por camada <input id=cmq type=number min=0 value='+cq+' style="width:90px"></div>'
-  +'<div id=spcmo></div><div id=spch3 class=sp-ch></div></div>'
  +'<div class=sp-box><h3>No histórico deste par</h3><div class=mu style="font-size:12.5px;margin-bottom:6px">Quando '+S+' ficou esticado contra '+B+' (z 20d), em quantos casos a relação caiu nos 5 pregões seguintes, ou seja, sair compensou</div>'+ht(h1,'|z| ≥ 1')+ht(h2,'|z| ≥ 2')+'<div class=sp-line><span>RSI da relação D / 30m</span><b>'+f2(p.rsiR,0)+' / '+f2(p.rsiM,0)+'</b></div><div class=sp-line><span>Correlação 60d</span><b>'+f2(p.cor)+'</b></div></div>'
  +'</div></div></div>';el.innerHTML=o;
  function calc(){var na=+document.getElementById('sa').value,nb=+document.getElementById('sb').value,nq=+document.getElementById('sq').value;if(!(na>0&&nb>0))return;st(key,na+','+nb);st('spq_'+S,String(nq));
@@ -188,7 +152,7 @@ function renderDetail(){var el=document.getElementById('spd');if(!sel||!BY[sel])
    +'<div class="sp-big '+(pos?'up':'dn')+'">'+(pos?'sobra':'falta')+' R$ '+f2(Math.abs(cash))+' por lote</div><div class=sp-line><span>'+S+' hoje</span><b>R$ '+f2(pS)+'</b></div><div class=sp-line><span>'+B+' hoje</span><b>R$ '+f2(pB)+'</b></div><div class=sp-line><span>Relação exata</span><b>1 '+S+' = '+f2(pS/pB,4)+' '+B+'</b></div>';
   document.getElementById('spc2').innerHTML='<div class=sp-line><span>Lotes completos</span><b>'+f2(lotes,0)+'</b></div><div class=sp-line><span>Compra '+B+'</span><b>'+f2(lotes*nb,0)+'</b></div><div class=sp-line><span>'+(pos?'Fica em caixa':'Precisa colocar')+'</span><b>R$ '+f2(Math.abs(tcash))+'</b></div><div class=sp-line><span>Custo B3 (0,03% × 2 pernas)</span><b>R$ '+f2(custo)+'</b></div>';
   CTX.na=na;CTX.nb=nb;document.getElementById('spdt').textContent='Sobra em R$ por lote ('+na+' '+S+' − '+nb+' '+B+')';drawCharts()}
- ['sa','sb','sq'].forEach(function(id){document.getElementById(id).oninput=calc});['cma','cmb','cmp','cmq'].forEach(function(id){document.getElementById(id).oninput=drawCharts});calc()}
+ ['sa','sb','sq'].forEach(function(id){document.getElementById(id).oninput=calc});calc()}
 function renderHeat(){var h='<div class=sc><table class=sp-hm><thead><tr><th></th>'+CUR.map(function(x){return'<th>'+x.n+'</th>'}).join('')+'</tr></thead><tbody>';
  CUR.forEach(function(r){h+='<tr><td>'+r.n+'</td>';CUR.forEach(function(c){if(r.n==c.n){h+='<td class=mu>–</td>';return}var p=pair(r.n,c.n);if(!p){h+='<td class=mu>–</td>';return}var z=p.z20,al=Math.min(Math.abs(z)/3,1);
   var bg=z>0?'rgba(22,163,74,'+(.1+.6*al)+')':'rgba(220,38,38,'+(.1+.6*al)+')';h+='<td data-x="'+r.n+'" data-y="'+c.n+'" style="background:'+bg+'">'+(z>0?'+':'')+f2(z,1)+'</td>'});h+='</tr>'});
