@@ -248,6 +248,12 @@ function ccPlano(S,B,U,D,au,ad,cur,se){if(cur===null||!se)return'';var w=ccWin(s
    +'Na janela, essa camada foi atingida em '+f2(hh.pct,0)+'% dos dias e fechou '+o.b.r.ciclos+' ciclo'+(o.b.r.ciclos==1?'':'s')+(hh.ult>=0?'; última vez que a diferença esteve nesse nível: '+dstr(tt[hh.ult])+'.':'; não chegou a esse nível na janela.')}
  var gc=0;ativ.concat(fut).forEach(function(o){gc+=ccNet((o.b.hi-o.b.lo)*(o.lots||0),ccFee({na:B.a,nb:B.b},pA,pB)*(o.lots||0),S.ir)});
  if(tem&&gc>0)h+='<br>Se todas as camadas fecharem um ciclo com esses lotes, o ganho líquido de taxas'+(S.ir?' e IR':'')+' é de cerca de <b>R$ '+f2(gc)+'</b>.';
+ if(tem){function lado(L,lots,up){var cum=0,mn=0,fee=0,tl=0;L.forEach(function(b,i){var l=lots[i]||0,e=up?b.hi:b.lo;cum+=up?l*e:-l*e;if(cum<mn)mn=cum;fee+=ccFee({na:B.a,nb:B.b},pA,pB)*l;tl+=l});return{need:-mn,net:cum,fee:fee,lots:tl}}
+  var lu=lado(U,au,true),ld=lado(D,ad,false),us=[];
+  [[ld,'▼',S.b],[lu,'▲',S.a]].forEach(function(q){var r=q[0];if(!r.lots)return;
+   us.push(r.need>0?'camadas '+q[1]+' (vendem '+q[2]+'): <b>R$ '+f2(r.need)+' em caixa</b> para sustentar todas abertas ao mesmo tempo (saldo de caixa com todas abertas: '+(r.net>=0?'+':'−')+'R$ '+f2(Math.abs(r.net))+')':'camadas '+q[1]+' (vendem '+q[2]+'): <b>sem caixa extra</b>; abrir todas ainda deixa R$ '+f2(Math.abs(r.net))+' '+(r.net>=0?'em caixa':'a pagar')+'')});
+  var pf=Math.max(lu.fee,ld.fee);
+  if(us.length)h+='<div style="margin-top:6px"><b>Caixa necessário:</b> '+us.join('; ')+'. Reserve também as taxas de B3 de um ciclo completo (até R$ '+f2(pf)+'). Ao desfazer cada camada, o caixa volta e fica a diferença capturada.</div>'}
  return h+'</div></div>'}
 function ccRecHtml(S){var key=[S.a,S.b,S.base,CCW,S.ir,S.totA>0?1:0,S.totB>0?1:0].join('|');if(CCR.k!=key){CCR.k=key;CCR.v=ccBest(S)}var B=CCR.v,per=S.base=='1h'?'velas de 1 hora':'fechamentos diários';
  if(!B)return'<div class=mu>Sem histórico suficiente para sugerir.</div>';
