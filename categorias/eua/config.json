@@ -224,6 +224,44 @@
    "setor": "Inteligência artificial",
    "novo": true,
    "ipo": 83.0
+  },
+  "WDC": {
+   "grupo": "nasdaq",
+   "bdr": "W1DC34",
+   "setor": "Semicondutores"
+  },
+  "STX": {
+   "grupo": "nasdaq",
+   "bdr": "S1TX34",
+   "setor": "Semicondutores"
+  },
+  "AMAT": {
+   "grupo": "nasdaq",
+   "bdr": "A1MT34",
+   "setor": "Semicondutores"
+  },
+  "LRCX": {
+   "grupo": "nasdaq",
+   "bdr": "L1RC34",
+   "setor": "Semicondutores"
+  },
+  "KLAC": {
+   "grupo": "nasdaq",
+   "bdr": "K1LA34",
+   "setor": "Semicondutores"
+  },
+  "HPE": {
+   "grupo": "sp500",
+   "bdr": "H1PE34",
+   "setor": "Software, nuvem e hardware"
+  },
+  "SNDK": {
+   "grupo": "nasdaq",
+   "setor": "Semicondutores"
+  },
+  "SMCI": {
+   "grupo": "nasdaq",
+   "setor": "Software, nuvem e hardware"
   }
  },
  "valor_mercado": true
