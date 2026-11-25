@@ -59,6 +59,9 @@ jobs:
       - name: candles de 1h do spread
         # 2 anos de velas de 1 hora dos ativos do Spread (um lote por rodada; atualiza a cada 12 h)
         run: HORARIO_ORC=120 timeout 170 python horario.py || true
+      - name: opcoes dos EUA
+        # 3 leituras por pregão (30 min após abrir, 15h e após fechar, horário de Nova York); nas demais rodadas sai na hora
+        run: OPCOES_ORC=120 timeout 170 python opcoes.py || true
       - name: painel
         run: python monitor.py --painel
       - name: guardar

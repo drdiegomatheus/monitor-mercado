@@ -264,5 +264,15 @@
    "setor": "Software, nuvem e hardware"
   }
  },
- "valor_mercado": true
+ "valor_mercado": true,
+ "opcoes": [
+  "NVDA",
+  "MSTR",
+  "MU",
+  "DELL",
+  "AMD",
+  "AVGO",
+  "SPY",
+  "QQQ"
+ ]
 }

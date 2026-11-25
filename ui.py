@@ -347,7 +347,7 @@ def _novas_ops():
 def cabeca(titulo, paginas, atual):
     agora = dt.datetime.now(BRT)
     n_ops = _novas_ops()
-    ICO = {"Todos": "☰", "Cripto": "₿", "Brasil": "R$", "EUA": "$", "Dados gerais": "◍", "Oscilações": "↕", "Spread": "⇄", "Mapa": "▦", "Trades": "⇆", "Momento": "◐", "Momento Cripto": "₿", "Baleias": "🐋", "Operações": "⚡", "Carteiras": "🏆", "Baleias TradeFi": "🏛", "Gráficos": "▤"}
+    ICO = {"Todos": "☰", "Cripto": "₿", "Brasil": "R$", "EUA": "$", "Opções": "◔", "Dados gerais": "◍", "Oscilações": "↕", "Spread": "⇄", "Mapa": "▦", "Trades": "⇆", "Momento": "◐", "Momento Cripto": "₿", "Baleias": "🐋", "Operações": "⚡", "Carteiras": "🏆", "Baleias TradeFi": "🏛", "Gráficos": "▤"}
     GRP = {"Oscilações": "Análises", "Momento Cripto": "Cripto", "Baleias": "Cripto", "Operações": "Cripto", "Carteiras": "Cripto", "Baleias TradeFi": "Cripto", "Gráficos": "Outros"}
     vistos = set()
     nav = ""
@@ -395,6 +395,9 @@ def inicio(paginas, secoes, eventos):
             continue
         if chaves == "spread":
             h.append(f"<a class=tile href='{arq}'><div class=tt>{titulo}<span>→</span></div><div class=ln>Relação entre ativos para permutar</div><div class=ln>Esticado x descontado, com a sobra em R$</div></a>")
+            continue
+        if chaves == "opcoes":
+            h.append(f"<a class=tile href='{arq}'><div class=tt>{titulo}<span>→</span></div><div class=ln>Barreiras de alta e de queda nas opções</div><div class=ln>Max pain, movimento precificado e viés</div></a>")
             continue
         if chaves == "mapa":
             h.append(f"<a class=tile href='{arq}'><div class=tt>{titulo}<span>→</span></div><div class=ln>Mapa de calor das ações da B3 e dos BDRs</div><div class=ln>Quadrados por valor de mercado, cor pela variação</div></a>")
