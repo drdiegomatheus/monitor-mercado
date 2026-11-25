@@ -1,17 +1,112 @@
 [
- {"data": "2026-11-20", "regiao": "Brasil", "evento": "B3 fechada (Consciência Negra)"},
- {"data": "2026-11-26", "regiao": "EUA", "evento": "Bolsas fechadas (Thanksgiving)"},
- {"data": "2026-12-01", "regiao": "EUA", "evento": "JOLTS (vagas de emprego, out)"},
- {"data": "2026-12-04", "regiao": "EUA", "evento": "Payroll (relatório de emprego, nov)"},
- {"data": "2026-12-09", "regiao": "Brasil", "evento": "Copom: decisão da Selic (reunião 8-9/12; Selic atual 13,75%)"},
- {"data": "2026-12-09", "regiao": "EUA", "evento": "FOMC: decisão de juros 14h ET, com projeções (faixa atual 3,75%-4,00%)"},
- {"data": "2026-12-10", "regiao": "EUA", "evento": "CPI (inflação ao consumidor, nov)"},
- {"data": "2026-12-15", "regiao": "EUA", "evento": "PPI (inflação ao produtor, nov)"},
- {"data": "2026-12-25", "regiao": "Brasil/EUA", "evento": "Bolsas fechadas (Natal)"},
- {"data": "2027-01-05", "regiao": "EUA", "evento": "JOLTS (vagas de emprego, nov)"},
- {"data": "2027-01-08", "regiao": "EUA", "evento": "Payroll (relatório de emprego, dez)"},
- {"data": "2027-01-13", "regiao": "EUA", "evento": "CPI (inflação ao consumidor, dez)"},
- {"data": "2027-01-14", "regiao": "EUA", "evento": "PPI (inflação ao produtor, dez)"},
- {"data": "2027-01-27", "regiao": "Brasil", "evento": "Copom: decisão da Selic (reunião 26-27/01)"},
- {"data": "2027-01-27", "regiao": "EUA", "evento": "FOMC: decisão de juros (reunião 26-27/01)"}
+ {
+  "data": "2026-11-20",
+  "regiao": "Brasil",
+  "evento": "B3 fechada (Consciência Negra)"
+ },
+ {
+  "data": "2026-11-25",
+  "regiao": "EUA",
+  "evento": "PCE de out (núcleo e cheio, 8h30 ET): previsão núcleo +0,3% m/m, 3,2% a/a"
+ },
+ {
+  "data": "2026-11-25",
+  "regiao": "EUA",
+  "evento": "PIB 3T, 2ª estimativa (8h30 ET): consenso 3,5% anualizado"
+ },
+ {
+  "data": "2026-11-25",
+  "regiao": "EUA",
+  "evento": "Pedidos de seguro-desemprego + bens duráveis (out), 8h30 ET"
+ },
+ {
+  "data": "2026-11-25",
+  "regiao": "EUA",
+  "evento": "Beige Book do Fed (15h ET)"
+ },
+ {
+  "data": "2026-11-26",
+  "regiao": "EUA",
+  "evento": "Bolsas fechadas (Thanksgiving)"
+ },
+ {
+  "data": "2026-11-27",
+  "regiao": "EUA",
+  "evento": "Bolsas fecham mais cedo (14h ET, pós-Thanksgiving)"
+ },
+ {
+  "data": "2026-12-01",
+  "regiao": "EUA",
+  "evento": "JOLTS (vagas de emprego, out)"
+ },
+ {
+  "data": "2026-12-01",
+  "regiao": "EUA",
+  "evento": "ISM industrial (nov)"
+ },
+ {
+  "data": "2026-12-02",
+  "regiao": "EUA",
+  "evento": "ADP (emprego privado, nov)"
+ },
+ {
+  "data": "2026-12-04",
+  "regiao": "EUA",
+  "evento": "Payroll (relatório de emprego, nov)"
+ },
+ {
+  "data": "2026-12-09",
+  "regiao": "Brasil",
+  "evento": "Copom: decisão da Selic (reunião 8-9/12; Selic atual 13,75%)"
+ },
+ {
+  "data": "2026-12-09",
+  "regiao": "EUA",
+  "evento": "FOMC: decisão de juros 14h ET, com projeções (faixa atual 3,75%-4,00%)"
+ },
+ {
+  "data": "2026-12-10",
+  "regiao": "EUA",
+  "evento": "CPI (inflação ao consumidor, nov)"
+ },
+ {
+  "data": "2026-12-15",
+  "regiao": "EUA",
+  "evento": "PPI (inflação ao produtor, nov)"
+ },
+ {
+  "data": "2026-12-25",
+  "regiao": "Brasil/EUA",
+  "evento": "Bolsas fechadas (Natal)"
+ },
+ {
+  "data": "2027-01-05",
+  "regiao": "EUA",
+  "evento": "JOLTS (vagas de emprego, nov)"
+ },
+ {
+  "data": "2027-01-08",
+  "regiao": "EUA",
+  "evento": "Payroll (relatório de emprego, dez)"
+ },
+ {
+  "data": "2027-01-13",
+  "regiao": "EUA",
+  "evento": "CPI (inflação ao consumidor, dez)"
+ },
+ {
+  "data": "2027-01-14",
+  "regiao": "EUA",
+  "evento": "PPI (inflação ao produtor, dez)"
+ },
+ {
+  "data": "2027-01-27",
+  "regiao": "Brasil",
+  "evento": "Copom: decisão da Selic (reunião 26-27/01)"
+ },
+ {
+  "data": "2027-01-27",
+  "regiao": "EUA",
+  "evento": "FOMC: decisão de juros (reunião 26-27/01)"
+ }
 ]
