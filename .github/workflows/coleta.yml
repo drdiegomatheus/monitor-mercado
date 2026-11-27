@@ -62,6 +62,9 @@ jobs:
       - name: opcoes dos EUA
         # 3 leituras por pregão (30 min após abrir, 15h e após fechar, horário de Nova York); nas demais rodadas sai na hora
         run: OPCOES_ORC=120 timeout 170 python opcoes.py || true
+      - name: universo de ativos
+        # ~770 ativos (B3 200, S&P 500 + Nasdaq-100, top 50 cripto): preços 1x por dia após o fechamento, lista nova 1x por semana
+        run: timeout 420 python universo.py --auto || true
       - name: painel
         run: python monitor.py --painel
       - name: guardar
@@ -70,7 +73,7 @@ jobs:
         run: |
           git config user.name "coleta"; git config user.email "coleta@users.noreply.github.com"
           ARQ=""
-          for f in painel.html painel_*.html ext.json index.html manifest.webmanifest sw.js icon.svg icon-192.png icon-512.png apple-touch-icon.png categorias/*/dados categorias/*/relatorio.html categorias/*/eventos.json categorias/*/fundamentos.json categorias/*/onchain.json categorias/*/mercado.json categorias/*/_meta.json; do
+          for f in painel.html painel_*.html ext.json index.html manifest.webmanifest sw.js icon.svg icon-192.png icon-512.png apple-touch-icon.png categorias/*/dados categorias/*/relatorio.html categorias/*/eventos.json categorias/*/fundamentos.json categorias/*/onchain.json categorias/*/mercado.json categorias/*/_meta.json universo; do
             if [ -e "$f" ]; then ARQ="$ARQ $f"; fi
           done
           git checkout -q --orphan dados_novo
