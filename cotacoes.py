@@ -49,7 +49,7 @@ function tab(){
     q.style.display="none";
     var L=D.linhas.filter(function(r){return r.m==at&&r.r&&r.r<="""+str(TOP)+r"""}),S={};
     L.forEach(function(r){(S[r.s]=S[r.s]||[]).push(r)});
-    var ks=Object.keys(S).sort(function(a,b){return S[b].length-S[a].length||a.localeCompare(b)});
+    var ult=function(k){return k=="Outras"||k=="Outros"?1:0};var ks=Object.keys(S).sort(function(a,b){return ult(a)-ult(b)||S[b].length-S[a].length||a.localeCompare(b)});
     h="<p class=ct-n>"+L.length+" ativos mais negociados em "+NM[at]+" (média do volume financeiro dos últimos 30 dias; lista revista toda semana), separados por setor.</p>";
     ks.forEach(function(k){h+="<div class=ct-sec><h3><span>"+k+"</span><span>"+S[k].length+"</span></h3><div class=ct-w><table>"+CAB+S[k].sort(function(a,b){return a.r-b.r}).map(function(r){return lin(r,false)}).join("")+"</table></div></div>"});
   }
