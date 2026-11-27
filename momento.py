@@ -1,4 +1,4 @@
-"""Aba Momento: semáforo de compra/venda por empresa (técnica; fundamental e analistas entram depois).
+"""Aba Momento: tendência (MM200), RSI e notas descritivas por empresa, sem sinal de compra ou venda.
 BDR e ação dos EUA ficam na mesma linha, com a técnica de cada um separada."""
 import json
 import html as H
@@ -17,7 +17,7 @@ CSS = """
 .mo-t tr.mr{cursor:pointer}.mo-t tr.mr:hover td{background:var(--card2)}
 .mo-n b{font-size:14px}.mo-n small{display:block;color:var(--mu);font-size:11px}
 .sf{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-variant-numeric:tabular-nums}.sf i{width:12px;height:12px;border-radius:50%;display:inline-block;background:var(--mu);opacity:.4}
-.sf.g i{background:#16a34a;opacity:1}.sf.r i{background:#dc2626;opacity:1}.sf.n i{background:#9ca3af;opacity:1}.sf small{color:var(--mu);font-weight:500;font-size:11px}
+.sf.g i{background:#16a34a;opacity:1}.sf.r i{background:#dc2626;opacity:1}.sf.n i{background:#9ca3af;opacity:1}.sf.y i{background:#f59e0b;opacity:1}.rb{display:inline-block;margin-left:6px;padding:1px 7px;border:1px solid var(--line);border-radius:999px;font-size:10.5px;font-weight:600;color:var(--mu);white-space:nowrap}.sf small{color:var(--mu);font-weight:500;font-size:11px}
 .mo-o{position:fixed;inset:0;background:rgba(5,8,15,.55);z-index:50;display:none;overflow:auto;padding:16px}
 .mo-p{max-width:1000px;margin:0 auto;background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
 .mo-p h2{margin:0 0 4px;font-size:20px}.mo-p .x{float:right;cursor:pointer;font-size:20px;color:var(--mu);border:0;background:none}
@@ -32,7 +32,10 @@ CSS = """
 LIB = r"""
 function f1(v,d){return(v==null||v!==v)?'–':v.toLocaleString('pt-BR',{minimumFractionDigits:d==null?1:d,maximumFractionDigits:d==null?1:d})}
 function sg(v,d){return v==null?'–':(v>=0?'+':'−')+f1(Math.abs(v),d)}
-function sf(t){if(!t||t.sc==null)return'<span class="sf"><i></i>–</span>';var c=t.sc>=6.5?'g':(t.sc<=3.5?'r':'n');return'<span class="sf '+c+'"><i></i>'+f1(t.sc,1)+'<small>'+(c=='g'?'compra':c=='r'?'venda':'neutro')+'</small></span>'}
+function sf(t){if(!t||t.sc==null)return'<span class="sf"><i></i>–</span>';var c=t.sc>=6.5?'g':(t.sc<=3.5?'r':'n');return'<span class="sf '+c+'"><i></i>'+f1(t.sc,1)+'<small>'+(c=='g'?'nota alta':c=='r'?'nota baixa':'nota média')+'</small></span>'}
+var TRN={'Alta':['g','tendência de alta','acima das duas MM200'],'Correção':['y','tendência mista','acima da MM200 semanal, abaixo da diária'],'Repique':['y','tendência mista','acima da MM200 diária, abaixo da semanal'],'Baixa':['r','tendência de baixa','abaixo das duas MM200']};
+function rsib(t){if(!t||t.rw==null)return'';return t.rw>=70?'<span class=rb title="RSI semanal acima de 70">RSI sem. '+f1(t.rw,0)+' ≥ 70</span>':t.rw<=30?'<span class=rb title="RSI semanal abaixo de 30">RSI sem. '+f1(t.rw,0)+' ≤ 30</span>':''}
+function tf(t){if(!t||!TRN[t.rg])return'<span class="sf"><i></i>–</span>';var x=TRN[t.rg];return'<span class="sf '+x[0]+'" title="'+x[2]+'"><i></i><small>'+x[1]+'</small></span>'+rsib(t)}
 function line(cv,series,opt){var dpr=window.devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;cv.width=W*dpr;cv.height=H*dpr;var g=cv.getContext('2d');g.scale(dpr,dpr);
  var all=[];series.forEach(function(s){s.v.forEach(function(x){if(x!=null)all.push(x)})});if(opt.lines)opt.lines.forEach(function(l){all.push(l.y)});
  var mn=Math.min.apply(null,all),mx=Math.max.apply(null,all);if(opt.min!=null)mn=opt.min;if(opt.max!=null)mx=opt.max;var pd=(mx-mn)*.06||1;if(opt.min==null)mn-=pd;if(opt.max==null)mx+=pd;
@@ -63,13 +66,14 @@ var R=D.rows,SORT={k:'ger',d:-1},FG='',FS='',FQ='',FSIG='';
 function ger(r){var v=[];['t1','t2'].forEach(function(k){if(r[k]&&r[k].sc!=null)v.push(r[k].sc)});var t=v.length?v.reduce(function(a,b){return a+b},0)/v.length:null;var P=[[t,.4],[r.fu&&r.fu.sc,.4],[r.an&&r.an.sc,.2]],a=0,w=0;P.forEach(function(p){if(p[0]!=null){a+=p[0]*p[1];w+=p[1]}});return w?a/w:null}
 R.forEach(function(r){r.ger=ger(r)});
 var SET=Array.from(new Set(R.map(function(r){return r.s}).filter(Boolean))).sort();
-function val(r,k){if(k=='n')return r.n;if(k=='ger')return r.ger;if(k=='t1')return r.t1&&r.t1.sc;if(k=='t2')return r.t2&&r.t2.sc;if(k=='fu')return r.fu&&r.fu.sc;if(k=='an')return r.an&&r.an.sc;return null}
+var TO={'Alta':3,'Correção':2,'Repique':2,'Baixa':1};
+function val(r,k){if(k=='n')return r.n;if(k=='ger')return r.ger;if(k=='t1')return r.t1&&TO[r.t1.rg];if(k=='t2')return r.t2&&TO[r.t2.rg];if(k=='fu')return r.fu&&r.fu.sc;if(k=='an')return r.an&&r.an.sc;return null}
 function build(){
- var bar='<div class=mo-bar><input id=q placeholder="buscar ativo…" value="'+FQ+'"><button data-g="" class="'+(FG==''?'on':'')+'">Todos</button><button data-g=B3 class="'+(FG=='B3'?'on':'')+'">B3</button><button data-g=EUA class="'+(FG=='EUA'?'on':'')+'">EUA + BDR</button><select id=st><option value="">Todos os setores</option>'+SET.map(function(s){return'<option'+(FS==s?' selected':'')+'>'+s+'</option>'}).join('')+'</select><button data-sg=g class="'+(FSIG=='g'?'on':'')+'">● Compra</button><button data-sg=r class="'+(FSIG=='r'?'on':'')+'">● Venda</button></div>';
+ var bar='<div class=mo-bar><input id=q placeholder="buscar ativo…" value="'+FQ+'"><button data-g="" class="'+(FG==''?'on':'')+'">Todos</button><button data-g=B3 class="'+(FG=='B3'?'on':'')+'">B3</button><button data-g=EUA class="'+(FG=='EUA'?'on':'')+'">EUA + BDR</button><select id=st><option value="">Todos os setores</option>'+SET.map(function(s){return'<option'+(FS==s?' selected':'')+'>'+s+'</option>'}).join('')+'</select><button data-sg=g class="'+(FSIG=='g'?'on':'')+'">● Nota alta</button><button data-sg=r class="'+(FSIG=='r'?'on':'')+'">● Nota baixa</button></div>';
  var L=R.filter(function(r){if(FG&&r.g!=FG)return false;if(FS&&r.s!=FS)return false;if(FQ&&(r.n+' '+(r.b||'')).toUpperCase().indexOf(FQ.toUpperCase())<0)return false;if(FSIG){var x=r.ger;if(x==null)return false;if(FSIG=='g'&&x<6.5)return false;if(FSIG=='r'&&x>3.5)return false}return true});
  L.sort(function(a,b){var x=val(a,SORT.k),y=val(b,SORT.k);if(x==null)return 1;if(y==null)return-1;return x<y?-SORT.d:x>y?SORT.d:0});
- var h=bar+'<table class=mo-t><thead><tr><th data-k=n>Empresa</th><th data-k=t1>Técnica (B3 / EUA)</th><th data-k=t2>Técnica BDR</th><th data-k=fu>Fundamental</th><th data-k=an>Analistas</th><th data-k=ger>Geral ▾</th></tr></thead><tbody>';
- L.forEach(function(r){h+='<tr class=mr data-i="'+r.i+'"><td class=mo-n><b>'+r.n+(r.b?' <span class=mu style="font-weight:500">· '+r.b+'</span>':'')+'</b><small>'+(r.s||'')+'</small></td><td>'+sf(r.t1)+'</td><td>'+(r.t2?sf(r.t2):'<span class=mu>–</span>')+'</td><td>'+(r.fu?sf(r.fu):'<span class=mu>–</span>')+'</td><td>'+(r.an?sf(r.an):'<span class=mu>–</span>')+'</td><td>'+sf({sc:r.ger})+'</td></tr>'});
+ var h=bar+'<table class=mo-t><thead><tr><th data-k=n>Empresa</th><th data-k=t1>Tendência (B3 / EUA)</th><th data-k=t2>Tendência BDR</th><th data-k=fu>Fundamental</th><th data-k=an>Analistas externos</th><th data-k=ger>Nota geral ▾</th></tr></thead><tbody>';
+ L.forEach(function(r){h+='<tr class=mr data-i="'+r.i+'"><td class=mo-n><b>'+r.n+(r.b?' <span class=mu style="font-weight:500">· '+r.b+'</span>':'')+'</b><small>'+(r.s||'')+'</small></td><td>'+tf(r.t1)+'</td><td>'+(r.t2?tf(r.t2):'<span class=mu>–</span>')+'</td><td>'+(r.fu?sf(r.fu):'<span class=mu>–</span>')+'</td><td>'+(r.an?sf(r.an):'<span class=mu>–</span>')+'</td><td>'+sf({sc:r.ger})+'</td></tr>'});
  h+='</tbody></table>';document.getElementById('mo').innerHTML=h}
 document.addEventListener('click',function(e){var t=e.target;
  if(t.dataset&&t.dataset.g!==undefined&&t.closest('.mo-bar')){FG=t.dataset.g;build();return}
@@ -86,6 +90,7 @@ function tr(a,s){return a?a.map(function(x){return x[1]}):[]}
 function dt(d){if(!d)return'–';var p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0]}
 function dias(d){var n=Math.round((new Date(d)-new Date(new Date().toISOString().slice(0,10)))/864e5);return n==0?'hoje':n>0?'em '+n+' dias':'há '+(-n)+' dias'}
 var RK={strong_buy:'Compra forte',buy:'Compra',hold:'Neutro',underperform:'Abaixo do mercado',sell:'Venda',strong_sell:'Venda forte'};
+var FONTE_AN='Dados de analistas externos (terceiros), compilados pelo Yahoo Finance. Não são opinião nem recomendação desta plataforma.';
 var SUB={val:'Valuation',cres:'Crescimento',rent:'Rentabilidade',saude:'Saúde financeira',div:'Dividendos'};
 function subs(fu){return'<div class=mo-g>'+Object.keys(SUB).map(function(k){var v=fu.sub[k];return'<div class=mo-k><small>'+SUB[k]+'</small><b>'+sf({sc:v})+'</b></div>'}).join('')+'</div>'}
 function pct(v){return v==null?'–':f1(v,1)+'%'}
@@ -106,24 +111,24 @@ function fundH(r){var fu=r.fu;if(!fu)return'<div class=mo-soon>Sem dados fundame
  h+='<div class=mo-c><h4>Receita e lucro líquido por trimestre (bi)</h4><canvas id=f1></canvas></div><div class=mo-c><h4>Margens por trimestre (%)</h4><canvas id=f2></canvas></div><div class=mo-c><h4>Dívida × caixa (bi)</h4><canvas id=f3></canvas></div><div class=mo-c><h4>Caixa operacional e livre por ano (bi)</h4><canvas id=f4></canvas></div>';
  h+='<div class=mo-note>Nota fundamentalista = média ponderada de valuation (peso 2), crescimento (2), rentabilidade (2), saúde financeira (2) e dividendos (1), por faixas absolutas fixas (ex.: P/L até 12 = barato; dív. líq./EBITDA até 1 = confortável). Bancos/seguradoras usam ROE, P/VP e ROA em vez de dívida/EBITDA. Valores em moeda do ativo (R$ ou US$).</div>';return h}
 function anaH(r){var a=r.an;if(!a)return'<div class=mo-soon>Sem cobertura de analistas disponível.</div>';
- var h='<div>'+sf(a)+' <span class=mu>'+(RK[a.rk]||a.rk||'–')+' · '+a.n+' analista'+(a.n==1?'':'s')+'</span></div><div class=mo-g>';
- h+=[['Consenso (1=compra forte … 5=venda)',a.rm==null?'–':f1(a.rm,2)],['Analistas',a.n],['Preço-alvo médio',a.alvo==null?'–':f1(a.alvo,2)],['Alvo máximo',a.max==null?'–':f1(a.max,2)],['Alvo mínimo',a.min==null?'–':f1(a.min,2)],['Potencial até o alvo',a.up==null?'–':sg(a.up,1)+'%']].map(function(x){return'<div class=mo-k><small>'+x[0]+'</small><b>'+x[1]+'</b></div>'}).join('')+'</div>';
+ var h='<div class=mo-note><b>'+FONTE_AN+'</b></div><div>'+sf(a)+' <span class=mu>consenso dos analistas externos: '+(RK[a.rk]||a.rk||'–')+' · '+a.n+' analista'+(a.n==1?'':'s')+'</span></div><div class=mo-g>';
+ h+=[['Consenso externo (1=compra forte … 5=venda)',a.rm==null?'–':f1(a.rm,2)],['Analistas',a.n],['Preço-alvo médio (externo)',a.alvo==null?'–':f1(a.alvo,2)],['Alvo máximo',a.max==null?'–':f1(a.max,2)],['Alvo mínimo',a.min==null?'–':f1(a.min,2)],['Potencial até o alvo',a.up==null?'–':sg(a.up,1)+'%']].map(function(x){return'<div class=mo-k><small>'+x[0]+'</small><b>'+x[1]+'</b></div>'}).join('')+'</div>';
  var cu=r.g=='B3'?'R$':'US$';
  h+='<div class=mo-note>Preço-alvo em '+cu+' (ativo de referência '+(r.g=='B3'?r.n:r.n+' nos EUA')+'; preço atual '+cu+' '+f1(a.p,2)+').';
  if(r.t2&&a.alvo!=null&&r.t1&&r.t1.p&&r.t2.p){var ratio=r.t2.p/r.t1.p;h+=' Equivalente no BDR '+r.b+': alvo R$ '+f1(a.alvo*ratio,2)+' (preço R$ '+f1(r.t2.p,2)+') — o potencial % é o mesmo, pois o BDR acompanha a ação; a diferença real fica no câmbio.'}
  h+='</div>';
  var rs=r.fu&&r.fu.rs;if(rs&&rs.ult)h+='<div class=mo-note>Último resultado: '+dt(rs.ult.d)+(rs.ult.sur!=null?' · surpresa de lucro '+sg(rs.ult.sur,1)+'%':'')+(rs.prox?' · próximo '+dt(rs.prox.d):'')+'</div>';
- h+='<div class=mo-note>Nota de analistas = 50% consenso (1→10 … 5→0) + 50% potencial até o preço-alvo (±20% ≈ nota 10/0). Com menos de 3 analistas a nota é puxada para o neutro.</div>';return h}
+ h+='<div class=mo-note>Fonte: Yahoo Finance (consenso de analistas de terceiros). Nota de analistas = 50% consenso (1→10 … 5→0) + 50% potencial até o preço-alvo (±20% ≈ nota 10/0). Com menos de 3 analistas a nota é puxada para o neutro.</div>';return h}
 function drawD(){var r=CUR,lst=LST==0?r.t1:r.t2,tabs='';
  var tt=['tec','fun','ana'],tn={tec:'Técnica',fun:'Fundamental',ana:'Analistas'};
  var h='<button class=x>✕</button><h2>'+r.n+(r.b?' <span class=mu style="font-weight:500">· '+r.b+'</span>':'')+'</h2><div class=mo-note>'+(r.s||'')+'</div>';
  h+='<div class=mo-tabs>'+tt.map(function(k){return'<button data-tab='+k+' class="'+(TAB==k?'on':'')+'">'+tn[k]+'</button>'}).join('')+'</div>';
  if(TAB=='tec'){
   if(r.t2)h+='<div class=mo-tabs>'+[r.t1,r.t2].map(function(t,i){return'<button data-l='+i+' class="'+(LST==i?'on':'')+'">'+t.lb+' · '+t.cu+'</button>'}).join('')+'</div>';
-  h+='<div>'+sf(lst)+' <span class=mu>Regime: <b>'+lst.rg+'</b></span> · <span class=mu>preço '+lst.cu+' '+f1(lst.p,2)+'</span></div>';
+  h+='<div>'+tf(lst)+' <span class=mu>Regime: <b>'+lst.rg+'</b></span> · <span class=mu>nota técnica '+f1(lst.sc,1)+'</span> · <span class=mu>preço '+lst.cu+' '+f1(lst.p,2)+'</span></div>';
   h+='<div class=mo-g>'+[['RSI diário',f1(lst.rd,0)],['RSI semanal',f1(lst.rw,0)],['vs MM200 diária',sg(lst.d2,1)+'%'],['vs MM200 semanal',sg(lst.w2,1)+'%'],['vs máx. 52 sem.',sg(lst.h52,1)+'%'],['vs máx. 5 anos',sg(lst.h5,1)+'%'],['vs mín. 52 sem.',sg(lst.l52,1)+'%'],['1 mês',sg(lst.r1,1)+'%'],['3 meses',sg(lst.r3,1)+'%'],['6 meses',sg(lst.r6,1)+'%'],['12 meses',sg(lst.r12,1)+'%'],['Força 6m vs '+lst.ix,sg(lst.rs,1)+' pp']].map(function(x){return'<div class=mo-k><small>'+x[0]+'</small><b>'+x[1]+'</b></div>'}).join('')+'</div>';
   h+='<div class=mo-c><h4>Preço diário (≈ 1 ano) com MM 50 e MM 200</h4><canvas id=c1></canvas></div><div class=mo-c><h4>Preço semanal (5 anos) com MM 200 semanal</h4><canvas id=c2></canvas></div><div class=mo-c><h4>RSI diário e semanal</h4><canvas id=c3></canvas></div>';
-  h+='<div class=mo-note>Nota técnica: média de RSI semanal, RSI diário, distância da MM 200 diária e queda desde a máxima de 52 semanas. Em regime de baixa (abaixo das duas MM 200) a nota de compra fica no máximo neutra, salvo RSI semanal abaixo de 30 (possível fundo). Pesos iniciais, ainda sem backtest.</div>'}
+  h+='<div class=mo-note>Cor = tendência pela MM200: verde = preço acima das MM200 diária e semanal; amarelo = entre elas; vermelho = abaixo das duas. Nota técnica (0–10): média de RSI semanal, RSI diário, distância da MM 200 diária e queda desde a máxima de 52 semanas; em regime de baixa ela fica no máximo em 6,4, salvo RSI semanal abaixo de 30. Pesos iniciais, ainda sem backtest.</div><div class=mo-note>Legenda: RSI acima de 70 costuma ser lido no mercado como região de sobrecompra, e abaixo de 30 como sobrevenda. O indicador não prevê preço.</div>'}
  else if(TAB=='fun')h+=fundH(r);else h+=anaH(r);
  var p=document.getElementById('mo-p');p.innerHTML=h;
  p.querySelectorAll('[data-tab]').forEach(function(b){b.onclick=function(){TAB=b.dataset.tab;drawD()}});
@@ -349,7 +354,7 @@ def dados(raiz):
 
 def pagina(arq, titulo, paginas, D):
     h = [ui.cabeca(titulo, paginas, arq), f"<style>{CSS}</style><h1>{H.escape(titulo)}</h1>",
-         "<p class=sub>Semáforo por empresa: verde = momento de compra, vermelho = venda, cinza = neutro. BDR e ação dos EUA ficam na mesma linha, com a técnica de cada um. Clique em uma linha para ver os detalhes e gráficos.</p>",
+         "<p class=sub>Tendência por empresa pela MM200: verde = acima das MM200 diária e semanal, amarelo = entre elas, vermelho = abaixo das duas. O selo de RSI aparece quando o RSI semanal está acima de 70 ou abaixo de 30 (costuma ser lido como sobrecompra e sobrevenda; o indicador não prevê preço). As notas de 0 a 10 resumem os dados e não são recomendação de compra ou venda. Clique em uma linha para ver os detalhes e gráficos.</p>",
          "<div id=mo></div><div class=mo-o id=mo-o><div class=mo-p id=mo-p></div></div>",
          "</main><script>var D=" + json.dumps(D, separators=(",", ":"), ensure_ascii=False) + ";" + JS + "</script></body></html>"]
     return "".join(h)
