@@ -149,19 +149,21 @@ def lista_brasil():
 
 
 def lista_cripto():
-    """candidatos: 250 de maior volume em 24 h, só entre as 300 maiores por valor de mercado (tira moedas de volume inflado); sem stablecoins/wrapped"""
-    j = _json("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=volume_desc&per_page=250&page=1")
+    """candidatos: 100 maiores por valor de mercado (CoinGecko), sem stablecoins/wrapped; a ordem da lista é a do valor de mercado"""
+    j = _json("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1")
     out = {}
     for c in j or []:
         s = c["symbol"].upper()
-        rk = c.get("market_cap_rank") or 9999
         nome = (c.get("name") or "").lower()
         estavel = abs((c.get("current_price") or 0) - 1) < 0.03 and abs(c.get("price_change_percentage_24h") or 0) < 1
-        if (s in EXCLUIR_CRIPTO or rk > 300 or estavel or "usd" in s.lower() or any(w in nome for w in ("wrapped", "staked", "bridged", "tether", "stable", "peg")) or
+        if (s in EXCLUIR_CRIPTO or estavel or "usd" in s.lower() or any(w in nome for w in ("wrapped", "staked", "bridged", "tether", "stable", "peg")) or
                 c["id"].startswith(("wrapped", "staked", "bridged", "binance-peg")) or "_" in s or s in out): continue
         out[s] = {"nome": c["name"], "setor": CRIPTO_SETOR.get(s, "Outras"), "preco_ref": c["current_price"], "cg": c["id"]}
-        if len(out) >= 80: break
+        if len(out) >= 75: break
     return out
+
+
+YAHOO_FIXO = {"SUI": "SUI20947-USD", "POL": "POL28321-USD", "UNI": "UNI7083-USD", "ARB": "ARB11841-USD", "TAO": "TAO22974-USD"}   # tickers do Yahoo com número
 
 
 def yahoo_cripto(L):
@@ -175,16 +177,18 @@ def yahoo_cripto(L):
         ok = tk in d and abs(d[tk].dropna().iloc[-1] / v["preco_ref"] - 1) < 0.08 if tk in d and not d[tk].dropna().empty else False
         if ok: v["yahoo"] = tk
         else: falta.append(s)
-    for s in falta:                                  # procura outro ticker (ex.: UNI7083-USD) pelo nome
+    for s in falta:                                  # procura outro ticker (ex.: UNI7083-USD) pelo nome e pelo símbolo; confere o preço
         v = L[s]
-        j = _json("https://query1.finance.yahoo.com/v1/finance/lookup?type=cryptocurrency&count=15&query=" + urllib.parse.quote(s))
-        docs = (((j or {}).get("finance") or {}).get("result") or [{}])[0].get("documents", [])
-        cs = [x["symbol"] for x in docs if x.get("symbol", "").endswith("-USD") and x.get("symbol", "").startswith(s)]
-        if cs:
-            dd, _ = baixar_yahoo(cs, "5d")
-            for tk in cs:
-                if tk in dd and not dd[tk].dropna().empty and abs(dd[tk].dropna().iloc[-1] / v["preco_ref"] - 1) < 0.08:
-                    v["yahoo"] = tk; break
+        cs = ([YAHOO_FIXO[s]] if s in YAHOO_FIXO else []) + [f"{s}-USD"]
+        for q in (v["nome"], s):
+            j = _json("https://query1.finance.yahoo.com/v1/finance/lookup?type=cryptocurrency&count=15&query=" + urllib.parse.quote(q))
+            docs = (((j or {}).get("finance") or {}).get("result") or [{}])[0].get("documents", [])
+            cs += [x["symbol"] for x in docs if x.get("symbol", "").endswith("-USD")][:8]
+        cs = list(dict.fromkeys(cs))
+        dd, _ = baixar_yahoo(cs, "5d")
+        for tk in cs:
+            if tk in dd and not dd[tk].dropna().empty and abs(dd[tk].dropna().iloc[-1] / v["preco_ref"] - 1) < 0.08:
+                v["yahoo"] = tk; break
         if "yahoo" not in v: print("   cripto sem ticker confiável no Yahoo:", s)
     ok = {s: v for s, v in L.items() if "yahoo" in v}
     return dict(list(ok.items())[:N_CRIPTO])
@@ -275,6 +279,7 @@ def calcular(L):
         P = pd.read_csv(_arq(m), index_col=0, parse_dates=True)
         rank = sorted((t for t, v in L[m].items() if v.get("adv")), key=lambda t: -L[m][t]["adv"])
         pos = {t: i + 1 for i, t in enumerate(rank)}
+        if m == "cripto": pos = {t: i + 1 for i, t in enumerate(L[m])}      # cripto: ordem do valor de mercado
         corte = N_B3 if m == "brasil" else None
         for t, v in L[m].items():
             if v["yahoo"] not in P.columns: continue
