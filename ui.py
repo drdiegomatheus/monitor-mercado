@@ -347,7 +347,7 @@ def _novas_ops():
 def cabeca(titulo, paginas, atual):
     agora = dt.datetime.now(BRT)
     n_ops = _novas_ops()
-    ICO = {"Todos": "☰", "Cripto": "₿", "Brasil": "R$", "EUA": "$", "Opções": "◔", "Dados gerais": "◍", "Oscilações": "↕", "Spread": "⇄", "Mapa": "▦", "Trades": "⇆", "Momento": "◐", "Momento Cripto": "₿", "Baleias": "🐋", "Operações": "⚡", "Carteiras": "🏆", "Baleias TradeFi": "🏛", "Gráficos": "▤"}
+    ICO = {"Todos": "☰", "Cotações": "≣", "Cripto": "₿", "Brasil": "R$", "EUA": "$", "Opções": "◔", "Dados gerais": "◍", "Oscilações": "↕", "Spread": "⇄", "Mapa": "▦", "Trades": "⇆", "Momento": "◐", "Momento Cripto": "₿", "Baleias": "🐋", "Operações": "⚡", "Carteiras": "🏆", "Baleias TradeFi": "🏛", "Gráficos": "▤"}
     GRP = {"Oscilações": "Análises", "Momento Cripto": "Cripto", "Baleias": "Cripto", "Operações": "Cripto", "Carteiras": "Cripto", "Baleias TradeFi": "Cripto", "Gráficos": "Outros"}
     vistos = set()
     nav = ""

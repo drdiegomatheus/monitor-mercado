@@ -676,6 +676,7 @@ def painel():
     PAGINAS = [("painel.html", "Todos", None), ("painel_cripto.html", "Cripto", ["cripto"]), ("painel_brasil.html", "Brasil", ["brasil"]),
                ("painel_eua.html", "EUA", ["eua"]), ("painel_opcoes.html", "Opções", "opcoes"), ("painel_outros.html", "Dados gerais", ["setores", "commodities", "macro", "juros"]),
                ("painel_oscilacoes.html", "Oscilações", "oscilacoes"), ("painel_spread.html", "Spread", "spread"), ("painel_mapa.html", "Mapa", "mapa"), ("painel_trades.html", "Trades", "trades"), ("painel_momento.html", "Momento", "momento"), ("painel_momento_cripto.html", "Momento Cripto", "momento_cripto"), ("painel_baleias.html", "Baleias", "baleias"), ("painel_operacoes.html", "Operações", "operacoes"), ("painel_carteiras.html", "Carteiras", "carteiras"), ("painel_tradefi.html", "Baleias TradeFi", "tradefi"), ("painel_graficos.html", "Gráficos", "graficos")]
+    PAGINAS.insert(1, ("painel_cotacoes.html", "Cotações", "cotacoes"))
     f_m = os.path.join(RAIZ, "macro.json")
     macro_ev = json.load(open(f_m, encoding="utf-8")) if os.path.exists(f_m) else []
     f_l = os.path.join(RAIZ, "live.json")
@@ -703,6 +704,11 @@ def painel():
             if not SO_PAINEL:
                 import momento
                 open(os.path.join(RAIZ, arq), "w", encoding="utf-8").write(momento.pagina(arq, titulo, PAGINAS, momento.dados(RAIZ)))
+            continue
+        if chaves == "cotacoes":
+            if not SO_PAINEL:
+                import cotacoes
+                open(os.path.join(RAIZ, arq), "w", encoding="utf-8").write(cotacoes.pagina(arq, titulo, PAGINAS, cotacoes.dados(RAIZ)))
             continue
         if chaves == "momento_cripto":
             if not SO_PAINEL:
